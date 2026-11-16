@@ -579,7 +579,7 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 동작하는 SDK, 배포된 npm 패키지 및 XR 기기 지원은 아직 제공되지 않습니다.
 
-현재 P0 작업은 [#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.com/ppsssj/SpatialFlex/issues/5)에서 추적합니다. 별도 XR 호스트 간 Live Bridge는 후속 검증 과제로 분리합니다.
+현재 P0 작업은 [#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.com/ppsssj/SpatialFlex/issues/5)에서 추적합니다. 별도 XR 호스트 간 Live Bridge는 [#7](https://github.com/ppsssj/SpatialFlex/issues/7)에서 후속 검증 과제로 분리합니다.
 
 향후 첫 번째 PoC와 핵심 기능 검증을 완료한 뒤 다음 자료를 공개할 예정입니다.
 
