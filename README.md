@@ -20,6 +20,17 @@ SpatialFlex는 **기존 웹 애플리케이션에 공간형 레이아웃과 살�
 >
 > 보이는 위치는 분리하되, 데이터와 기능의 연결은 유지합니다.
 
+### Design Principle — Render Independently. Function Continuously.
+
+**렌더링과 배치는 원본 페이지로부터 독립할 수 있지만, 기능은 원본 애플리케이션에 Live로 연결되어야 합니다.**
+
+- **Visual Independence:** 분리된 UI의 위치·크기·방향·표현 호스트는 사용자 작업 공간이 관리합니다.
+- **Functional Dependence:** 애플리케이션 데이터, 공유 상태, 비즈니스 로직 및 도메인 액션의 **단일 진실 공급원(Single Source of Truth)** 은 원본 앱입니다.
+- **Live Synchronization:** 원본 상태 변경은 분리된 뷰에 반영되고, 분리된 뷰의 사용자 액션은 원본 앱에 전달되어 처리됩니다.
+- **No Fake Independence:** 독립 패널은 정적 스크린샷이나 기능을 따로 복제한 가짜 앱이 되어서는 안 됩니다.
+
+이것은 **목표 아키텍처의 계약**입니다. 현재 P0에서는 동일한 React 실행 환경 안에서 검증하고, 별도 XR 런타임과의 연결은 후속 단계에서 검증합니다.
+
 ---
 
 ## 1. From CLI to GUI — and Beyond the Screen
@@ -266,6 +277,22 @@ SpatialFlex에서는 개발자가 컴포넌트와 제약 조건을 제공하고,
 
 또한 작업 환경을 저장해 다음 실행에서 복원할 수 있도록 합니다.
 
+### Scenario E. Live Counter — XR에서 누른 버튼이 원본 앱을 바꾼다면
+
+개발자가 카운터 컴포넌트를 SpatialItem으로 등록했다고 가정합니다.
+
+```text
+Original Application               Detached XR View
+   Shared Count: 3   ─── state ───▶  Count: 3
+          ▲                               │
+          │         action: increment     │
+          └───────────────────────────────┘
+```
+
+사용자가 XR 패널의 `+` 버튼을 누르면 원본 앱이 `increment` 액션을 처리하고 공유 카운트가 4로 변경됩니다. 변경된 값은 원본 UI와 XR 뷰에 동일하게 반영되어야 합니다. 반대로 원본 앱에서 값이 바뀌어도 독립 뷰가 갱신되어야 합니다.
+
+여기서 **XR 뷰는 비즈니스 로직의 또 다른 소유자가 아닙니다.** 뷰는 상태를 읽고 앱의 명시적인 액션을 요청합니다. 별도 프로세스·런타임을 사용하는 경우에는 이를 위한 브리지와 연결 상태 관리가 필요합니다.
+
 ## 5. Our Vision — Developers Provide, Users Compose
 
 SpatialFlex가 지향하는 모델에는 네 가지 역할이 있습니다.
@@ -294,11 +321,30 @@ SpatialFlex가 지향하는 모델에는 네 가지 역할이 있습니다.
 | --- | --- |
 | **Spatial Item** | 공간형 사용이 가능한 웹 컴포넌트 단위 |
 | **Detachment** | 기존 레이아웃에서 독립적인 표시 영역으로 전환 |
-| **Live Binding** | 데이터·상태·이벤트 연결 유지 |
+| **Live Binding** | 원본 앱의 상태 구독 및 액션 호출; 기능의 소유권 유지 |
 | **Spatial Constraints** | 크기·거리·충돌·시야·고정 조건 |
 | **Adaptive Layout** | 공간 조건을 고려한 자동 배치 |
 | **Workspace Persistence** | 사용자 레이아웃 저장·복원 |
 | **Renderer Adapter** | 2D 또는 XR 환경에 맞는 UI 표현 |
+
+### The Live Contract — Source of Truth vs Presentation
+
+| 대상 | 소유자 | 분리 후 동작 |
+| --- | --- | --- |
+| 도메인 데이터·공유 상태 | 원본 웹 애플리케이션 | 분리된 뷰가 구독하고 변경을 반영 |
+| API 요청·비즈니스 로직 | 원본 웹 애플리케이션 | 원본 로직을 재사용; 중복 실행 방지 |
+| 버튼·폼 등 도메인 액션 | 원본 웹 애플리케이션 | 분리된 뷰의 요청을 원본으로 전달·검증 |
+| 위치·크기·회전·고정 | SpatialFlex / 사용자 작업 공간 | 원본 페이지의 레이아웃과 독립적으로 변경 |
+| 뷰 전용 임시 상태 | 렌더러 / 뷰 | 도메인 상태와 구분; 호스트 변경 시 보존 범위 별도 정의 |
+
+**Live는 단순히 최신 콘텐츠를 다시 그리는 것이 아닙니다.** 원본 상태 구독, 도메인 액션 전달, 결과 반영을 포함합니다. 외부 렌더러에 전체 React 컴포넌트를 임의로 복사해 기능 보존을 보장하는 방식은 목표로 하지 않습니다.
+
+#### Same-Host vs Cross-Host
+
+- **Same-Host (P0):** 같은 브라우저·React 애플리케이션 안에서 분리된 패널을 표시합니다. 가능한 경우 기존 마운트를 유지하거나 상태 소유권을 상위 앱에 두어 일관성을 테스트합니다.
+- **Cross-Host (future):** 별도 XR 렌더러나 실행 환경이 원본 앱의 상태 스냅샷/변경 이벤트를 받고, 사용자 액션을 원본 앱에 전달합니다. 메시지 계약, 인증·권한, 순서, 연결 단절, 재연결이 필요합니다.
+
+**연결 단절은 Live가 아닙니다.** 원본 앱 또는 전송 경로가 중단되면 분리된 뷰는 끊김/오래된 데이터 상태를 명시하고 도메인 변경 액션을 제한해야 합니다. 원본 앱이 닫혀도 기능이 계속된다고 보장하지 않습니다.
 
 ### Detachment is not DOM cloning
 
@@ -385,56 +431,48 @@ Workspace 저장 또는 Attach
 
 실제 XR 환경에서 HTML이 어떻게 렌더링되는지는 사용 가능한 렌더러와 기기의 지원 범위에 따라 달라집니다.
 
-## 8. Architecture — Layout & Detachment Core
+## 8. Architecture — Presentation Independence, Functional Dependence
 
 ```text
-Application Components
-     │
-     ├── Data
-     ├── State
-     └── Events
-     │
-     ▼
-Spatial Item Registry
-     │
-     ├── Identity
-     ├── Constraints
-     └── Live Bindings
-     │
-     ▼
-┌────────────────────────────┐
-│       SpatialFlex Core     │
-│                            │
-│  ┌──────────────────────┐  │
-│  │ Detachment Manager   │  │
-│  │ Select / Detach      │  │
-│  │ Attach / Lifecycle   │  │
-│  └──────────────────────┘  │
-│                            │
-│  ┌──────────────────────┐  │
-│  │ Spatial Layout Engine│  │
-│  │ Adaptive Placement   │  │
-│  │ Constraints          │  │
-│  │ User Overrides       │  │
-│  └──────────────────────┘  │
-│                            │
-│  ┌──────────────────────┐  │
-│  │ Workspace State      │  │
-│  │ Live Bindings        │  │
-│  │ Layout Persistence   │  │
-│  └──────────────────────┘  │
-└────────────────────────────┘
-     │
-     ▼
-Renderer Adapter
-     │
-     ├── 2D Web
-     └── XR Runtime
+         Original Web Application
+    ┌───────────────────────────────┐
+    │ Domain State / Store          │
+    │ Business Logic / API          │
+    │ Authorized Actions            │
+    └───────────────┬───────────────┘
+                    │
+       state updates│▲ action requests
+                    ▼│
+    ┌───────────────────────────────┐
+    │ SpatialFlex Live Binding      │
+    │  - stable item identity       │
+    │  - subscribe / read snapshot  │
+    │  - dispatch domain actions    │
+    │  - lifecycle / connection     │
+    └───────────────┬───────────────┘
+                    │
+    ┌───────────────▼───────────────┐
+    │ SpatialFlex Workspace         │
+    │  - Detachment Manager         │
+    │  - Layout / Constraints        │
+    │  - User Overrides / Persistence│
+    └───────────────┬───────────────┘
+                    │
+         ┌──────────┴──────────┐
+         ▼                     ▼
+     2D Web Host         XR Renderer Host
+     (P0 target)         (future adapter)
+         └──────────┬──────────┘
+                    │
+        Independent presentation
+        Shared application behavior
 ```
 
-핵심 설계 원칙은 **렌더링 환경을 변경하더라도 Spatial Item의 식별, 상태 연결, 배치 제약, 사용자 설정을 재사용할 수 있어야 한다**는 것입니다.
+**Layout/Detachment와 Live Binding은 별도 책임으로 유지합니다.** SpatialFlex 코어는 레이아웃 의도, 아이템 ID, 사용자 선택을 관리합니다. 렌더러는 표현을 담당하고, 비즈니스 기능은 원본 애플리케이션의 액션과 상태에 연결됩니다.
 
-이를 위해 초기에는 일반 브라우저에서 기능을 검증하고, XR 렌더러는 별도의 어댑터로 통합하는 방향을 검토합니다.
+P0에서는 동일한 React 실행 환경 내에서 검증합니다. 별도 XR 런타임으로 이전할 때에는 전송 계층(예: 허용된 메시징 인터페이스), 식별자·상태 버전, 명시적 도메인 액션, 권한 검증 및 재연결 정책을 설계해야 합니다. 단순히 DOM을 복제하거나 이벤트를 무조건 재전송해서 해결할 수 있는 문제가 아닙니다.
+
+**브라우저 창 밖 표시 여부와 실제 이동 범위는 XR 런타임의 기능에 종속됩니다.** SpatialFlex는 모든 환경에서 독립 시스템 창이나 무제한 공간 배치를 보장하지 않습니다.
 
 ### Planned Packages
 
@@ -465,7 +503,7 @@ spatialflex/
 
 - XR 환경에 맞는 공간형 레이아웃 제공
 - 사용자가 원하는 웹 요소의 독립화
-- 분리한 컴포넌트의 데이터와 상태 연결
+- 분리한 컴포넌트의 원본 앱 데이터·액션·상태 연결
 - 공간 제약을 고려한 배치
 - 컴포넌트 이동·크기 조절·고정·숨김
 - 사용자별 작업 공간 저장 및 복원
@@ -476,6 +514,8 @@ spatialflex/
 - 모든 외부 웹사이트에서 DOM을 강제로 추출하는 기능
 - 브라우저 보안 정책 우회
 - 모든 React 컴포넌트의 완전한 상태 보존 보장
+- 원본 앱이 종료되거나 연결이 끊긴 뒤에도 분리 UI의 모든 기능이 지속된다는 보장
+- 별도 XR 호스트에서 임의의 DOM/React 내부 상태를 그대로 이전하는 범용 기능
 - 자체적인 3D 그래픽 엔진 구현
 - 모든 XR 기기에 대한 즉각적인 호환성 보장
 
@@ -487,11 +527,11 @@ SpatialFlex는 WebSpatial이나 React Three Fiber와 같은 렌더링 기술을 
 
 - [ ] **P0 — Spatial Item Contract:** 독립 가능한 요소의 ID, 제약, 상태 연결 인터페이스 정의
 - [ ] **P1 — 2D Detachment PoC:** 이미지 세 장 중 하나를 분리해 독립 패널로 이동·확대
-- [ ] **P2 — Live Component:** 원본 데이터 변경과 상태 유지 검증
+- [ ] **P2 — Live Component:** 원본 데이터 변경, 액션의 역방향 전달, 상태 소유권 및 중복 실행 검증
 - [ ] **P3 — Adaptive Layout:** 자동 배치, 충돌 방지, 시야·가독성 제약 구현
 - [ ] **P4 — Workspace Persistence:** 레이아웃 저장·복원 및 Attach 지원
 - [ ] **P5 — Multi-Component Examples:** README·실시간 차트·버튼 사례 검증
-- [ ] **P6 — XR Adapter:** XR 런타임의 공간 패널과 입력 연동
+- [ ] **P6 — XR Adapter & Live Bridge:** 렌더러 호스트 연결, 상태·액션 전송 계약 및 연결 단절 처리 검증
 - [ ] **P7 — Open-Source Release:** npm 배포, 문서화, 성능 측정 및 호환성 테스트
 
 ### First Proof of Concept
@@ -505,6 +545,7 @@ SpatialFlex는 WebSpatial이나 React Three Fiber와 같은 렌더링 기술을 
 - 선택한 이미지만 독립적으로 표시
 - 독립 패널 이동 및 크기 조절
 - 원본 이미지 변경 동기화
+- 분리된 뷰에서 실행한 앱 액션이 원본 앱 상태를 변경하고, 그 결과가 반영됨
 - 독립 요소의 재부착(Attach)
 - 원본 페이지의 나머지 기능 유지
 
@@ -517,7 +558,7 @@ SpatialFlex는 오픈소스 라이브러리 개발과 함께 다음 연구 문�
 | 평가 대상 | 측정 지표 |
 | --- | --- |
 | Detachment | 재마운트·상태 초기화 발생률, 기능 보존율 |
-| Liveness | 데이터 업데이트 정확도 및 지연 |
+| Liveness | 상태 갱신 정확도·지연, 액션 전달 성공률, 중복 실행·재연결 처리 |
 | Layout | 충돌률, 제약 만족률, 배치 계산 시간 |
 | User Composition | 이동·숨김·복원 성공률 |
 | Compatibility | 브라우저 및 XR 어댑터별 지원 범위 |
@@ -537,6 +578,8 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 현재는 프로젝트의 개념과 아키텍처를 정의하는 단계입니다.
 
 동작하는 SDK, 배포된 npm 패키지 및 XR 기기 지원은 아직 제공되지 않습니다.
+
+현재 P0 작업은 [#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.com/ppsssj/SpatialFlex/issues/5)에서 추적합니다. 별도 XR 호스트 간 Live Bridge는 후속 검증 과제로 분리합니다.
 
 향후 첫 번째 PoC와 핵심 기능 검증을 완료한 뒤 다음 자료를 공개할 예정입니다.
 
