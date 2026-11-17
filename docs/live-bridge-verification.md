@@ -31,7 +31,7 @@ are recorded on the published PR checks, independently of these local results.
 `src/bridge/protocol.test.ts` covers all message shapes, structured-clone
 compatibility, unknown fields/types, incorrect versions, malformed identities,
 nonfinite coordinates, sparse arrays, invalid panel bodies, unique IDs, exact
-origin/source, bounded idempotency, conflicting retries, unknown/unavailable items,
+origin/source, bounded idempotency, conflicting retries (including cross-view request ID reuse after remount), unknown/unavailable items,
 unknown actions, exceptions after a possible mutation and revision ordering.
 
 `e2e/bridge.spec.ts` runs 16 cases in each browser (32 total), including real mouse
@@ -64,7 +64,7 @@ than a bridge assertion. That run was stopped after further bridge hardening
 invalidated its build. The final run executes gates sequentially, with existing
 test limits and assertions preserved. Earlier compilation/lint issues were fixed
 before the final validation. The final serial run passed all 190 browser tests;
-XR Lab completed in 8.5 minutes.
+Both browsers exercised desktop 3D and the existing same-context IWER paths.
 
 This evidence covers desktop cross-context rendering in both browsers and both
 engines. IWER tests cover the existing **same-context** immersive path only.

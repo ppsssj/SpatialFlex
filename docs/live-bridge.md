@@ -158,9 +158,10 @@ sequenceDiagram
 
 ### Idempotency guarantee and limits
 
-The parent ledger reserves `(viewId, requestId)` before invoking a synchronous
-domain callback. It stores the item/action fingerprint and result. A retry replays
-the result; reuse for a different item/action returns `conflict`. Unknown or
+The parent ledger reserves `requestId` across the entire app session before
+invoking a synchronous domain callback. It stores the view/item/action fingerprint
+and result. A retry replays the result; reuse from a different view or for a
+different item/action returns `conflict`, including after workspace remount. Unknown or
 unavailable items and undeclared actions return `denied`. Even failures after a
 possible mutation are recorded and never automatically reexecuted.
 

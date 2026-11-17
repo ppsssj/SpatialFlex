@@ -497,6 +497,20 @@ for (const mode of MODES) {
     page,
   }) => {
     let frame = await openBridge(page, "three", mode);
+    await show(page, frame, "shared-counter");
+    await click3D(page, frame, "shared-counter", "button:increment");
+    await expect(page.getByTestId("increment-calls")).toHaveText("1");
+    const originalRequestId = await page.evaluate(() => {
+      const message = (
+        window as unknown as TestWindow
+      ).__bridgeFaults.messages.find((m) => m.type === "action-request");
+      return message?.type === "action-request" ? message.requestId : "";
+    });
+    expect(originalRequestId).not.toBe("");
+    await page
+      .getByTestId("xr-item-shared-counter")
+      .getByRole("button", { name: "Remove from XR", exact: true })
+      .click();
     const baseline = await page
       .getByTestId("active-subscriptions")
       .textContent();
@@ -523,6 +537,11 @@ for (const mode of MODES) {
       await expect(page.getByTestId("bridge-status")).toHaveText("connected");
       frame = page.frames().find((f) => f.url().includes("/host.html"))!;
       await expect.poll(() => panels(frame)).toContain("shared-counter");
+      await inject(frame, { requestId: originalRequestId });
+      await click3D(page, frame, "shared-counter", "button:increment");
+      await expect(page.getByTestId("increment-calls")).toHaveText(
+        String(i + 2),
+      );
       await expect
         .poll(() =>
           frame.evaluate(

@@ -178,6 +178,9 @@ describe("session action ledger", () => {
     expect(
       ledger.execute({ ...request, action: "different" }, [panel], e).status,
     ).toBe("conflict");
+    expect(
+      ledger.execute({ ...request, viewId: "remounted-view" }, [panel], e),
+    ).toMatchObject({ status: "conflict", viewId: "remounted-view" });
     expect(e.onPanelButton).toHaveBeenCalledTimes(1);
   });
   it("bounds records without evicting retry protection", () => {

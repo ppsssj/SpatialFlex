@@ -20,14 +20,20 @@ export class ActionLedger {
     panels: readonly HostPanel[],
     events: HostEvents,
   ): Result {
-    const fingerprint = JSON.stringify([request.itemId, request.action]);
-    const key = JSON.stringify([request.viewId, request.requestId]);
+    const fingerprint = JSON.stringify([
+      request.viewId,
+      request.itemId,
+      request.action,
+    ]);
+    const key = request.requestId;
     const prior = this.records.get(key);
     if (prior)
       return prior.fingerprint === fingerprint
         ? { ...prior.result, connectionId: request.connectionId }
         : {
             ...prior.result,
+            viewId: request.viewId,
+            itemId: request.itemId,
             connectionId: request.connectionId,
             status: "conflict",
           };
