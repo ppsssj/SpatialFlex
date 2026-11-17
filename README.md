@@ -616,6 +616,7 @@ import { SpatialItem, SpatialWorkspace, useSpatialItems } from "@spatialflex/rea
 - **Registry가 다루는 것:** 아이템 ID, 기능 메타데이터(`detachable`·`movable`·`resizable`), 연결 상태(`attached`/`detached`; 현재는 항상 `attached`), 직렬화 가능한 레이아웃(`position`·`size`·`visible`). 레코드는 불변이며 JSON으로 직렬화할 수 있습니다.
 - **Registry가 다루지 않는 것:** 애플리케이션 도메인 상태, 비즈니스 로직, 액션. 이는 원본 앱이 계속 소유합니다. 레코드에는 DOM 요소, React 인스턴스, 콜백이 들어가지 않습니다.
 - **조회:** `useSpatialItems()`, `useSpatialItem(id)`, `useSpatialRegistry()` 또는 core의 `registry.get/list/subscribe`.
+- **서버 렌더링(SSR):** 지원합니다. 등록은 effect에서 일어나고 서버에서는 effect가 실행되지 않으므로, 서버 렌더링과 하이드레이션 중에는 `useSpatialItems()`가 항상 빈 목록, `useSpatialItem(id)`가 `undefined`를 반환합니다. 주입한 Registry에 이미 아이템이 있어도 마찬가지이며, 이 덕분에 서버 마크업과 클라이언트 하이드레이션 결과가 항상 일치합니다. 등록된 아이템은 하이드레이션 직후 재렌더링에서 나타납니다. 서버에서는 `<SpatialItem>`이 Registry에 등록하지 않고 자식만 렌더링합니다.
 
 ```text
 packages/
