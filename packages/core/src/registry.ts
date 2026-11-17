@@ -1,4 +1,10 @@
 import { SpatialFlexError } from "./errors";
+import {
+  prepareView,
+  type SpatialViewBinding,
+  type SpatialViewRecord,
+} from "./spatialView";
+let nextViewWorkspace = 0;
 import type {
   SpatialDetachOptions,
   SpatialItemCapabilities,
@@ -24,6 +30,8 @@ export interface SpatialItemRegistration {
    * detached item attaches it.
    */
   update(capabilities: Partial<SpatialItemCapabilities>): void;
+  /** @experimental Publish/revoke a spatial view for this exact registration. */
+  setView(view: SpatialViewBinding | undefined): void;
   /** Removes this registration. Safe to call more than once. */
   unregister(): void;
 }
@@ -42,6 +50,12 @@ const DEFAULT_CAPABILITIES: SpatialItemCapabilities = {
  * compared by reference to detect updates.
  */
 export class SpatialRegistry {
+  readonly #viewWorkspace = ++nextViewWorkspace;
+  #viewGeneration = 0;
+  readonly #views = new Map<SpatialItemId, SpatialViewRecord>();
+  readonly #viewHandlers = new Map<SpatialItemId, Map<string, () => void>>();
+  readonly #viewListeners = new Set<SpatialRegistryListener>();
+  #viewSnapshot: readonly SpatialViewRecord[] = Object.freeze([]);
   readonly #items = new Map<SpatialItemId, SpatialItemRecord>();
   readonly #owners = new Map<SpatialItemId, object>();
   readonly #listeners = new Set<SpatialRegistryListener>();
@@ -72,18 +86,36 @@ export class SpatialRegistry {
       ...DEFAULT_CAPABILITIES,
       ...definition.capabilities,
     });
-    this.#items.set(id, record);
-    this.#commit();
-
     // Identifies this registration, so its handle cannot touch a later
     // registration that reuses the same ID. Records are replaced on every
     // change, so ownership is tracked by token rather than record identity.
     const token = {};
     this.#owners.set(id, token);
+    this.#items.set(id, record);
+    this.#commit();
     const isCurrent = () => this.#owners.get(id) === token;
 
     return {
       id,
+      setView: (view) => {
+        if (!isCurrent()) return;
+        if (!view) {
+          this.#viewHandlers.delete(id);
+          if (this.#views.delete(id)) this.#commitViews();
+          return;
+        }
+        const { data, handlers } = prepareView(id, view);
+        const previous = this.#views.get(id);
+        this.#viewHandlers.set(id, handlers);
+        const registrationId =
+          previous?.registrationId ??
+          `${this.#viewWorkspace}:${++this.#viewGeneration}`;
+        const next = Object.freeze({ id, registrationId, ...data });
+        if (previous && JSON.stringify(previous) === JSON.stringify(next))
+          return;
+        this.#views.set(id, next);
+        this.#commitViews();
+      },
       update: (capabilities) => {
         const record = this.#items.get(id);
         if (!record || !isCurrent()) return;
@@ -110,6 +142,8 @@ export class SpatialRegistry {
   unregister(id: SpatialItemId): boolean {
     if (!this.#items.delete(id)) return false;
     this.#owners.delete(id);
+    this.#viewHandlers.delete(id);
+    if (this.#views.delete(id)) this.#commitViews();
     this.#commit();
     return true;
   }
@@ -225,6 +259,42 @@ export class SpatialRegistry {
 
   get(id: SpatialItemId): SpatialItemRecord | undefined {
     return this.#items.get(id);
+  }
+
+  /** @experimental Stable serializable view snapshot; handlers are private. */
+  views(): readonly SpatialViewRecord[] {
+    return this.#viewSnapshot;
+  }
+  /** @experimental Exact current view, including registration ownership. */
+  getView(id: SpatialItemId): SpatialViewRecord | undefined {
+    return this.#views.get(id);
+  }
+  /** @experimental Invokes only the current registration's declared action. */
+  invokeView(
+    id: SpatialItemId,
+    registrationId: string,
+    actionId: string,
+  ): boolean {
+    if (
+      !this.#items.has(id) ||
+      this.#views.get(id)?.registrationId !== registrationId
+    )
+      return false;
+    const invoke = this.#viewHandlers.get(id)?.get(actionId);
+    if (!invoke) return false;
+    invoke();
+    return true;
+  }
+  /** @experimental Subscribe independently of P0 layout metadata. */
+  subscribeViews(listener: SpatialRegistryListener): () => void {
+    this.#viewListeners.add(listener);
+    return () => {
+      this.#viewListeners.delete(listener);
+    };
+  }
+  #commitViews(): void {
+    this.#viewSnapshot = Object.freeze([...this.#views.values()]);
+    for (const listener of [...this.#viewListeners]) listener();
   }
 
   has(id: SpatialItemId): boolean {

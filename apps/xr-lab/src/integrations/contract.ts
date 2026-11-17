@@ -10,6 +10,7 @@ import type { RenderWidget } from "../fixtures";
  * the same shell, host, fixture and tests.
  */
 export interface LabIntegration extends HostEvents {
+  readonly actionOwners?: Readonly<Record<string, string>>;
   /** Items that can be shown in XR, in display order. */
   readonly items: readonly XRItemOption[];
   /** Where `items` come from, shown in the UI. */

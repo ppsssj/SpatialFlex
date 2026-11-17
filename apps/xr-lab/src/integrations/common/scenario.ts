@@ -9,8 +9,8 @@ import {
 } from "../../fixtures";
 
 /**
- * The XR scenario, shared by every integration so that both modes render the
- * same panels at the same coordinates with the same content and actions.
+ * Manual baseline XR scenario. The SpatialFlex path declares content/actions
+ * at each component and does not import this table.
  */
 export interface XRViewSpec {
   readonly label: string;
@@ -27,6 +27,17 @@ export interface XRViewSpec {
 const VARIANTS = Object.keys(IMAGE_COLORS) as ImageVariant[];
 
 export const XR_VIEWS: Readonly<Record<WidgetId, XRViewSpec>> = {
+  [WIDGETS.thermostat]: {
+    label: "Thermostat",
+    position: [-0.75, 2, -1.3],
+    buttons: [{ id: "heat", label: "Heat" }],
+    body: (state) => ({
+      kind: "value",
+      label: "Temperature",
+      value: String(state.temperature),
+    }),
+    actions: { heat: (actions, state) => actions.heat(state.heatStep) },
+  },
   [WIDGETS.counter]: {
     label: "Shared counter",
     position: [0, 1.4, -1.2],

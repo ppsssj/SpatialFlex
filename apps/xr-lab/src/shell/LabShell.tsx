@@ -88,6 +88,7 @@ function ShellLayout({
           </div>
           {workspaceMounted && (
             <Host
+              {...(lab.actionOwners && { actionOwners: lab.actionOwners })}
               panels={lab.panels}
               onPanelButton={lab.onPanelButton}
               onPanelSelect={lab.onPanelSelect}

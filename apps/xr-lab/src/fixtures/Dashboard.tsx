@@ -1,12 +1,19 @@
-import type { ReactNode } from "react";
+import {
+  WidgetRendererContext,
+  useWidgetRenderer,
+  type RenderWidget,
+} from "./spatialView";
+export type { RenderWidget } from "./spatialView";
 import { useLabDiagnostics, useLabState, useLabStore } from "./context";
 import type { ImageVariant } from "./labStore";
+import { ThermostatWidget } from "./ThermostatWidget";
 
 /** Ids of the dashboard's widgets: the app's own component identities. */
 export const WIDGETS = {
   counter: "shared-counter",
   chart: "live-chart",
   image: "image-panel",
+  thermostat: "thermostat",
 } as const;
 export type WidgetId = (typeof WIDGETS)[keyof typeof WIDGETS];
 
@@ -20,7 +27,6 @@ export const IMAGE_COLORS: Record<ImageVariant, string> = {
  * Wraps a widget. The default renders it as is; an integration can supply
  * its own (for example to register the widget with an SDK).
  */
-export type RenderWidget = (id: WidgetId, widget: ReactNode) => ReactNode;
 const renderPlain: RenderWidget = (_, widget) => widget;
 
 /** The original web dashboard. Works the same in every integration mode. */
@@ -30,34 +36,49 @@ export function Dashboard({
   renderWidget?: RenderWidget;
 }) {
   const imageMounted = useLabState((state) => state.imageMounted);
+  const thermostatMounted = useLabState((state) => state.thermostatMounted);
   const { actions } = useLabStore();
 
   return (
-    <section className="dashboard" aria-labelledby="dashboard-heading">
-      <h2 id="dashboard-heading">Original web dashboard</h2>
-      <div className="widgets">
-        {renderWidget(WIDGETS.counter, <CounterWidget />)}
-        {renderWidget(WIDGETS.chart, <ChartWidget />)}
-        {imageMounted && renderWidget(WIDGETS.image, <ImageWidget />)}
-      </div>
-      <label>
-        <input
-          type="checkbox"
-          data-testid="image-mounted"
-          checked={imageMounted}
-          onChange={(event) => actions.setImageMounted(event.target.checked)}
-        />{" "}
-        Mount image widget
-      </label>
-      <DomainDiagnostics />
-    </section>
+    <WidgetRendererContext value={renderWidget}>
+      <section className="dashboard" aria-labelledby="dashboard-heading">
+        <h2 id="dashboard-heading">Original web dashboard</h2>
+        <div className="widgets">
+          <CounterWidget />
+          <ChartWidget />
+          {imageMounted && <ImageWidget />}
+          {thermostatMounted && <ThermostatWidget />}
+        </div>
+        <label>
+          <input
+            type="checkbox"
+            data-testid="image-mounted"
+            checked={imageMounted}
+            onChange={(event) => actions.setImageMounted(event.target.checked)}
+          />{" "}
+          Mount image widget
+        </label>
+        <DomainDiagnostics />
+        <label>
+          <input
+            type="checkbox"
+            data-testid="thermostat-mounted"
+            checked={thermostatMounted}
+            onChange={(e) => actions.setThermostatMounted(e.target.checked)}
+          />{" "}
+          Mount thermostat widget (P1-04)
+        </label>
+      </section>
+    </WidgetRendererContext>
   );
 }
 
 function CounterWidget() {
+  const renderWidget = useWidgetRenderer();
   const count = useLabState((state) => state.sharedCount);
   const { actions } = useLabStore();
-  return (
+  return renderWidget(
+    WIDGETS.counter,
     <article className="widget" aria-label="Shared counter">
       <h3>Shared counter</h3>
       <output data-testid="web-count">{count}</output>{" "}
@@ -68,14 +89,21 @@ function CounterWidget() {
       >
         +1
       </button>
-    </article>
+    </article>,
+    {
+      title: "Shared counter",
+      body: { kind: "value", label: "Shared count", value: String(count) },
+      actions: [{ id: "increment", label: "+1", invoke: actions.increment }],
+    },
   );
 }
 
 function ChartWidget() {
+  const renderWidget = useWidgetRenderer();
   const history = useLabState((state) => state.history);
   const max = Math.max(1, ...history);
-  return (
+  return renderWidget(
+    WIDGETS.chart,
     <article className="widget" aria-label="Live chart">
       <h3>Live chart</h3>
       <svg
@@ -101,14 +129,20 @@ function ChartWidget() {
           );
         })}
       </svg>
-    </article>
+    </article>,
+    {
+      title: "Live chart",
+      body: { kind: "bars", label: "Recent counts", values: history },
+    },
   );
 }
 
 function ImageWidget() {
+  const renderWidget = useWidgetRenderer();
   const variant = useLabState((state) => state.imageVariant);
   const { actions } = useLabStore();
-  return (
+  return renderWidget(
+    WIDGETS.image,
     <article className="widget" aria-label="Image">
       <h3>Image</h3>
       <svg width="160" height="60" role="img" aria-label={`Image (${variant})`}>
@@ -125,7 +159,23 @@ function ImageWidget() {
           <option key={name}>{name}</option>
         ))}
       </select>
-    </article>
+    </article>,
+    {
+      title: "Image",
+      body: { kind: "swatch", color: IMAGE_COLORS[variant], caption: variant },
+      actions: [
+        {
+          id: "next-variant",
+          label: "Next",
+          invoke: () => {
+            const variants = Object.keys(IMAGE_COLORS) as ImageVariant[];
+            actions.setImageVariant(
+              variants[(variants.indexOf(variant) + 1) % variants.length]!,
+            );
+          },
+        },
+      ],
+    },
   );
 }
 

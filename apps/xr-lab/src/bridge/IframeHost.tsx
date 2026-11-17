@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { EngineId, HostModule, XRHostProps } from "../contracts/xrHost";
 import { ActionLedger } from "./authority";
+import { ViewAuthorization } from "./viewAuthorization";
 import {
   CAPABILITY,
   envelope,
@@ -46,6 +47,7 @@ function IframeHost({ engine, ...props }: XRHostProps & { engine: EngineId }) {
     let revision = revisionRef.current;
     let previous = "";
     let previousIds: string[] = [];
+    const authorization = new ViewAuthorization();
     const send = (message: BridgeMessage) =>
       frame.current?.contentWindow?.postMessage(message, origin);
     const snapshot = (force = false) => {
@@ -53,7 +55,11 @@ function IframeHost({ engine, ...props }: XRHostProps & { engine: EngineId }) {
       const panels = latest.current.panels;
       const serialized = JSON.stringify(panels);
       const ids = panels.map((p) => p.id);
-      if (!force && serialized === previous) return;
+      const ownersChanged = authorization.update(
+        latest.current.actionOwners,
+        revision,
+      );
+      if (!force && serialized === previous && !ownersChanged) return;
       revision++;
       revisionRef.current = revision;
       const added = ids.find((id) => !previousIds.includes(id));
@@ -108,7 +114,12 @@ function IframeHost({ engine, ...props }: XRHostProps & { engine: EngineId }) {
       if (m.type === "resync") snapshot(true);
       if (m.type === "action-request") {
         if (m.revision > revision) return;
-        const result = ledger.execute(m, latest.current.panels, latest.current);
+        const result = ledger.execute(
+          m,
+          latest.current.panels,
+          latest.current,
+          authorization.allows(m.itemId, m.revision),
+        );
         send({ ...result, revision });
       }
     };

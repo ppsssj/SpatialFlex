@@ -53,6 +53,8 @@ export interface HostEvents {
 }
 
 export interface XRHostProps extends HostEvents {
+  /** Parent-only registration epochs; never part of serialized HostPanel data. */
+  readonly actionOwners?: Readonly<Record<string, string>>;
   /** Panels to render. A host keeps no copy of their content. */
   readonly panels: readonly HostPanel[];
 }

@@ -4,7 +4,8 @@
 
 > 개발자는 공간형 UI와 제약 조건을 정의하고, 사용자는 필요한 웹 요소를 독립시켜 자신만의 작업 공간을 구성합니다.
 
-**Status:** P0 Same-Host PoC Implemented — XR Integration Pending  
+**Status:** P0 Detach + P1 Cross-Context XR Mirror Implemented — P1-04 Declarative View API Experimental
+
 **Type:** Open-source Spatial Layout & Element Detachment SDK  
 **Focus:** Adaptive Layout · Element Detachment · Live Components · User Composition · Layout Persistence
 
@@ -525,16 +526,15 @@ SpatialFlex는 WebSpatial이나 React Three Fiber와 같은 렌더링 기술을 
 
 ## 10. Roadmap
 
-- [ ] **P0 — Spatial Item Contract:** 독립 가능한 요소의 ID, 제약, 상태 연결 인터페이스 정의
-- [ ] **P1 — 2D Detachment PoC:** 이미지 세 장 중 하나를 분리해 독립 패널로 이동·확대
-- [ ] **P2 — Live Component:** 원본 데이터 변경, 액션의 역방향 전달, 상태 소유권 및 중복 실행 검증
-- [ ] **P3 — Adaptive Layout:** 자동 배치, 충돌 방지, 시야·가독성 제약 구현
-- [ ] **P4 — Workspace Persistence:** 레이아웃 저장·복원 및 Attach 지원
-- [ ] **P5 — Multi-Component Examples:** README·실시간 차트·버튼 사례 검증
-- [ ] **P6 — XR Adapter & Live Bridge:** 렌더러 호스트 연결, 상태·액션 전송 계약 및 연결 단절 처리 검증
-- [ ] **P7 — Open-Source Release:** npm 배포, 문서화, 성능 측정 및 호환성 테스트
+- [x] **P0 — Same-Host Detach:** Registry, 원본 React mount 보존, Detach/Move/Resize/Attach 및 Live 상태·액션 검증
+- [x] **P1-00 / P1-02 — Same-Context XR Mirror:** Three.js/Babylon.js의 별도 3D 표현과 desktop/IWER 검증
+- [x] **P1-03 — Cross-Context XR Mirror:** same-origin iframe의 versioned 상태·액션 브리지, 중복 방지와 재연결
+- [x] **P1-04 — Declarative Spatial View (Experimental):** 컴포넌트 근처의 명시적 `SpatialItem xr` 선언과 실제 등록 수명주기
+- [ ] **Future — Generalized Detach to XR:** 런타임 capability에 따른 더 폭넓은 presentation 재사용; 자동 DOM 변환을 뜻하지 않음
+- [ ] **Future — Adaptive Layout / Persistence:** 자동 배치, 충돌 방지, 레이아웃 저장·복원
+- [ ] **Future — Open-Source Release:** API 안정화, 기기 호환성 검증, 문서 및 npm 배포
 
-### First Proof of Concept
+### Initial Proof of Concept (implemented)
 
 첫 번째 PoC는 세 장의 이미지가 있는 테스트 페이지에서 시작합니다.
 
@@ -573,7 +573,7 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 ## 12. Project Status
 
-**Current stage: P0 Same-Host PoC Implemented — XR Integration Pending**
+**Current stage: P0 Detach + P1 Cross-Context XR Mirror Implemented — P1-04 Declarative View API Experimental**
 
 P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.com/ppsssj/SpatialFlex/issues/5))에서 **같은 브라우저 페이지 안의 2D 개념 증명(PoC)** 을 구현하고 자동화 테스트로 검증했습니다. 이는 위에서 설명한 SpatialFlex 비전의 첫 단계이며, XR 환경에서의 동작이나 SDK 전체의 완성을 뜻하지 않습니다. 실행 방법과 세부 동작은 [13. Local Development](#13-local-development)에 있습니다.
 
@@ -585,10 +585,16 @@ P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.co
 - **앱 소유 Live 상태와 양방향 액션:** 분리된 뷰는 원본 앱의 상태를 그대로 표시하고, 분리된 뷰의 버튼은 원본 앱의 같은 액션을 호출합니다. 클릭당 액션 1회, 중복 구독 없음을 계측으로 확인합니다. 도메인 상태와 로직의 소유자는 계속 원본 앱입니다.
 - **브라우저 E2E:** Playwright로 production 빌드를 **Chromium과 Firefox**에서 테스트하며, CI에서도 두 엔진 모두 실행합니다.
 
+### 구현된 P1 XR Mirror
+
+- **두 XR 엔진:** Three.js와 Babylon.js의 renderer-neutral Host 계약, desktop 3D 및 기존 same-context IWER 검증.
+- **P1-03 Cross-Context Mirror:** 별도 JavaScript realm의 same-origin iframe에 검증된 데이터와 semantic action ID만 전달하며, 앱이 상태와 액션을 소유합니다. [Live Bridge](docs/live-bridge.md).
+- **P1-04 선언형 View (실험적):** `SpatialItem xr`로 컴포넌트 근처에서 representation과 허용 액션을 선언합니다. 실제 등록·해제와 최신 handler를 추적하며 앱별 XR adapter entry 없이 발견합니다. [API / DX 비교](docs/declarative-spatial-view.md).
+
 ### 아직 구현되지 않은 것
 
 - **실제 XR 렌더링 (물리 기기):** SDK의 분리는 같은 문서 안의 CSS 위치 변경이며 XR 렌더링과 같지 않습니다. P1 [XR Lab](docs/xr-lab.md)은 등록된 아이템의 **별도 3D 미러 뷰**를 WebXR 장면에 그리고 데스크톱 3D와 IWER 에뮬레이터에서만 검증했습니다. 물리 헤드셋에서는 검증하지 않았습니다.
-- **Cross-Host Live Bridge:** 별도 창·iframe·XR 런타임과 상태 스냅샷·액션 요청·연결 단절·재동기화를 주고받는 브리지는 [#7](https://github.com/ppsssj/SpatialFlex/issues/7)의 후속 과제입니다.
+- **범용 Cross-Origin / 외부 XR Host:** P1-03의 same-origin iframe 브리지는 구현되어 있습니다. Cross-origin 인증과 임의 외부 런타임 지원은 구현하지 않았습니다.
 - **범용 DOM → XR 변환:** 임의의 웹 페이지나 등록되지 않은 DOM을 XR 콘텐츠로 바꾸는 기능은 없으며, 초기 범위도 아닙니다.
 - **npm 배포:** 패키지는 `private`이며 배포되지 않았습니다. 공개 API는 바뀔 수 있습니다.
 - **프로덕션 수준의 브라우저 호환성:** 데스크톱 Chromium·Firefox에서 마우스로만 검증했습니다. Safari/WebKit, 모바일, 터치·펜·키보드 조작, React 18은 검증하지 않았고, `transform` 등이 있는 조상 요소 아래에서는 동작하지 않는 것으로 알려져 있습니다([알려진 제한](#알려진-제한)).
@@ -604,7 +610,7 @@ P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.co
 
 ## 13. Local Development
 
-현재 구현된 범위는 모노레포 기반([#1](https://github.com/ppsssj/SpatialFlex/issues/1)), SpatialItem 계약·Registry([#2](https://github.com/ppsssj/SpatialFlex/issues/2)), 동일 페이지 안의 2D Detach/Attach·이동([#3](https://github.com/ppsssj/SpatialFlex/issues/3)), Same-Host Live 동작 검증([#4](https://github.com/ppsssj/SpatialFlex/issues/4)), 크기 조절·Playground 완성·브라우저 E2E([#5](https://github.com/ppsssj/SpatialFlex/issues/5))입니다. 즉 **P0 Same-Host PoC**(같은 페이지 안의 2D 분리)가 동작합니다. XR 렌더링과 별도 호스트 간 Cross-Host XR Live Bridge([#7](https://github.com/ppsssj/SpatialFlex/issues/7))는 아직 구현되지 않았으며 npm에 배포되지 않았습니다.
+P0의 Registry, 원본 React mount를 보존하는 같은 페이지의 2D Detach/Attach·이동·크기 조절·Live 동작이 구현되어 있습니다. P1에서는 Three.js/Babylon.js의 별도 XR 미러, same-origin iframe Live Bridge와 실험적 선언형 `SpatialItem xr` 바인딩을 추가했습니다. [선언형 API와 DX 검증](docs/declarative-spatial-view.md), [브리지 계약](docs/live-bridge.md)을 참고하세요. 패키지는 npm에 배포하지 않았습니다.
 
 ### Quick Start
 

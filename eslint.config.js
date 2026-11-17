@@ -128,6 +128,10 @@ export default tseslint.config(
     ],
   }),
   {
+    files: ["apps/xr-lab/scripts/*.mjs"],
+    languageOptions: { globals: globals.node },
+  },
+  {
     files: ["**/*.config.{js,ts}"],
     languageOptions: { globals: globals.node },
   },

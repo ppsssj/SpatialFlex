@@ -3,6 +3,7 @@ import type {
   SpatialItemRecord,
   SpatialRegistry,
   SpatialRegistryListener,
+  SpatialViewRecord,
 } from "@spatialflex/core";
 import { useCallback, useSyncExternalStore } from "react";
 import { useSpatialRegistry } from "./context";
@@ -15,6 +16,21 @@ import { useSpatialRegistry } from "./context";
 const SERVER_ITEMS: readonly SpatialItemRecord[] = Object.freeze([]);
 const getServerItems = () => SERVER_ITEMS;
 const getServerItem = () => undefined;
+const SERVER_VIEWS: readonly SpatialViewRecord[] = Object.freeze([]);
+const getServerViews = () => SERVER_VIEWS;
+
+/** @experimental Mounted, explicitly declared views. Empty during SSR/hydration. */
+export function useSpatialViews(): readonly SpatialViewRecord[] {
+  const registry = useSpatialRegistry();
+  return useSyncExternalStore(
+    useCallback(
+      (listener: SpatialRegistryListener) => registry.subscribeViews(listener),
+      [registry],
+    ),
+    useCallback(() => registry.views(), [registry]),
+    getServerViews,
+  );
+}
 
 /**
  * Items registered in the current workspace, in registration order.

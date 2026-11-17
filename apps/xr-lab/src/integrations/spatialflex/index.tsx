@@ -1,69 +1,76 @@
 import {
   SpatialItem,
   SpatialWorkspace,
-  useSpatialItems,
+  useSpatialRegistry,
+  useSpatialViews,
 } from "@spatialflex/react";
 import { useMemo } from "react";
-import { useLabState, useLabStore, type RenderWidget } from "../../fixtures";
-import { usePanels, usePresentation } from "../common/presentation";
-import { hasXRView, XR_VIEWS } from "../common/scenario";
+import type { RenderWidget } from "../../fixtures";
+import { usePresentation } from "../common/presentation";
 import type { IntegrationModule, LabIntegration } from "../contract";
 
-/**
- * SpatialFlex: dashboard widgets are registered as SpatialItems, and the XR
- * items are the registered items that have an XR view.
- *
- * - Eligibility comes from the live SpatialFlex registry, not a static list.
- * - When a widget unmounts, its SpatialItem unregisters and its XR panel is
- *   removed, with no extra wiring.
- * - A panel action is forwarded only if its item is still registered, shown
- *   and declares that action.
- *
- * This is a mirror: the XR panel is a separate 3D view of the same logical
- * item and the same app state. The original DOM and React component stay in
- * the dashboard; nothing is moved into XR.
- */
-const renderWidget: RenderWidget = (id, widget) => (
-  <SpatialItem id={id} label={XR_VIEWS[id].label}>
+// Generic translation only: no widget IDs, application state or action table.
+const renderWidget: RenderWidget = (id, widget, view) => (
+  <SpatialItem id={id} xr={view}>
     {widget}
   </SpatialItem>
 );
-
 function useSpatialFlexIntegration(): LabIntegration {
-  const store = useLabStore();
-  const state = useLabState((s) => s);
-  const registered = useSpatialItems();
-
-  const available = useMemo(
-    () => registered.map((item) => item.id).filter(hasXRView),
-    [registered],
-  );
+  const registry = useSpatialRegistry();
+  const views = useSpatialViews();
+  const available = useMemo(() => views.map((v) => v.id), [views]);
   const { presentation, show, hide, move, select } = usePresentation(available);
-  const panels = usePanels(presentation, state);
-
+  const panels = presentation.shown.flatMap((id) => {
+    const index = views.findIndex((v) => v.id === id);
+    const view = views[index];
+    if (!view) return [];
+    const [x, y, z] = slot(index);
+    const [ox, oy, oz] = presentation.offsets[id] ?? [0, 0, 0];
+    return [
+      {
+        id,
+        title: view.title,
+        position: [round(x + ox), round(y + oy), round(z + oz)] as const,
+        body: view.body,
+        buttons: view.actions,
+        selected: presentation.selected === id,
+      },
+    ];
+  });
   return {
     source: "SpatialFlex registry",
-    items: available.map((id) => ({
-      id,
-      label: XR_VIEWS[id].label,
-      shown: presentation.shown.includes(id),
-      selected: presentation.selected === id,
+    items: views.map((v) => ({
+      id: v.id,
+      label: v.title,
+      shown: presentation.shown.includes(v.id),
+      selected: presentation.selected === v.id,
     })),
     panels,
-    show: (id) => hasXRView(id) && show(id),
+    actionOwners: Object.fromEntries(
+      views.map((v) => [v.id, v.registrationId]),
+    ),
+    show,
     hide,
     move,
-    onPanelButton(panelId, buttonId) {
-      if (!hasXRView(panelId) || !available.includes(panelId)) return;
-      if (!presentation.shown.includes(panelId)) return;
-      XR_VIEWS[panelId].actions[buttonId]?.(store.actions, store.getState());
+    onPanelButton(id, action) {
+      if (!presentation.shown.includes(id)) return;
+      const view = views.find((v) => v.id === id);
+      if (view) registry.invokeView(id, view.registrationId, action);
     },
     onPanelSelect: select,
-    onPanelClose: (panelId) => void hide(panelId),
+    onPanelClose: (id) => void hide(id),
     renderWidget,
   };
 }
 
+// Renderer-owned placement; independent of component identity or domain state.
+const slot = (index: number): readonly [number, number, number] => {
+  if (index === 0) return [0, 1.4, -1.2];
+  if (index === 1) return [-0.75, 1.4, -1];
+  if (index === 2) return [0.75, 1.4, -1];
+  return [(((index - 3) % 3) - 1) * 0.75, 2, -1.3];
+};
+const round = (value: number) => Math.round(value * 1000) / 1000;
 export const spatialflexIntegration: IntegrationModule = {
   id: "spatialflex",
   Provider: SpatialWorkspace,
