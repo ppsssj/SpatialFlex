@@ -1,4 +1,4 @@
-import type { HostButton, HostPanelBody, Vec3 } from "../../host";
+import type { HostButton, HostPanelBody, Vec3 } from "../../contracts/xrHost";
 import {
   IMAGE_COLORS,
   WIDGETS,

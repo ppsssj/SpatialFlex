@@ -1,13 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import {
   actionCount,
   activeSubscriptions,
   clickPart,
+  COMBINATIONS,
   drawnText,
   hovered,
   incrementCalls,
   locate,
-  MODES,
   openLab,
   probe,
   removeFromXR,
@@ -18,18 +18,22 @@ import {
   xrItem,
 } from "./lab";
 
-// Desktop 3D (no XR session): the same scenarios, the same assertions, in
-// every integration mode. 3D interaction is real mouse input on the canvas.
+// Desktop 3D (no XR session): the same scenarios and assertions for every
+// XR engine × integration combination. 3D interaction is real mouse input on
+// the canvas, picked by the engine itself.
 
-for (const mode of MODES) {
-  test.describe(`${mode} — desktop 3D`, () => {
+const moveRight = (page: Page, id: string) =>
+  xrItem(page, id).getByRole("button", { name: /right/i }).click();
+
+for (const { engine, mode } of COMBINATIONS) {
+  test.describe(`${engine} × ${mode} — desktop 3D`, () => {
     let problems: string[];
     let remote: string[];
 
     test.beforeEach(async ({ page }) => {
       problems = watchConsole(page);
       remote = watchRemoteRequests(page);
-      await openLab(page, mode);
+      await openLab(page, engine, mode);
     });
 
     test.afterEach(() => {
@@ -92,12 +96,8 @@ for (const mode of MODES) {
       await expect(
         xrItem(page, "shared-counter").getByText("selected"),
       ).toBeVisible();
-      await xrItem(page, "shared-counter")
-        .getByRole("button", { name: /right/i })
-        .click();
-      await xrItem(page, "shared-counter")
-        .getByRole("button", { name: /right/i })
-        .click();
+      await moveRight(page, "shared-counter");
+      await moveRight(page, "shared-counter");
 
       await expect
         .poll(
@@ -227,17 +227,139 @@ for (const mode of MODES) {
         .toBeLessThan(2);
     });
 
-    test("loads SpatialFlex only in spatialflex mode", async ({ page }) => {
+    test("shared counter flow (web → 3D → move → 3D)", async ({ page }) => {
+      await showInXR(page, "shared-counter");
+      await expect(webCount(page)).toHaveText("0");
+      await expect
+        .poll(() => drawnText(page, "shared-counter"))
+        .toBe("Shared count=0");
+      await expect(actionCount(page)).toHaveText("0");
+
+      await page.getByTestId("web-increment").click();
+      await expect
+        .poll(() => drawnText(page, "shared-counter"))
+        .toBe("Shared count=1");
+
+      await clickPart(page, "shared-counter", "button:increment");
+      await expect(webCount(page)).toHaveText("2");
+      await expect(actionCount(page)).toHaveText("2");
+
+      const before = await locate(page, "shared-counter", "button:increment");
+      await moveRight(page, "shared-counter");
+      // Wait until the panel is at its new place before clicking it there.
+      await expect
+        .poll(
+          async () =>
+            (await locate(page, "shared-counter", "button:increment")).x,
+        )
+        .toBeGreaterThan(before.x + 10);
+      await clickPart(page, "shared-counter", "button:increment");
+      await expect(webCount(page)).toHaveText("3");
+      await expect
+        .poll(() => drawnText(page, "shared-counter"))
+        .toBe("Shared count=3");
+      await expect(actionCount(page)).toHaveText("3");
+      await expect(incrementCalls(page)).toHaveText("3");
+    });
+
+    test("chart reflects app data without another store", async ({ page }) => {
+      await showInXR(page, "live-chart");
+      await expect
+        .poll(() => drawnText(page, "live-chart"))
+        .toBe("Recent counts=[0]");
+
+      await page.getByTestId("web-increment").click();
+      await page.getByTestId("web-increment").click();
+
+      await expect
+        .poll(() => drawnText(page, "live-chart"))
+        .toBe("Recent counts=[0,1,2]");
+      await expect(page.getByTestId("web-chart")).toHaveAttribute(
+        "data-values",
+        "0,1,2",
+      );
+    });
+
+    test("image follows the web variant; unmount and show again", async ({
+      page,
+    }) => {
+      await showInXR(page, "image-panel");
+      await page.getByTestId("image-variant").selectOption("mono");
+      await expect
+        .poll(() => drawnText(page, "image-panel"))
+        .toBe("#57606a:mono");
+
+      await page.getByTestId("image-mounted").uncheck();
+      await expect.poll(() => probe(page, "panels")).toEqual([]);
+
+      await page.getByTestId("image-mounted").check();
+      await showInXR(page, "image-panel");
+      // The variant is app state: it survives the widget's unmount.
+      await expect
+        .poll(() => drawnText(page, "image-panel"))
+        .toBe("#57606a:mono");
+    });
+
+    test("resource cleanup: textures, host and render loop", async ({
+      page,
+    }) => {
+      await expect.poll(() => probe(page, "activeHosts")).toBe(1);
+      await expect.poll(() => probe(page, "engine")).toBe(engine);
+      expect(await probe(page, "liveTextures")).toBe(0);
+
+      for (const id of ["shared-counter", "live-chart", "image-panel"]) {
+        await showInXR(page, id);
+      }
+      // 3 panels + their controls (+1 & close, close, Next & close).
+      await expect.poll(() => probe(page, "liveTextures")).toBe(8);
+      for (const id of ["shared-counter", "live-chart", "image-panel"]) {
+        await removeFromXR(page, id);
+      }
+      await expect.poll(() => probe(page, "liveTextures")).toBe(0);
+
+      await showInXR(page, "shared-counter");
+      await page.getByRole("button", { name: "Unmount workspace" }).click();
+      await expect(page.getByTestId("xr-canvas")).toHaveCount(0);
+      await expect.poll(() => probe(page, "activeHosts")).toBe(0);
+      await expect.poll(() => probe(page, "liveTextures")).toBe(0);
+      // The render loop has stopped: no frames are rendered any more.
+      const frames = await probe(page, "frames");
+      await page.waitForTimeout(500); // observation window, not synchronization
+      expect(await probe(page, "frames")).toBe(frames);
+
+      // Releasing the GL context on unmount is the expected cleanup; some
+      // browsers report it as a warning.
+      const released = /WebGL context was lost/;
+      problems.splice(
+        0,
+        problems.length,
+        ...problems.filter((p) => !released.test(p)),
+      );
+
+      await page.getByRole("button", { name: "Mount workspace" }).click();
+      await expect.poll(() => probe(page, "activeHosts")).toBe(1);
+      await expect.poll(() => probe(page, "liveTextures")).toBe(3);
+      await clickPart(page, "shared-counter", "button:increment");
+      await expect(webCount(page)).toHaveText("1");
+      await expect(incrementCalls(page)).toHaveText("1");
+    });
+
+    test("loads only the selected engine, and SpatialFlex only in spatialflex mode", async ({
+      page,
+    }) => {
       const scripts = await page.evaluate(() =>
         performance
           .getEntriesByType("resource")
           .map((entry) => entry.name)
           .filter((name) => name.endsWith(".js")),
       );
-      const loadedSpatialFlex = scripts.some((name) =>
-        /\/spatialflex-[^/]*\.js$/.test(name),
-      );
-      expect(loadedSpatialFlex).toBe(mode === "spatialflex");
+      const loaded = (chunk: string) =>
+        scripts.some((name) => new RegExp(`/${chunk}-[^/]*\\.js$`).test(name));
+      expect(loaded("three-host")).toBe(engine === "three");
+      expect(loaded("babylon-host")).toBe(engine === "babylon");
+      // The Three.js library itself is never downloaded for Babylon.js.
+      expect(loaded("three.module")).toBe(engine === "three");
+      expect(loaded("spatialflex")).toBe(mode === "spatialflex");
       expect(await page.locator("[data-spatialflex-item]").count()).toBe(
         mode === "spatialflex" ? 3 : 0,
       );

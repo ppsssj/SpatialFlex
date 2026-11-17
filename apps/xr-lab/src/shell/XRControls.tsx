@@ -1,4 +1,4 @@
-import type { Vec3 } from "../host";
+import type { Vec3 } from "../contracts/xrHost";
 import type { LabIntegration } from "../integrations/contract";
 
 const STEP = 0.1; // meters

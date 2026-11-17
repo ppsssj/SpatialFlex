@@ -8,6 +8,8 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  /* A full-viewport app: the page itself never scrolls. */
+  overflow: hidden;
 }
 
 .lab-header {
@@ -43,6 +45,13 @@ body {
 .lab-right {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.lab-right > .xr-host {
+  flex: 1;
+  min-height: 0;
 }
 
 .widgets {
@@ -98,7 +107,6 @@ body {
 .xr-host {
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .xr-host-bar {
@@ -118,4 +126,19 @@ body {
 .xr-host-canvas {
   flex: 1;
   min-height: 0;
+}
+
+.workspace-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #d0d7de;
+}
+
+canvas.xr-host-canvas {
+  display: block;
+  width: 100%;
+  touch-action: none;
+  outline: none;
 }

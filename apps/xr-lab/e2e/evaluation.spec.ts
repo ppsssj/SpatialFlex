@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import {
   incrementCalls,
   locate,
-  MODES,
+  COMBINATIONS,
   openLab,
   probe,
   showInXR,
@@ -12,6 +12,14 @@ import {
 } from "./lab";
 
 // Comparative measurements: the same workload, browser and configuration in
+// every combination. Compare baseline with spatialflex within one engine;
+// differences between engines are not a controlled rendering benchmark.
+//
+// All timings are proxies: "pointer -> web DOM" is the DOM mutation time,
+// "pointer -> CPU texture update" is when the panel's canvas texture was
+// redrawn on the CPU (not GPU presentation), and the frame interval is the
+// time between JavaScript frame callbacks (not GPU frame time).
+//
 // every mode. The test asserts correctness only (no duplicated actions, no
 // errors); the numbers are recorded as JSON attachments for comparison and
 // must not be read as a performance claim from a single run.
@@ -31,12 +39,15 @@ const p95 = (values: number[]) => {
 };
 const round = (value: number) => Math.round(value * 10) / 10;
 
-for (const mode of MODES) {
-  test(`evaluation — ${mode}`, async ({ page, browserName }, info) => {
+for (const { engine, mode } of COMBINATIONS) {
+  test(`evaluation — ${engine} × ${mode}`, async ({
+    page,
+    browserName,
+  }, info) => {
     // 20 clicks, a 3 s sampling window and a cold software-GL start.
     test.setTimeout(90_000);
     const problems = watchConsole(page);
-    await openLab(page, mode);
+    await openLab(page, engine, mode);
     await showInXR(page, "shared-counter");
     await showInXR(page, "live-chart");
 
@@ -115,6 +126,7 @@ for (const mode of MODES) {
     });
 
     const result = {
+      engine,
       mode,
       browser: browserName,
       repeat: info.repeatEachIndex,
@@ -126,10 +138,10 @@ for (const mode of MODES) {
       latencyMs: {
         webMedian: round(median(webLatency)),
         webP95: round(p95(webLatency)),
-        xrRedrawMedian: round(median(xrLatency)),
-        xrRedrawP95: round(p95(xrLatency)),
+        cpuTextureUpdateMedian: round(median(xrLatency)),
+        cpuTextureUpdateP95: round(p95(xrLatency)),
       },
-      frameTimeMs: {
+      jsFrameIntervalMs: {
         median: round(median(frameTimes)),
         p95: round(p95(frameTimes)),
         samples: frameTimes.length,

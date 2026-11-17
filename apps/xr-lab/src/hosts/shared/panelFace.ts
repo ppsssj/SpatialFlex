@@ -1,46 +1,26 @@
-import { CanvasTexture, SRGBColorSpace } from "three";
-import type { HostPanelBody } from "./types";
+import type { HostPanelBody } from "../../contracts/xrHost";
 
-// Panel faces are drawn with the 2D canvas API and local system fonts, so the
-// scene needs no remote fonts or texture assets.
-const PIXELS_PER_METER = 1000;
+/**
+ * Panel and button faces, drawn with the 2D canvas API and local system
+ * fonts. Shared by every host so that all engines show identical pixels;
+ * each engine only wraps the canvas in its own texture type. No rendering
+ * engine is imported here.
+ */
 
-/** A canvas-backed texture that is redrawn in place. */
-export class CanvasFace {
-  readonly canvas: HTMLCanvasElement;
-  readonly texture: CanvasTexture;
+/** Texture resolution: pixels per meter of panel surface. */
+export const PIXELS_PER_METER = 1000;
 
-  constructor(widthM: number, heightM: number) {
-    this.canvas = document.createElement("canvas");
-    this.canvas.width = Math.round(widthM * PIXELS_PER_METER);
-    this.canvas.height = Math.round(heightM * PIXELS_PER_METER);
-    this.texture = new CanvasTexture(this.canvas);
-    this.texture.colorSpace = SRGBColorSpace;
-  }
+export const pixelSize = (meters: number) =>
+  Math.round(meters * PIXELS_PER_METER);
 
-  drawPanel(title: string, body: HostPanelBody, selected: boolean) {
-    drawPanelFace(this.canvas, title, body, selected);
-    this.texture.needsUpdate = true;
-  }
-
-  drawButton(label: string, hovered: boolean) {
-    drawButtonFace(this.canvas, label, hovered);
-    this.texture.needsUpdate = true;
-  }
-
-  dispose() {
-    this.texture.dispose();
-  }
-}
-
-function drawPanelFace(
-  canvas: HTMLCanvasElement,
+export function drawPanelFace(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
   title: string,
   body: HostPanelBody,
   selected: boolean,
 ) {
-  const ctx = canvas.getContext("2d")!;
-  const { width, height } = canvas;
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#f6f8fa";
   ctx.fillRect(0, 0, width, height);
@@ -96,13 +76,13 @@ function drawPanelFace(
   }
 }
 
-function drawButtonFace(
-  canvas: HTMLCanvasElement,
+export function drawButtonFace(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
   label: string,
   hovered: boolean,
 ) {
-  const ctx = canvas.getContext("2d")!;
-  const { width, height } = canvas;
   ctx.fillStyle = hovered ? "#0550ae" : "#0969da";
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = "#ffffff";

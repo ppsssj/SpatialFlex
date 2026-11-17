@@ -51,6 +51,9 @@ export default defineConfig({
     command: `pnpm build && pnpm preview --host 127.0.0.1 --port ${PORT} --strictPort`,
     url: BASE_URL,
     reuseExistingServer: false,
+    // Test builds expose the read-only host probe and allow the dev-only
+    // WebXR emulator; normal production builds do neither.
+    env: { VITE_XR_LAB_TEST_HOOKS: "1" },
     timeout: 120_000,
     stdout: "ignore",
     stderr: "pipe",

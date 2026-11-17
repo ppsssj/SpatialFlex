@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from "react";
-import type { HostEvents, HostPanel, Vec3 } from "../host";
+import type { HostEvents, HostPanel, Vec3 } from "../contracts/xrHost";
 import type { RenderWidget } from "../fixtures";
 
 /**

@@ -1,7 +1,6 @@
-import type { XRStore } from "@react-three/xr";
-import type { ComponentType, ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import type { HostModule } from "../contracts/xrHost";
 import { Dashboard, LabStoreContext, type LabStore } from "../fixtures";
-import { XRHost, type XRHostProps } from "../host";
 import type {
   IntegrationModule,
   LabIntegration,
@@ -10,23 +9,23 @@ import { XRControls } from "./XRControls";
 
 export interface LabShellProps {
   integration: IntegrationModule;
+  host: HostModule;
   store: LabStore;
-  xrStore: XRStore;
-  /** Replaces the XR host (unit tests run without WebGL). */
-  Host?: ComponentType<XRHostProps>;
+  /** Status of the development emulator, shown in the workspace. */
+  emulator: string;
   header?: ReactNode;
 }
 
 /**
- * Lays out the original dashboard and the spatial workspace. The same shell,
- * host and fixture are used for every integration; only `integration`
- * changes.
+ * Lays out the original dashboard and the spatial workspace. The same shell
+ * and fixture are used for every engine and integration; only `host` and
+ * `integration` change.
  */
 export function LabShell({
   integration,
+  host,
   store,
-  xrStore,
-  Host = XRHost,
+  emulator,
   header,
 }: LabShellProps) {
   const { Provider } = integration;
@@ -35,8 +34,8 @@ export function LabShell({
       <Provider>
         <ShellLayout
           integration={integration}
-          xrStore={xrStore}
-          Host={Host}
+          host={host}
+          emulator={emulator}
           header={header}
         />
       </Provider>
@@ -46,18 +45,27 @@ export function LabShell({
 
 function ShellLayout({
   integration,
-  xrStore,
-  Host,
+  host,
+  emulator,
   header,
 }: {
   integration: IntegrationModule;
-  xrStore: XRStore;
-  Host: ComponentType<XRHostProps>;
+  host: HostModule;
+  emulator: string;
   header: ReactNode;
 }) {
   const lab: LabIntegration = integration.useIntegration();
+  // Unmounting the workspace disposes the host's engine, scene and render
+  // loop; used to check resource cleanup.
+  const [workspaceMounted, setWorkspaceMounted] = useState(true);
+  const { Host } = host;
+
   return (
-    <div className="lab" data-integration={integration.id}>
+    <div
+      className="lab"
+      data-integration={integration.id}
+      data-engine={host.id}
+    >
       <header className="lab-header">{header}</header>
       <div className="lab-columns">
         <div className="lab-left">
@@ -67,13 +75,25 @@ function ShellLayout({
           <XRControls lab={lab} />
         </div>
         <div className="lab-right">
-          <Host
-            store={xrStore}
-            panels={lab.panels}
-            onPanelButton={lab.onPanelButton}
-            onPanelSelect={lab.onPanelSelect}
-            onPanelClose={lab.onPanelClose}
-          />
+          <div className="workspace-bar">
+            <button
+              type="button"
+              onClick={() => setWorkspaceMounted((mounted) => !mounted)}
+            >
+              {workspaceMounted ? "Unmount workspace" : "Mount workspace"}
+            </button>
+            <span className="hint" data-testid="xr-emulator">
+              Emulator: {emulator}
+            </span>
+          </div>
+          {workspaceMounted && (
+            <Host
+              panels={lab.panels}
+              onPanelButton={lab.onPanelButton}
+              onPanelSelect={lab.onPanelSelect}
+              onPanelClose={lab.onPanelClose}
+            />
+          )}
         </div>
       </div>
     </div>

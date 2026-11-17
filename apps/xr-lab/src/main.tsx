@@ -1,13 +1,20 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createLabXRStore, readEmulatorMode } from "./devtools/xrRuntime";
+import type { EngineId, HostModule } from "./contracts/xrHost";
+import { setupEmulator } from "./devtools/emulator";
 import { createLabStore } from "./fixtures";
 import type { IntegrationId, IntegrationModule } from "./integrations/contract";
 import { LabShell } from "./shell/LabShell";
 import "./styles.css";
 
-// Each integration is a separate chunk: baseline mode never loads SpatialFlex.
-const loaders: Record<IntegrationId, () => Promise<IntegrationModule>> = {
+// Every engine and integration is a separate chunk: only the selected engine
+// is downloaded, and baseline mode never loads SpatialFlex.
+const engines: Record<EngineId, () => Promise<HostModule>> = {
+  three: () => import("./hosts/three/three-host").then((m) => m.threeHost),
+  babylon: () =>
+    import("./hosts/babylon/babylon-host").then((m) => m.babylonHost),
+};
+const integrations: Record<IntegrationId, () => Promise<IntegrationModule>> = {
   baseline: () =>
     import("./integrations/baseline").then((m) => m.baselineIntegration),
   spatialflex: () =>
@@ -15,19 +22,25 @@ const loaders: Record<IntegrationId, () => Promise<IntegrationModule>> = {
 };
 
 const params = new URLSearchParams(window.location.search);
+const engine: EngineId =
+  params.get("engine") === "babylon" ? "babylon" : "three";
 const mode: IntegrationId =
   params.get("integration") === "spatialflex" ? "spatialflex" : "baseline";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing #root element");
 
-const integration = await loaders[mode]();
+// The emulator, if requested, must be the WebXR runtime before a host loads.
+const emulator = await setupEmulator(window.location.search);
+const [host, integration] = await Promise.all([
+  engines[engine](),
+  integrations[mode](),
+]);
 const store = createLabStore();
-const xrStore = createLabXRStore(readEmulatorMode(window.location.search));
 
-const link = (target: IntegrationId) => {
+const link = (key: string, value: string) => {
   const next = new URLSearchParams(window.location.search);
-  next.set("integration", target);
+  next.set(key, value);
   return `?${next}`;
 };
 
@@ -35,19 +48,28 @@ createRoot(root).render(
   <StrictMode>
     <LabShell
       integration={integration}
+      host={host}
       store={store}
-      xrStore={xrStore}
+      emulator={emulator.detail}
       header={
         <>
           <h1>SpatialFlex XR Lab</h1>
           <p className="hint">
-            Neutral WebXR test environment. Integration:{" "}
+            Neutral WebXR test environment. Engine:{" "}
+            <strong data-testid="engine-id">{host.id}</strong> (
+            <a href={link("engine", engine === "three" ? "babylon" : "three")}>
+              switch to {engine === "three" ? "babylon" : "three"}
+            </a>
+            ) · Integration:{" "}
             <strong data-testid="integration-mode">{integration.id}</strong> (
-            {mode === "baseline" ? (
-              <a href={link("spatialflex")}>switch to spatialflex</a>
-            ) : (
-              <a href={link("baseline")}>switch to baseline</a>
-            )}
+            <a
+              href={link(
+                "integration",
+                mode === "baseline" ? "spatialflex" : "baseline",
+              )}
+            >
+              switch to {mode === "baseline" ? "spatialflex" : "baseline"}
+            </a>
             )
           </p>
         </>
