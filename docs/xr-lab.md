@@ -211,6 +211,12 @@ other because headless browsers render WebGL in software. Every test fails on
 console errors or warnings except a documented list of third-party messages
 (`e2e/lab.ts`), which applies to both modes alike.
 
+**CI (Ubuntu, no GPU):** headless Firefox cannot create a WebGL context there,
+even with `webgl.force-enabled`. In CI the Firefox project runs **headed under
+Xvfb** (`xvfb-run`, `XR_LAB_FIREFOX_HEADED=1`); Chromium stays headless. Both
+integration modes use the same setup. With this, CI passes 22/22 XR Lab tests
+in each browser.
+
 ### Comparative results
 
 `PASS` / `FAIL` / `BLOCKED` / `NOT_TESTED`, from the local Windows run in
@@ -306,3 +312,6 @@ numbers do not show that either mode is faster.
   pages starve each other.
 - **A second `three` in the bundle** (warning "Multiple instances of Three.js")
   means the overrides in `pnpm-workspace.yaml` were lost. Run `pnpm why three`.
+- **Firefox "WebGL creation failed" on Linux CI:** headless Firefox has no
+  WebGL without a GPU. Run it headed under Xvfb, as `.github/workflows/ci.yml`
+  does.
