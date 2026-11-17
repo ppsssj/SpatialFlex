@@ -587,7 +587,7 @@ P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.co
 
 ### 아직 구현되지 않은 것
 
-- **실제 XR 렌더링:** XR 기기·런타임에 패널을 표시하는 기능은 없습니다. 현재 분리는 같은 문서 안의 CSS 위치 변경이며, XR 렌더링과 같지 않습니다.
+- **실제 XR 렌더링 (물리 기기):** SDK의 분리는 같은 문서 안의 CSS 위치 변경이며 XR 렌더링과 같지 않습니다. P1 [XR Lab](docs/xr-lab.md)은 등록된 아이템의 **별도 3D 미러 뷰**를 WebXR 장면에 그리고 데스크톱 3D와 IWER 에뮬레이터에서만 검증했습니다. 물리 헤드셋에서는 검증하지 않았습니다.
 - **Cross-Host Live Bridge:** 별도 창·iframe·XR 런타임과 상태 스냅샷·액션 요청·연결 단절·재동기화를 주고받는 브리지는 [#7](https://github.com/ppsssj/SpatialFlex/issues/7)의 후속 과제입니다.
 - **범용 DOM → XR 변환:** 임의의 웹 페이지나 등록되지 않은 DOM을 XR 콘텐츠로 바꾸는 기능은 없으며, 초기 범위도 아닙니다.
 - **npm 배포:** 패키지는 `private`이며 배포되지 않았습니다. 공개 API는 바뀔 수 있습니다.
@@ -727,6 +727,14 @@ function DetachButton() {
 - `registry.detach()`를 직접 호출하면 DOM을 측정하지 않으므로 placeholder 크기가 없어 reflow가 발생하고, `registry.move()`·`resize()`는 뷰포트 제한을 적용하지 않습니다. React에서는 `useSpatialController()`를 사용하세요.
 - 같은 브라우저 페이지 안에서만 동작합니다. 별도 XR 호스트로의 이동은 [#7](https://github.com/ppsssj/SpatialFlex/issues/7) 범위입니다.
 
+### XR Lab (P1-00)
+
+[`apps/xr-lab`](apps/xr-lab)은 SpatialFlex가 일반적인 WebXR 애플리케이션과 통합되는지 평가하는 **벤더 중립 테스트 환경**입니다. 같은 XR 장면·앱 상태·테스트로 SpatialFlex 없는 `baseline` 통합과 `spatialflex` 통합을 비교합니다. 3D 패널은 원본 컴포넌트를 옮긴 것이 아니라 같은 앱 상태에 연결된 별도 미러 뷰입니다. 실행 방법, 아키텍처, 비교 결과는 [docs/xr-lab.md](docs/xr-lab.md)에 있습니다.
+
+```bash
+pnpm dev:xr-lab     # http://localhost:5173/?integration=baseline 또는 ?integration=spatialflex
+```
+
 ### Same-Host Live 동작 (v0.1)
 
 분리된 SpatialItem은 원본 React 앱과 **같은 페이지, 같은 React 트리** 안에 남아 있습니다. 따라서 앱의 Context, 상태 저장소, 이벤트 핸들러를 별도 장치 없이 그대로 사용하며, SDK에 Live Binding 전용 코드는 없습니다.
@@ -762,7 +770,7 @@ pnpm dev            # playground 개발 서버 (http://localhost:5173)
 pnpm typecheck      # 모든 workspace 타입 검사
 pnpm build          # packages/* → dist, playground → dist
 pnpm test           # Vitest 단위·통합 테스트 (core, react, playground)
-pnpm test:e2e       # Playwright 브라우저 E2E (Chromium, Firefox)
+pnpm test:e2e       # Playwright 브라우저 E2E (Chromium, Firefox; playground와 XR Lab)
 pnpm lint           # ESLint
 pnpm format:check   # Prettier 검사 (pnpm format으로 자동 수정)
 ```
