@@ -244,8 +244,15 @@ for (const { engine, mode } of COMBINATIONS) {
       await expect(webCount(page)).toHaveText("2");
       await expect(actionCount(page)).toHaveText("2");
 
+      const before = await locate(page, "shared-counter", "button:increment");
       await moveRight(page, "shared-counter");
-      await expect.poll(() => probe(page, "drawn")).toBeTruthy();
+      // Wait until the panel is at its new place before clicking it there.
+      await expect
+        .poll(
+          async () =>
+            (await locate(page, "shared-counter", "button:increment")).x,
+        )
+        .toBeGreaterThan(before.x + 10);
       await clickPart(page, "shared-counter", "button:increment");
       await expect(webCount(page)).toHaveText("3");
       await expect

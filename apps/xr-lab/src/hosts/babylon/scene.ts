@@ -208,7 +208,15 @@ export class BabylonLabScene {
         entry = undefined;
       }
       entry ??= this.#createPanel(panel, signature);
-      entry.root.position.set(...panel.position);
+      const [x, y, z] = panel.position;
+      if (!entry.root.position.equalsToFloats(x, y, z)) {
+        entry.root.position.set(x, y, z);
+        // Babylon caches world matrices until the next render. Refresh them
+        // now so picking and probes use the new position immediately.
+        entry.root.computeWorldMatrix(true);
+        for (const part of entry.parts.values())
+          part.mesh.computeWorldMatrix(true);
+      }
       const drawn = entry.drawn;
       if (
         !drawn ||
