@@ -1,30 +1,37 @@
 import { expect, type Page } from "@playwright/test";
 
 /**
- * Shared page model for the XR Lab E2E tests. Every helper works the same in
- * every integration mode; the 3D scene is reached only through real mouse
- * input on the canvas (or the emulated XR device), never through app
- * shortcuts. The host probe is read-only: it reports where a panel part is
- * on screen and what a panel last drew.
+ * Shared page model for the XR Lab E2E tests. Every helper works the same for
+ * every XR engine and integration mode; the 3D scene is reached only through
+ * real mouse input on the canvas (or the emulated XR device), never through
+ * app shortcuts. The host probe is read-only: it reports where a panel part
+ * is on screen and what a panel last drew.
  */
 
+export const ENGINES = ["three", "babylon"] as const;
+export type Engine = (typeof ENGINES)[number];
 export const MODES = ["baseline", "spatialflex"] as const;
 export type Mode = (typeof MODES)[number];
 
+/** The four engine × integration combinations. */
+export const COMBINATIONS = ENGINES.flatMap((engine) =>
+  MODES.map((mode) => ({ engine, mode })),
+);
+
 /**
- * Known third-party console messages, allowed in every mode alike:
+ * Known third-party console messages, allowed for every engine and mode:
  * - @react-three/fiber 9.8 still uses THREE.Clock, deprecated in three 0.187.
  * - Chromium's software GL driver reports read-back stalls as warnings.
- * - @react-three/xr calls IWER's installRuntime() before the lab's dev
- *   tooling forces the install over Chromium's native navigator.xr.
  * - Firefox warns when pointer-event libraries copy every MouseEvent field,
  *   including its deprecated moz* getters.
+ * - Firefox warns when an engine probes WEBGL_debug_renderer_info for GPU
+ *   capabilities (Babylon.js does on startup).
  */
 const ALLOWED = [
+  /WEBGL_debug_renderer_info is deprecated/,
   /MouseEvent\.moz(Pressure|InputSource) is deprecated/,
   /THREE\.Clock: This module has been deprecated/,
   /GL Driver Message/,
-  /IWER: a native WebXR runtime is already available/,
 ];
 
 export function watchConsole(page: Page) {
@@ -53,10 +60,14 @@ export function watchRemoteRequests(page: Page) {
 
 export async function openLab(
   page: Page,
+  engine: Engine,
   mode: Mode,
   emulator: "off" | "iwer" = "off",
 ) {
-  await page.goto(`/?integration=${mode}&xr-emulator=${emulator}`);
+  await page.goto(
+    `/?engine=${engine}&integration=${mode}&xr-emulator=${emulator}`,
+  );
+  await expect(page.getByTestId("engine-id")).toHaveText(engine);
   await expect(page.getByTestId("integration-mode")).toHaveText(mode);
   // The first frames have been rendered.
   await expect.poll(() => probe(page, "frames")).toBeGreaterThan(2);
@@ -71,11 +82,22 @@ export type Probe = {
   drawn: Record<string, { text: string; at: number }>;
   panels: string[];
   sessionMode: string | null;
+  liveTextures: number;
+  activeHosts: number;
+  engine: string | null;
 };
 
 /** Reads a field of the host probe. */
 export function probe<
-  K extends "frames" | "frameTimes" | "drawn" | "panels" | "sessionMode",
+  K extends
+    | "frames"
+    | "frameTimes"
+    | "drawn"
+    | "panels"
+    | "sessionMode"
+    | "liveTextures"
+    | "activeHosts"
+    | "engine",
 >(page: Page, field: K): Promise<Probe[K]> {
   return page.evaluate(
     // Undefined until the canvas has mounted; polling callers retry.

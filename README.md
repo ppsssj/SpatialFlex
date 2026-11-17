@@ -727,12 +727,12 @@ function DetachButton() {
 - `registry.detach()`를 직접 호출하면 DOM을 측정하지 않으므로 placeholder 크기가 없어 reflow가 발생하고, `registry.move()`·`resize()`는 뷰포트 제한을 적용하지 않습니다. React에서는 `useSpatialController()`를 사용하세요.
 - 같은 브라우저 페이지 안에서만 동작합니다. 별도 XR 호스트로의 이동은 [#7](https://github.com/ppsssj/SpatialFlex/issues/7) 범위입니다.
 
-### XR Lab (P1-00)
+### XR Lab (P1-00, P1-02)
 
-[`apps/xr-lab`](apps/xr-lab)은 SpatialFlex가 일반적인 WebXR 애플리케이션과 통합되는지 평가하는 **벤더 중립 테스트 환경**입니다. 같은 XR 장면·앱 상태·테스트로 SpatialFlex 없는 `baseline` 통합과 `spatialflex` 통합을 비교합니다. 3D 패널은 원본 컴포넌트를 옮긴 것이 아니라 같은 앱 상태에 연결된 별도 미러 뷰입니다. 실행 방법, 아키텍처, 비교 결과는 [docs/xr-lab.md](docs/xr-lab.md)에 있습니다.
+[`apps/xr-lab`](apps/xr-lab)은 SpatialFlex가 일반적인 WebXR 애플리케이션과 통합되는지 평가하는 **벤더 중립 테스트 환경**입니다. 같은 앱 상태·테스트로 SpatialFlex 없는 `baseline` 통합과 `spatialflex` 통합을 비교하며, 렌더러 중립 Host 계약을 통해 **서로 독립된 두 XR 엔진**(Three.js, Babylon.js)에서 같은 시나리오를 검증합니다. 3D 패널은 원본 컴포넌트를 옮긴 것이 아니라 같은 앱 상태에 연결된 별도 미러 뷰입니다. 실행 방법과 아키텍처는 [docs/xr-lab.md](docs/xr-lab.md), 엔진 간 호환성과 4가지 조합 비교 결과는 [docs/xr-host-compatibility.md](docs/xr-host-compatibility.md)에 있습니다.
 
 ```bash
-pnpm dev:xr-lab     # http://localhost:5173/?integration=baseline 또는 ?integration=spatialflex
+pnpm dev:xr-lab     # http://localhost:5173/?engine=three|babylon&integration=baseline|spatialflex
 ```
 
 ### Same-Host Live 동작 (v0.1)

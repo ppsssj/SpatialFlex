@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import type { HostPanel, Vec3 } from "../../host";
+import type { HostPanel, Vec3 } from "../../contracts/xrHost";
 import type { LabState, WidgetId } from "../../fixtures";
 import { XR_VIEWS } from "./scenario";
 

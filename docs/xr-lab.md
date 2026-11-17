@@ -4,14 +4,16 @@
 SpatialFlex integrates with an ordinary standards-based XR application under
 the same conditions as a conventional, hand-written integration.
 
-It is **not** a showcase tuned for SpatialFlex. The XR scene, application,
-input, test data and tests are shared. Only the **integration adapter**
-changes between the two modes:
+It is **not** a showcase tuned for SpatialFlex. The application, input, test
+data and tests are shared. Two things can be swapped independently:
 
-| Mode                 | URL                        | What connects the app to the XR scene        |
-| -------------------- | -------------------------- | -------------------------------------------- |
-| `baseline` (default) | `?integration=baseline`    | Hand-written code without SpatialFlex        |
-| `spatialflex`        | `?integration=spatialflex` | SpatialFlex registration and its React hooks |
+| Dimension   | URL                                                            | Options                                                                                |
+| ----------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| XR engine   | `?engine=three` (default) / `?engine=babylon`                  | Three.js (React Three Fiber + `@react-three/xr`) or Babylon.js                         |
+| Integration | `?integration=baseline` (default) / `?integration=spatialflex` | Hand-written code without SpatialFlex, or SpatialFlex registration and its React hooks |
+
+The second engine and the four-combination comparison are described in
+[xr-host-compatibility.md](xr-host-compatibility.md).
 
 ## Three models that must not be conflated
 
@@ -27,36 +29,39 @@ components or DOM into XR.
 ## Architecture
 
 ```text
-                    main.tsx  ── ?integration=…  (dynamic import, one chunk per mode)
-                       │
-          ┌────────────┴─────────────┐
-          ▼                          ▼
- integrations/baseline       integrations/spatialflex ── @spatialflex/react
-          │                          │
-          └──────────┬───────────────┘
-                     ▼ implements IntegrationModule (integrations/contract.ts)
-       integrations/common (shared XR scenario + presentation state)
-                     │
-   shell/ ───────────┼──────────────► host/      Neutral XR host: R3F, Three.js,
-     │               │                           @react-three/xr. No app, no SDK.
-     └──────────────►fixtures/                   App state + actions + web widgets.
-                                                 No XR, no SDK.
-   devtools/xrRuntime.ts ── creates the WebXR store; the only IWER configuration
+            main.tsx ── ?engine=… ?integration=…  (dynamic import, one chunk each)
+               │
+   ┌───────────┴───────────┐                    ┌──────────────────────┐
+   ▼                       ▼                    ▼                      ▼
+hosts/three           hosts/babylon     integrations/baseline  integrations/spatialflex
+ (R3F, three,          (Babylon.js)             │                      │ @spatialflex/react
+  @react-three/xr)          │                   └──────────┬───────────┘
+   │                        │                              ▼ IntegrationModule
+   └──────────┬─────────────┘                    integrations/common (scenario,
+              ▼                                   presentation state)
+   contracts/xrHost.ts  ◄── HostPanel data + events ───────┘
+   contracts/hostProbe.ts      hosts/shared (2D panel faces, toolbar)
+
+   shell/ ── lays out fixtures/ (app state, actions, widgets) and the selected host
+   devtools/emulator.ts ── installs IWER as the WebXR runtime (dev/test only)
 ```
 
 ESLint (`no-restricted-imports` in `eslint.config.js`) enforces the dependency
 direction:
 
-- `host/` imports nothing from the lab and no SpatialFlex package.
-- `fixtures/` imports no XR library, no host and no integration.
-- `integrations/{contract,common,baseline}` and `shell/`, `devtools/` import no
-  SpatialFlex package.
+- `contracts/` and `hosts/shared/` import no rendering engine, app, SDK or
+  integration.
+- Each `hosts/<engine>/` imports only the contract, the shared host code and
+  its own engine: never the other engine, the app, an integration or
+  SpatialFlex.
+- `fixtures/` imports no XR library, no contract, no host and no integration.
+- Integrations reach hosts only through the contract.
 - Only `integrations/spatialflex/` imports `@spatialflex/*`.
 
-In baseline mode the SpatialFlex chunk is never downloaded, and an E2E test
-checks this.
+Only the selected engine's chunk is downloaded, and in baseline mode the
+SpatialFlex chunk is never downloaded. E2E tests check both.
 
-### Neutral host contract (`src/host/types.ts`)
+### Neutral host contract (`src/contracts/xrHost.ts`)
 
 ```ts
 interface HostPanel {
@@ -72,20 +77,23 @@ interface HostEvents {
   onPanelSelect(panelId): void;
   onPanelClose(panelId): void;
 }
-<XRHost store={xrStore} panels={…} {...events} />
+<Host panels={…} {...events} />   // HostModule.Host, one per engine
 ```
 
-The host renders panels as Three.js geometry: a textured plane, button meshes
-and a close control. It handles mouse and XR ray input through R3F pointer
-events (raycasting), and reports interactions as events. Panel faces are drawn
-with the 2D canvas API and local system fonts, so there are no remote fonts or
-textures. Coordinates are meters. CSS pixels are never interpreted as XR
-coordinates.
+Each host renders panels with its own engine: a textured plane, button meshes
+and a close control, placed by the shared `panelLayout()`. It picks with its
+own engine (R3F raycasting, Babylon `scene.onPointerObservable`) for both mouse
+and XR controller rays, and reports interactions as events. Panel faces are
+drawn by shared 2D canvas code with local system fonts, so both engines show
+the same pixels and need no remote fonts or textures. Coordinates are meters.
+CSS pixels are never interpreted as XR coordinates.
 
-A read-only **host probe** (`window.__xrHostProbe`) reports where a panel part
-is on screen or in the world, frame times, and when each panel last drew. It is
-part of the host, so it is identical for both modes, and it never triggers
-interactions.
+A read-only **host probe** (`contracts/hostProbe.ts`, `window.__xrHostProbe`)
+reports where a panel part is on screen or in the world, frame callback
+intervals, when each panel last drew, live panel textures and mounted hosts.
+Every host fills it the same way and it never triggers interactions. It is
+exposed only in development and in builds made with `VITE_XR_LAB_TEST_HOOKS=1`
+(the E2E builds).
 
 ### State ownership
 
@@ -132,7 +140,8 @@ pnpm install
 pnpm dev:xr-lab                    # http://localhost:5173
 ```
 
-No headset is needed. Open `?integration=baseline` or `?integration=spatialflex`.
+No headset is needed. Choose the engine and integration with `?engine=` and
+`?integration=` (links in the header switch them).
 
 ### Desktop 3D
 
@@ -146,26 +155,28 @@ No headset is needed. Open `?integration=baseline` or `?integration=spatialflex`
 
 ### IWER emulator (immersive VR without a headset)
 
-`@react-three/xr` bundles the IWER emulator with its devui. The lab's dev tooling
-(`src/devtools/xrRuntime.ts`) is the only place that configures it:
+The lab's dev tooling (`src/devtools/emulator.ts`) installs the IWER emulator
+and its devui as the browser's WebXR runtime (`navigator.xr`) **before any
+engine loads**. Hosts never configure emulation: to every engine the emulator
+is simply a WebXR runtime. The emulator is installed only when all of these
+hold:
 
-| `?xr-emulator=`  | Behavior                                                                               |
-| ---------------- | -------------------------------------------------------------------------------------- |
-| `auto` (default) | Library default: inject on `localhost` when the browser has no immersive WebXR support |
-| `iwer`           | Always inject (used by tests, which run on `127.0.0.1`)                                |
-| `off`            | Never inject                                                                           |
+1. It is requested with `?xr-emulator=iwer`.
+2. The build allows it: development (`pnpm dev:xr-lab`) or a test build made
+   with `VITE_XR_LAB_TEST_HOOKS=1`. A normal production build never installs
+   it, whatever the URL says.
+3. The browser has no immersive VR support of its own. If a headset or native
+   runtime is present, the emulator is not installed and the status says so.
 
-Steps: open `http://localhost:5173/?xr-emulator=iwer`. The status shows
-"immersive VR available (emulated)". Show the counter, then click **Enter VR**.
-The devui shows the emulated headset view and controller inspectors. Aim the
-right controller at **+1** and pull the trigger. The web dashboard updates.
-Click **Exit VR** to return; the app state is kept.
+Steps: open `http://localhost:5173/?xr-emulator=iwer` (add `&engine=babylon`
+for Babylon.js). The workspace shows "Emulator: IWER emulator installed…" and
+"XR: immersive VR available". Show the counter, then click **Enter VR**. The
+devui shows the emulated headset view and controller inspectors. Aim the right
+controller at **+1** and pull the trigger. The web dashboard updates. Click
+**Exit VR** to return; the app state is kept.
 
-The XR status distinguishes **native** (the browser's own WebXR supports
-immersive VR), **emulated** (an injected emulator actually provides the
-session) and **unavailable**. Enter VR is never permanently disabled, because
-support can appear later. Rejected requests are shown as an error, and desktop
-3D keeps working.
+Enter VR is never permanently disabled, because support can appear later.
+Rejected requests are shown as an error, and desktop 3D keeps working.
 
 ### Physical headset
 
@@ -175,28 +186,28 @@ configured.
 
 ## Library compatibility workarounds (dev tooling only)
 
-These were needed to make the documented emulator work with the installed
-versions. They live outside the host, and both modes use them identically.
+These were needed to make the emulator work with the installed versions. They
+live outside the hosts, and every engine and integration uses them alike.
 
-1. **Aligned emulator packages.** `@react-three/xr` 6.6.32 pins `@iwer/devui`
-   1.x and `@iwer/sem` 0.2 next to `iwer` 2.8. That mix loaded a second
-   `three` ("e.onBuild is not a function") and let devui 1.x override
-   controller poses, so emulated controllers could not be aimed.
-   `pnpm-workspace.yaml` overrides `@iwer/devui` and `@iwer/sem` to 2.8.0 and
-   their `three` to the app's `~0.187.0`.
+1. **Single `three`.** `@iwer/devui` and `@iwer/sem` declare `three` as a regular
+   dependency (`^0.184`). `pnpm-workspace.yaml` overrides it to the app's
+   `~0.187.0`, so only one `three` is loaded. It also keeps the emulator
+   packages that `@react-three/xr` 6.6 depends on at 2.8.0; P1-00 found that
+   the 1.x devui it pins overrides controller poses.
 2. **Forced runtime install.** IWER 2.8 does not install over an existing
-   `navigator.xr`, and Chromium exposes one even without a headset. The dev
-   tooling calls IWER's documented `installRuntime({ forceInstall: true })`
-   after `@react-three/xr` has injected the emulator. It only injects after the
-   native runtime reported no immersive support, so a real headset is never
-   hidden.
-3. **`offerSession: false`.** `@react-three/xr` re-requests a browser session
-   offer after emulator injection and after each session. The superseded offer
-   is an unhandled promise rejection. The lab enters XR through its own button.
-4. **Controller and hand models off** (`model: false`). Models load from a
-   remote CDN. Controller _layout profiles_ are still fetched from
-   `cdn.jsdelivr.net` during an XR session (library default `baseAssetPath`).
-   Desktop 3D makes no remote requests, which the E2E tests check.
+   `navigator.xr`, and Chromium exposes one even without a headset. After
+   checking that the native runtime reports no immersive VR, the dev tooling
+   calls IWER's documented `installRuntime({ forceInstall: true })`.
+3. **No library-injected emulation.** The Three.js host creates its
+   `@react-three/xr` store with `emulate: false` and `offerSession: false` (the
+   automatic session offer is re-requested after each session and the
+   superseded promise is an unhandled rejection).
+4. **No remote controller assets.** Three.js: controller and hand models off
+   (`model: false`); controller _layout profiles_ are still fetched from
+   `cdn.jsdelivr.net` during an XR session. Babylon.js: controller meshes and the
+   online profile repository off; controllers use Babylon's built-in
+   `generic-trigger` profile. Desktop 3D makes no remote requests, which the E2E
+   tests check.
 
 ## Automated tests
 
@@ -209,81 +220,33 @@ E2E runs against the production build (`vite preview` on `127.0.0.1:4180`,
 strict port, no server reuse), with one worker. Parallel pages starve each
 other because headless browsers render WebGL in software. Every test fails on
 console errors or warnings except a documented list of third-party messages
-(`e2e/lab.ts`), which applies to both modes alike.
+(`e2e/lab.ts`), which applies to every engine and integration alike.
 
 **CI (Ubuntu, no GPU):** headless Firefox cannot create a WebGL context there,
 even with `webgl.force-enabled`. In CI the Firefox project runs **headed under
-Xvfb** (`xvfb-run`, `XR_LAB_FIREFOX_HEADED=1`); Chromium stays headless. Both
-integration modes use the same setup. With this, CI passes 22/22 XR Lab tests
-in each browser.
+Xvfb** (`xvfb-run`, `XR_LAB_FIREFOX_HEADED=1`); Chromium stays headless. Every
+engine and integration uses the same setup.
 
-### Comparative results
+### Results
 
-`PASS` / `FAIL` / `BLOCKED` / `NOT_TESTED`, from the local Windows run in
-Chromium (Chrome for Testing 159) and Firefox 159.
-
-| #   | Scenario                                                          | baseline | spatialflex |
-| --- | ----------------------------------------------------------------- | -------- | ----------- |
-| 1   | Original web → XR state update                                    | PASS     | PASS        |
-| 2   | XR → original web action (real canvas click)                      | PASS     | PASS        |
-| 3   | Exactly-once action processing                                    | PASS     | PASS        |
-| 4   | Panel selection and repositioning                                 | PASS     | PASS        |
-| 5   | Repeated open/close (10× and 3D close)                            | PASS     | PASS        |
-| 6   | Cleanup: widget unmount removes the panel; subscriptions released | PASS     | PASS        |
-| 7   | Unsupported immersive XR reported, desktop keeps working          | PASS     | PASS        |
-| 8   | Real canvas pointer: hover, orbit, reset                          | PASS     | PASS        |
-| —   | SpatialFlex chunk loaded only in `spatialflex` mode               | PASS     | PASS        |
+The XR Lab's results now cover two XR engines × two integrations × two
+browsers: 13 desktop scenarios, the emulated immersive scenario and the
+measurements for each of the four combinations. They are reported in
+[xr-host-compatibility.md](xr-host-compatibility.md#test-matrix).
 
 The Vitest contract suite runs the same 12 tests against both adapters (plus
-2 mode-specific checks). A mutation check confirmed that it tests each mode's
-own wiring: removing the baseline's hand-written lifecycle filter fails only
-the baseline's cleanup test.
+2 mode-specific checks). A mutation check (P1-00) confirmed that it tests each
+mode's own wiring: removing the baseline's hand-written lifecycle filter fails
+only the baseline's cleanup test.
 
-### Immersive WebXR
-
-| Check                                                     | baseline   | spatialflex |
-| --------------------------------------------------------- | ---------- | ----------- |
-| Native WebXR (physical device)                            | NOT_TESTED | NOT_TESTED  |
-| IWER emulator injected and detected as `emulated`         | PASS       | PASS        |
-| Immersive session created (`immersive-vr`)                | PASS       | PASS        |
-| Controller input: ray hover on the 3D +1 (IWER `look_at`) | PASS       | PASS        |
-| XR panel action: `select` runs `increment()` exactly once | PASS       | PASS        |
-| State sync during the session (web change → panel)        | PASS       | PASS        |
-| Exit session, state kept, desktop 3D works again          | PASS       | PASS        |
-
-Emulator results come from IWER's documented remote API (`look_at`, `select`),
-which drives the real WebXR input source → XR ray → pointer event path. They
-passed in Chromium and Firefox. They are not physical-device results.
-
-### Measurements
-
-The same workload, browser and configuration for both modes:
-
-- 2 panels shown and 20 real 3D clicks
-- idle frame times over 3 s
-- 3 repetitions per mode and browser
-
-Values are ranges across repetitions. Headless browsers render with software
-GL, so absolute numbers do not represent real hardware. Firefox reduces timer
-precision.
-
-| Metric                                                             | Chromium baseline | Chromium spatialflex | Firefox baseline | Firefox spatialflex |
-| ------------------------------------------------------------------ | ----------------- | -------------------- | ---------------- | ------------------- |
-| Duplicate actions                                                  | 0                 | 0                    | 0                | 0                   |
-| Pointer → web DOM update, median (ms)                              | 1.6–1.8           | 1.8–2.0              | 5                | 4–6                 |
-| Pointer → 3D panel redraw, median (ms)                             | 2.5–2.7           | 2.5–2.7              | 6–7              | 5–7                 |
-| Idle frame time, median (ms)                                       | 19.8–19.9         | 19.8–20.1            | 17               | 17                  |
-| JavaScript loaded (decoded bytes)                                  | 1,327,426         | 1,335,213 (+7.8 kB)  | same             | same                |
-| JS heap after workload (MB, Chromium only)                         | 10.1–13.6         | 12.1–12.8            | n/a              | n/a                 |
-| Integration adapter code (formatted, non-blank, non-comment lines) | 50                | 52                   |                  |                     |
-
-No difference between the modes stands out from run-to-run variation. These
-numbers do not show that either mode is faster.
+All timings the lab records are proxies: CPU-side texture updates and
+JavaScript frame callback intervals, not GPU presentation.
 
 ## Supported and unsupported
 
 **Supported:**
 
+- Two independent XR engines (Three.js, Babylon.js) behind one renderer-neutral host contract.
 - Desktop 3D preview with mouse orbit, hover, select, close and repositioning.
 - Mirroring three registered items.
 - App-owned state in both directions with exactly-once actions.
@@ -297,13 +260,14 @@ numbers do not show that either mode is faster.
 - Converting arbitrary React components or DOM into XR.
 - A cross-host bridge (#7).
 - Safari/WebKit.
-- Offline XR sessions: controller layout profiles come from a CDN.
+- Offline XR sessions with the Three.js host: controller layout profiles come from a CDN.
 
 ## Troubleshooting
 
 - **"immersive VR unavailable (desktop 3D only)":** expected without a headset
-  or emulator. Use `?xr-emulator=iwer`, or open the app on `localhost` with the
-  default `auto` mode.
+  or emulator. In development, add `?xr-emulator=iwer`.
+- **"Emulator: disabled in this build":** production builds never install the
+  emulator. Use `pnpm dev:xr-lab`, or build with `VITE_XR_LAB_TEST_HOOKS=1`.
 - **"The VR session request was rejected…":** the browser refused the session.
   Desktop 3D still works.
 - **The Immersive Web Emulator browser extension (IWE 1.x)** prevents the
@@ -312,6 +276,8 @@ numbers do not show that either mode is faster.
   pages starve each other.
 - **A second `three` in the bundle** (warning "Multiple instances of Three.js")
   means the overrides in `pnpm-workspace.yaml` were lost. Run `pnpm why three`.
+- **Babylon.js panels invisible or mirrored, or clicks ignored:** see the engine
+  differences in [xr-host-compatibility.md](xr-host-compatibility.md#differences-between-the-two-engine-integrations).
 - **Firefox "WebGL creation failed" on Linux CI:** headless Firefox has no
   WebGL without a GPU. Run it headed under Xvfb, as `.github/workflows/ci.yml`
   does.
