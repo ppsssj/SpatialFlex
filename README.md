@@ -592,6 +592,34 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 오픈소스 라이선스는 최초 코드 공개 전에 확정합니다.
 
+## 13. Local Development
+
+P0-01([#1](https://github.com/ppsssj/SpatialFlex/issues/1))에서 모노레포 개발 기반만 구성했습니다. 아래 패키지는 **빌드·테스트 파이프라인 검증용 최소 export**만 제공하며, SpatialItem 계약과 Registry 등 실제 API는 [#2](https://github.com/ppsssj/SpatialFlex/issues/2) 이후에 구현합니다.
+
+```text
+packages/
+├── core/        @spatialflex/core — 프레임워크·렌더러 독립 TypeScript 패키지
+└── react/       @spatialflex/react — React 통합 (core를 workspace 의존성으로 사용)
+apps/
+└── playground/  Vite + React 개발/검증 앱 (core, react 사용)
+```
+
+**요구 사항:** Node.js 22 이상, pnpm (`package.json`의 `packageManager` 버전; `corepack enable`로 활성화 가능)
+
+```bash
+pnpm install        # 의존성 설치
+pnpm dev            # playground 개발 서버 (http://localhost:5173)
+pnpm typecheck      # 모든 workspace 타입 검사
+pnpm build          # packages/* → dist, playground → dist
+pnpm test           # Vitest 단위 테스트
+pnpm lint           # ESLint
+pnpm format:check   # Prettier 검사 (pnpm format으로 자동 수정)
+```
+
+workspace 패키지는 `source` export 조건으로 TypeScript 소스를 직접 가리키므로, `pnpm dev`·`pnpm typecheck`·`pnpm test`는 패키지를 먼저 빌드하지 않아도 동작합니다. `pnpm build`는 의존 순서대로(core → react → playground) 실행됩니다.
+
+CI(`.github/workflows/ci.yml`)는 PR과 `main` push에서 install → lint → format check → typecheck → build → test를 실행합니다.
+
 ---
 
 ## Beyond Fixed Pages
