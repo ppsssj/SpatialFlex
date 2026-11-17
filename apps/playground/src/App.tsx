@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 import { GalleryStoreContext } from "./galleryContext";
 import { GalleryImage } from "./GalleryImage";
+import { DemoGuide } from "./DemoGuide";
 import { createGalleryStore, type GalleryStore } from "./galleryStore";
 import { GalleryThemeContext } from "./GalleryTheme";
 import { LiveCounter } from "./LiveCounter";
@@ -37,6 +38,11 @@ export function App({ store, registry }: AppProps) {
   return (
     <main>
       <h1>SpatialFlex Playground</h1>
+      <p className="hint">
+        Same-Host proof of concept: detach, move and resize a registered
+        component while it stays connected to this app.
+      </p>
+      <DemoGuide />
       <GalleryStoreContext value={store ?? ownStore}>
         <GalleryThemeContext value={theme}>
           <SpatialWorkspace {...(registry && { registry })}>
@@ -44,6 +50,7 @@ export function App({ store, registry }: AppProps) {
               <h2 id="gallery-heading">Gallery</h2>
               <div className="controls">
                 <DetachToggle id="image-b" label="Image B" />
+                <DetachToggle id="image-c" label="Image C" />
                 <label>
                   Theme{" "}
                   <select
@@ -83,7 +90,8 @@ export function App({ store, registry }: AppProps) {
                   <LiveCounter />
                 </SpatialItem>
                 {showImageC && (
-                  <SpatialItem id="image-c" detachable>
+                  // Detachable only: no dragging, no resize handle.
+                  <SpatialItem id="image-c" label="Image C" detachable>
                     <GalleryImage label="Image C" color="#15803d" />
                   </SpatialItem>
                 )}
@@ -100,11 +108,13 @@ export function App({ store, registry }: AppProps) {
 
 function DetachToggle({ id, label }: { id: string; label: string }) {
   const controller = useSpatialController();
-  const detached = useSpatialItem(id)?.status === "detached";
+  const record = useSpatialItem(id);
+  const detached = record?.status === "detached";
 
   return (
     <button
       type="button"
+      disabled={!record}
       onClick={() => (detached ? controller.attach(id) : controller.detach(id))}
     >
       {detached ? `Attach ${label}` : `Detach ${label}`}

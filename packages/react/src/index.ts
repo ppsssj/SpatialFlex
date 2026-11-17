@@ -9,7 +9,7 @@ export function useSpatialFlexVersion(): string {
 }
 
 export { useSpatialController, useSpatialRegistry } from "./context";
-export type { SpatialController } from "./controller";
+export { MIN_PANEL_SIZE, type SpatialController } from "./controller";
 export { useSpatialItem, useSpatialItems } from "./hooks";
 export { SpatialItem, type SpatialItemProps } from "./SpatialItem";
 export {

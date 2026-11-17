@@ -156,6 +156,8 @@ function pointer(target: Element, type: string, x: number, y: number) {
       new PointerEvent(type, {
         bubbles: true,
         button: 0,
+        // Like browsers: the primary button is pressed between down and up.
+        buttons: type === "pointerdown" || type === "pointermove" ? 1 : 0,
         pointerId: 1,
         clientX: x,
         clientY: y,
@@ -207,9 +209,11 @@ describe("detached presentation", () => {
 
     act(() => controller.detach("image-b"));
 
+    // The registry holds the panel size (null: natural size). The original
+    // 240x190 size is host-owned and only used for the placeholder.
     expect(registry.get("image-b")?.layout).toEqual({
       position: { x: 300, y: 120 },
-      size: { width: 240, height: 190 },
+      size: null,
       visible: true,
     });
     expect(item("image-b").dataset.status).toBe("detached");

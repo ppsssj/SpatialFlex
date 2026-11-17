@@ -4,6 +4,10 @@ import { defineConfig } from "vitest/config";
 // depend on packages/* having been built. These options replace Vite's
 // default conditions, so the defaults are repeated after "source".
 export default defineConfig({
+  test: {
+    // Browser E2E specs in e2e/ run with Playwright, not Vitest.
+    include: ["src/**/*.test.{ts,tsx}"],
+  },
   resolve: {
     // Used by tests in the jsdom environment.
     conditions: ["source", "module", "browser", "development|production"],

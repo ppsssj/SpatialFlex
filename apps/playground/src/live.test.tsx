@@ -18,9 +18,9 @@ import { createGalleryStore, type GalleryStore } from "./galleryStore";
 // Components in the playground that subscribe to the domain store:
 // SharedCounter (app), ImageBControls, DomainImageB, SharedCounter (image-b).
 const DOMAIN_SUBSCRIBERS = 4;
-// Components that subscribe to the SpatialFlex registry: DetachToggle,
+// Components that subscribe to the SpatialFlex registry: two DetachToggles,
 // three SpatialItems and RegistryDebugView.
-const REGISTRY_SUBSCRIBERS = 5;
+const REGISTRY_SUBSCRIBERS = 6;
 
 let root: Root | undefined;
 let container: HTMLElement;
@@ -117,6 +117,7 @@ function drag(dx: number, dy: number) {
         new PointerEvent(type, {
           bubbles: true,
           button: 0,
+          buttons: type === "pointerup" ? 0 : 1,
           pointerId: 7,
           clientX: x,
           clientY: y,
@@ -352,6 +353,42 @@ describe("G. repetition", () => {
     expect(
       container.querySelectorAll("[data-spatialflex-panel-bar]"),
     ).toHaveLength(0);
+  });
+});
+
+describe("resize and domain state", () => {
+  it("resizing changes layout only: no domain action, state or subscription change", () => {
+    render();
+    detachB();
+    const state = store.getState();
+    const diagnostics = store.getDiagnostics();
+    const imageBInstance = instance();
+    const handle = imageB().querySelector("[data-spatialflex-resize-handle]")!;
+    const fire = (type: string, x: number, y: number) =>
+      act(() => {
+        handle.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            button: 0,
+            buttons: type === "pointerup" ? 0 : 1,
+            pointerId: 9,
+            clientX: x,
+            clientY: y,
+          }),
+        );
+      });
+
+    fire("pointerdown", 100, 100);
+    fire("pointermove", 400, 400);
+    fire("pointerup", 400, 400);
+
+    expect(registry.get("image-b")?.layout.size).not.toBeNull();
+    expect(store.getState()).toBe(state);
+    expect(store.getDiagnostics()).toBe(diagnostics);
+    expect(instance()).toBe(imageBInstance);
+    incrementFromImageB();
+    expect(actions()).toBe(1);
+    expect([appCount(), imageBCount()]).toEqual(["1", "1"]);
   });
 });
 

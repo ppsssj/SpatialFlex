@@ -14,7 +14,13 @@ export function useGalleryStore(): GalleryStore {
   return store;
 }
 
-/** Subscribes to the part of the domain state returned by `select`. */
+/**
+ * Subscribes to the part of the domain state returned by `select`.
+ *
+ * `select` must return a stable value for unchanged state: a primitive or an
+ * object taken from the state as is (the store replaces objects on change).
+ * Returning a newly allocated object breaks `useSyncExternalStore`.
+ */
 export function useGalleryState<T>(select: (state: GalleryState) => T): T {
   const store = useGalleryStore();
   const getSnapshot = () => select(store.getState());
