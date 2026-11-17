@@ -4,7 +4,7 @@
 
 > 개발자는 공간형 UI와 제약 조건을 정의하고, 사용자는 필요한 웹 요소를 독립시켜 자신만의 작업 공간을 구성합니다.
 
-**Status:** Concept / Pre-implementation  
+**Status:** P0 Same-Host PoC Implemented — XR Integration Pending  
 **Type:** Open-source Spatial Layout & Element Detachment SDK  
 **Focus:** Adaptive Layout · Element Detachment · Live Components · User Composition · Layout Persistence
 
@@ -573,19 +573,29 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 ## 12. Project Status
 
-**Current stage: Concept / Proof-of-Concept Planning**
+**Current stage: P0 Same-Host PoC Implemented — XR Integration Pending**
 
-현재는 프로젝트의 개념과 아키텍처를 정의하는 단계입니다.
+P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.com/ppsssj/SpatialFlex/issues/5))에서 **같은 브라우저 페이지 안의 2D 개념 증명(PoC)** 을 구현하고 자동화 테스트로 검증했습니다. 이는 위에서 설명한 SpatialFlex 비전의 첫 단계이며, XR 환경에서의 동작이나 SDK 전체의 완성을 뜻하지 않습니다. 실행 방법과 세부 동작은 [13. Local Development](#13-local-development)에 있습니다.
 
-동작하는 SDK, 배포된 npm 패키지 및 XR 기기 지원은 아직 제공되지 않습니다.
+### 구현되어 검증된 기능 (Same-Host P0)
 
-현재 P0 작업은 [#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.com/ppsssj/SpatialFlex/issues/5)에서 추적합니다. 별도 XR 호스트 간 Live Bridge는 [#7](https://github.com/ppsssj/SpatialFlex/issues/7)에서 후속 검증 과제로 분리합니다.
+- **SpatialItem 등록과 Registry:** 개발자가 `<SpatialItem>`으로 명시적으로 등록한 컴포넌트만 다루는 Workspace 범위 Registry. 중복 ID 거부, 언마운트 시 정리, 불변·직렬화 가능한 레코드, SSR/하이드레이션 지원.
+- **Same-Host Detach / Move / Resize / Attach:** 등록된 컴포넌트를 같은 페이지에서 떠 있는 패널로 분리하고, 포인터로 이동·크기 조절한 뒤 원래 레이아웃으로 되돌립니다. 원래 자리는 placeholder가 유지하며, 기능(`detachable`·`movable`·`resizable`)과 뷰포트 경계를 강제합니다.
+- **React 로컬 상태 보존:** 분리·이동·크기 조절·복귀 중에 컴포넌트를 재마운트하지 않으므로 내부 `useState`, Context, 이벤트 핸들러, 포커스가 유지됩니다. 동일 인스턴스와 mount 횟수로 검증합니다.
+- **앱 소유 Live 상태와 양방향 액션:** 분리된 뷰는 원본 앱의 상태를 그대로 표시하고, 분리된 뷰의 버튼은 원본 앱의 같은 액션을 호출합니다. 클릭당 액션 1회, 중복 구독 없음을 계측으로 확인합니다. 도메인 상태와 로직의 소유자는 계속 원본 앱입니다.
+- **브라우저 E2E:** Playwright로 production 빌드를 **Chromium과 Firefox**에서 테스트하며, CI에서도 두 엔진 모두 실행합니다.
 
-향후 첫 번째 PoC와 핵심 기능 검증을 완료한 뒤 다음 자료를 공개할 예정입니다.
+### 아직 구현되지 않은 것
 
-- Getting Started
+- **실제 XR 렌더링:** XR 기기·런타임에 패널을 표시하는 기능은 없습니다. 현재 분리는 같은 문서 안의 CSS 위치 변경이며, XR 렌더링과 같지 않습니다.
+- **Cross-Host Live Bridge:** 별도 창·iframe·XR 런타임과 상태 스냅샷·액션 요청·연결 단절·재동기화를 주고받는 브리지는 [#7](https://github.com/ppsssj/SpatialFlex/issues/7)의 후속 과제입니다.
+- **범용 DOM → XR 변환:** 임의의 웹 페이지나 등록되지 않은 DOM을 XR 콘텐츠로 바꾸는 기능은 없으며, 초기 범위도 아닙니다.
+- **npm 배포:** 패키지는 `private`이며 배포되지 않았습니다. 공개 API는 바뀔 수 있습니다.
+- **프로덕션 수준의 브라우저 호환성:** 데스크톱 Chromium·Firefox에서 마우스로만 검증했습니다. Safari/WebKit, 모바일, 터치·펜·키보드 조작, React 18은 검증하지 않았고, `transform` 등이 있는 조상 요소 아래에서는 동작하지 않는 것으로 알려져 있습니다([알려진 제한](#알려진-제한)).
+
+### 앞으로 공개할 자료
+
 - API Reference
-- Interactive Demo
 - Supported Platforms
 - Performance Benchmarks
 - Contributing Guide
@@ -691,6 +701,7 @@ function DetachButton() {
 
 - **좌표:** CSS 픽셀, 뷰포트 왼쪽 위가 원점(`position: fixed`의 기준), x는 오른쪽, y는 아래쪽. `position`은 패널의 왼쪽 위 모서리, `size`는 패널의 border-box 크기입니다. 값은 정수로 반올림됩니다.
 - **뷰포트 경계:** Detach·이동 시 패널이 뷰포트 안에 들어가도록 위치를 제한합니다. 패널이 뷰포트보다 크면 왼쪽 위에 맞춥니다. 크기 조절은 최소 `MIN_PANEL_SIZE`(160 × 120), 최대 패널 위치에서 뷰포트 오른쪽 아래까지입니다. 창 크기가 바뀌면 `movable` 아이템의 위치와 `resizable` 아이템의 크기를 다시 제한합니다.
+- **아주 작은 뷰포트(160 × 120 CSS 픽셀 미만):** 최소 크기와 "뷰포트 안에 완전히 들어감"을 동시에 만족할 수 없으므로 **최소 크기가 우선**합니다. 크기 조절된 패널은 160 × 120 아래로 줄어들지 않고 왼쪽 위(0, 0)에 붙어 오른쪽·아래로 뷰포트를 벗어나며, 벗어난 부분은 보이지 않습니다(`position: fixed`라 스크롤로도 볼 수 없음). 크기를 조절하지 않은 자연 크기 패널도 뷰포트보다 크면 같은 방식으로 왼쪽 위에 맞춰집니다. 이런 뷰포트는 지원 대상이 아닙니다.
 - **Placeholder:** 분리된 아이템의 원래 자리는 측정한 크기를 유지하므로 다른 아이템의 위치가 바뀌지 않습니다(reflow 없음). 슬롯과 패널에는 `data-status="attached|detached"`가 있어 앱이 스타일을 지정할 수 있습니다. SDK는 기능에 필요한 인라인 스타일(위치·크기)만 적용하며, `z-index`·배경·핸들 모양 등은 앱이 정합니다.
 
 #### Resize와 레이아웃: Placeholder 크기 ≠ 패널 크기

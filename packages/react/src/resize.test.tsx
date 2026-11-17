@@ -214,6 +214,27 @@ describe("resize handle", () => {
     expect(sizeOf("image-b")).toEqual({ width: 724, height: 648 });
   });
 
+  it("lets the minimum size win in a viewport smaller than the minimum", () => {
+    render();
+    act(() => controller.detach("image-b"));
+    resizeBy(-1000, -1000);
+
+    VIEWPORT.width = 140;
+    VIEWPORT.height = 100;
+    try {
+      act(() => window.dispatchEvent(new Event("resize")));
+      act(() => controller.resize("image-b", { width: 120, height: 80 }));
+    } finally {
+      VIEWPORT.width = 1024;
+      VIEWPORT.height = 768;
+    }
+
+    // Documented in the README: the panel keeps 160x120, pinned to the
+    // top-left corner, and overflows the viewport to the right and bottom.
+    expect(sizeOf("image-b")).toEqual(MIN_PANEL_SIZE);
+    expect(registry.get("image-b")?.layout.position).toEqual({ x: 0, y: 0 });
+  });
+
   it("re-fits the size when the window shrinks", () => {
     render();
     act(() => controller.detach("image-b"));
