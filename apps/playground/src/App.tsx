@@ -1,19 +1,42 @@
-import { VERSION as CORE_VERSION } from "@spatialflex/core";
-import { useSpatialFlexVersion } from "@spatialflex/react";
+import { SpatialItem, SpatialWorkspace } from "@spatialflex/react";
+import { useState } from "react";
+import { GalleryImage } from "./GalleryImage";
+import { RegistryDebugView } from "./RegistryDebugView";
+import "./App.css";
 
 export function App() {
-  const linkedVersion = useSpatialFlexVersion();
+  const [showImageC, setShowImageC] = useState(true);
 
   return (
     <main>
       <h1>SpatialFlex Playground</h1>
-      <p>Development app for validating SpatialFlex packages.</p>
-      <dl>
-        <dt>@spatialflex/core</dt>
-        <dd>{CORE_VERSION}</dd>
-        <dt>@spatialflex/react (linked core)</dt>
-        <dd>{linkedVersion}</dd>
-      </dl>
+      <SpatialWorkspace>
+        <section aria-labelledby="gallery-heading">
+          <h2 id="gallery-heading">Gallery</h2>
+          <label>
+            <input
+              type="checkbox"
+              checked={showImageC}
+              onChange={(event) => setShowImageC(event.target.checked)}
+            />{" "}
+            Mount Image C
+          </label>
+          <div className="gallery">
+            <SpatialItem id="image-a" detachable movable resizable>
+              <GalleryImage label="Image A" color="#2f6fdf" />
+            </SpatialItem>
+            <SpatialItem id="image-b" detachable movable resizable>
+              <GalleryImage label="Image B" color="#c2410c" />
+            </SpatialItem>
+            {showImageC && (
+              <SpatialItem id="image-c" detachable>
+                <GalleryImage label="Image C" color="#15803d" />
+              </SpatialItem>
+            )}
+          </div>
+        </section>
+        <RegistryDebugView />
+      </SpatialWorkspace>
     </main>
   );
 }

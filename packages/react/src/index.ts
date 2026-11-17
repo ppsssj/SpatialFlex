@@ -7,3 +7,11 @@ import { VERSION } from "@spatialflex/core";
 export function useSpatialFlexVersion(): string {
   return VERSION;
 }
+
+export { useSpatialRegistry } from "./context";
+export { useSpatialItem, useSpatialItems } from "./hooks";
+export { SpatialItem, type SpatialItemProps } from "./SpatialItem";
+export {
+  SpatialWorkspace,
+  type SpatialWorkspaceProps,
+} from "./SpatialWorkspace";
