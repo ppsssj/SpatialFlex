@@ -33,7 +33,9 @@ if (!root) throw new Error("Missing #root element");
 // The emulator, if requested, must be the WebXR runtime before a host loads.
 const emulator = await setupEmulator(window.location.search);
 const [host, integration] = await Promise.all([
-  engines[engine](),
+  params.get("bridge") === "iframe"
+    ? import("./bridge/IframeHost").then((m) => m.iframeHost(engine))
+    : engines[engine](),
   integrations[mode](),
 ]);
 const store = createLabStore();
@@ -55,6 +57,17 @@ createRoot(root).render(
         <>
           <h1>SpatialFlex XR Lab</h1>
           <p className="hint">
+            <a
+              href={link(
+                "bridge",
+                params.get("bridge") === "iframe" ? "off" : "iframe",
+              )}
+            >
+              {params.get("bridge") === "iframe"
+                ? "Use same-context Host"
+                : "Use cross-context iframe Host"}
+            </a>
+            {" · "}
             Neutral WebXR test environment. Engine:{" "}
             <strong data-testid="engine-id">{host.id}</strong> (
             <a href={link("engine", engine === "three" ? "babylon" : "three")}>
