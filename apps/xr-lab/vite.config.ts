@@ -4,6 +4,7 @@ import { defaultClientConditions, defineConfig } from "vite";
 export default defineConfig({
   plugins: [react()],
   build: {
+    rollupOptions: { input: { app: "index.html", host: "host.html" } },
     // The bundled WebXR emulator (IWER) and its optional rooms are large,
     // lazily loaded chunks.
     chunkSizeWarningLimit: 2500,

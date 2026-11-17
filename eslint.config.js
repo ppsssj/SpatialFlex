@@ -19,6 +19,13 @@ export default tseslint.config(
   // XR Lab dependency direction: only the SpatialFlex integration may use the
   // SDK, and the neutral XR host depends on nothing in the lab.
   ...xrLabBoundaries({
+    "apps/xr-lab/src/bridge/**": [
+      "@spatialflex/*",
+      "**/fixtures",
+      "**/fixtures/**",
+      "**/integrations/**",
+      "**/shell/**",
+    ],
     // Renderer-neutral contract: no engine, app, SDK or integration.
     "apps/xr-lab/src/contracts/**": [
       "@spatialflex/*",

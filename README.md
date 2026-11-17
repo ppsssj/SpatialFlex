@@ -792,3 +792,9 @@ XR 시대의 웹은 기존 페이지를 공간에 그대로 옮기는 것만으�
 SpatialFlex는 **개발자가 제공한 웹 요소를 사용자가 필요한 만큼 독립시켜 자신에게 맞는 공간형 레이아웃으로 재구성하는 방법**을 탐구합니다.
 
 **Build spatial layouts. Detach what matters. Compose your workspace.**
+
+## Cross-context XR bridge
+
+The opt-in P1-03 iframe mirror connects the original app to an independent
+Three.js or Babylon.js Host via a validated state/action protocol. See
+[Live Bridge](docs/live-bridge.md) for usage, security, reliability and limitations.
