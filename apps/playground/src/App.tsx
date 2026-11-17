@@ -1,3 +1,4 @@
+import type { SpatialRegistry } from "@spatialflex/core";
 import {
   SpatialItem,
   SpatialWorkspace,
@@ -5,71 +6,94 @@ import {
   useSpatialItem,
 } from "@spatialflex/react";
 import { useState } from "react";
+import { GalleryStoreContext } from "./galleryContext";
 import { GalleryImage } from "./GalleryImage";
+import { createGalleryStore, type GalleryStore } from "./galleryStore";
 import { GalleryThemeContext } from "./GalleryTheme";
 import { LiveCounter } from "./LiveCounter";
+import {
+  DomainDiagnosticsView,
+  DomainImageB,
+  ImageBControls,
+  SharedCounter,
+} from "./LiveDomain";
 import { RegistryDebugView } from "./RegistryDebugView";
 import "./App.css";
 
 const THEMES = ["ocean", "forest", "sunset"];
 
-export function App() {
+export interface AppProps {
+  /** Application-owned domain store. Tests inject one to inspect it. */
+  store?: GalleryStore;
+  /** SpatialFlex registry. Tests inject one to inspect it. */
+  registry?: SpatialRegistry;
+}
+
+export function App({ store, registry }: AppProps) {
+  const [ownStore] = useState(() => store ?? createGalleryStore());
   const [showImageC, setShowImageC] = useState(true);
   const [theme, setTheme] = useState(THEMES[0]!);
 
   return (
     <main>
       <h1>SpatialFlex Playground</h1>
-      <GalleryThemeContext value={theme}>
-        <SpatialWorkspace>
-          <section aria-labelledby="gallery-heading">
-            <h2 id="gallery-heading">Gallery</h2>
-            <div className="controls">
-              <DetachToggle id="image-b" label="Image B" />
-              <label>
-                Theme{" "}
-                <select
-                  value={theme}
-                  onChange={(event) => setTheme(event.target.value)}
-                >
-                  {THEMES.map((name) => (
-                    <option key={name}>{name}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={showImageC}
-                  onChange={(event) => setShowImageC(event.target.checked)}
-                />{" "}
-                Mount Image C
-              </label>
-            </div>
-            <div className="gallery">
-              <SpatialItem id="image-a" detachable movable resizable>
-                <GalleryImage label="Image A" color="#2f6fdf" />
-              </SpatialItem>
-              <SpatialItem
-                id="image-b"
-                label="Image B"
-                detachable
-                movable
-                resizable
-              >
-                <GalleryImage label="Image B" color="#c2410c" />
-                <LiveCounter />
-              </SpatialItem>
-              {showImageC && (
-                <SpatialItem id="image-c" detachable>
-                  <GalleryImage label="Image C" color="#15803d" />
+      <GalleryStoreContext value={store ?? ownStore}>
+        <GalleryThemeContext value={theme}>
+          <SpatialWorkspace {...(registry && { registry })}>
+            <section aria-labelledby="gallery-heading">
+              <h2 id="gallery-heading">Gallery</h2>
+              <div className="controls">
+                <DetachToggle id="image-b" label="Image B" />
+                <label>
+                  Theme{" "}
+                  <select
+                    data-testid="theme-select"
+                    value={theme}
+                    onChange={(event) => setTheme(event.target.value)}
+                  >
+                    {THEMES.map((name) => (
+                      <option key={name}>{name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={showImageC}
+                    onChange={(event) => setShowImageC(event.target.checked)}
+                  />{" "}
+                  Mount Image C
+                </label>
+              </div>
+              <SharedCounter location="app" />
+              <ImageBControls />
+              <div className="gallery">
+                <SpatialItem id="image-a" detachable movable resizable>
+                  <GalleryImage label="Image A" color="#2f6fdf" />
                 </SpatialItem>
-              )}
-            </div>
-          </section>
-          <RegistryDebugView />
-        </SpatialWorkspace>
-      </GalleryThemeContext>
+                <SpatialItem
+                  id="image-b"
+                  label="Image B"
+                  detachable
+                  movable
+                  resizable
+                >
+                  <DomainImageB />
+                  <SharedCounter location="image-b" />
+                  <LiveCounter />
+                </SpatialItem>
+                {showImageC && (
+                  <SpatialItem id="image-c" detachable>
+                    <GalleryImage label="Image C" color="#15803d" />
+                  </SpatialItem>
+                )}
+              </div>
+            </section>
+            <DomainDiagnosticsView />
+            <RegistryDebugView />
+          </SpatialWorkspace>
+        </GalleryThemeContext>
+      </GalleryStoreContext>
     </main>
   );
 }

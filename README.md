@@ -594,7 +594,7 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 ## 13. Local Development
 
-현재 구현된 범위는 모노레포 기반([#1](https://github.com/ppsssj/SpatialFlex/issues/1)), SpatialItem 계약·Registry([#2](https://github.com/ppsssj/SpatialFlex/issues/2)), 동일 페이지 안의 2D Detach/Attach·이동([#3](https://github.com/ppsssj/SpatialFlex/issues/3))입니다. 크기 조절, XR 렌더링, 별도 호스트 간 Live Bridge는 아직 구현되지 않았으며 npm에 배포되지 않았습니다.
+현재 구현된 범위는 모노레포 기반([#1](https://github.com/ppsssj/SpatialFlex/issues/1)), SpatialItem 계약·Registry([#2](https://github.com/ppsssj/SpatialFlex/issues/2)), 동일 페이지 안의 2D Detach/Attach·이동([#3](https://github.com/ppsssj/SpatialFlex/issues/3)), Same-Host Live 동작 검증([#4](https://github.com/ppsssj/SpatialFlex/issues/4))입니다. 크기 조절, XR 렌더링, 별도 호스트 간 Live Bridge는 아직 구현되지 않았으며 npm에 배포되지 않았습니다.
 
 ### SpatialItem Registry (v0.1)
 
@@ -665,12 +665,31 @@ function DetachButton() {
 - `registry.detach()`를 직접 호출하면 DOM을 측정하지 않으므로 placeholder 크기가 없어 reflow가 발생합니다. React에서는 `useSpatialController()`를 사용하세요.
 - 같은 브라우저 페이지 안에서만 동작합니다. 별도 XR 호스트로의 이동은 [#7](https://github.com/ppsssj/SpatialFlex/issues/7) 범위입니다.
 
+### Same-Host Live 동작 (v0.1)
+
+분리된 SpatialItem은 원본 React 앱과 **같은 페이지, 같은 React 트리** 안에 남아 있습니다. 따라서 앱의 Context, 상태 저장소, 이벤트 핸들러를 별도 장치 없이 그대로 사용하며, SDK에 Live Binding 전용 코드는 없습니다.
+
+**두 가지 보장은 별도로 검증합니다.** 하나가 성립한다고 다른 하나가 증명되지는 않습니다. 실제로 Detach 시 컴포넌트를 강제로 재마운트하도록 바꿔도 도메인 상태 동기화 테스트는 통과하고, 인스턴스·구독 테스트만 실패합니다.
+
+| | React 로컬 상태 | 공유 도메인 상태 |
+| --- | --- | --- |
+| 위치 | Image B 내부 컴포넌트의 `useState` | 원본 앱의 저장소(Context로 전달) |
+| 보장 | Detach·이동·Attach 후에도 값과 컴포넌트 인스턴스가 유지됨(재마운트 없음) | 원본 UI와 분리된 뷰가 항상 같은 값을 표시하고, 어느 쪽에서든 같은 액션으로 변경됨 |
+| 근거 | 동일 인스턴스 번호·mount 횟수·DOM 노드 | 액션 실행 횟수, 활성 구독 수, 두 뷰의 값 일치 |
+
+- **소유권:** 도메인 상태, 비즈니스 액션, API 요청과 부수 효과는 원본 앱이 소유합니다. 분리된 뷰의 버튼도 원본 앱의 같은 액션 함수를 호출하고, 앱이 이를 처리합니다. SpatialFlex Registry에는 ID, 기능, 상태, 레이아웃만 저장되며 도메인 데이터는 들어가지 않습니다.
+- **중복 없음:** 클릭 한 번은 액션 한 번입니다. Detach·Attach·이동은 재렌더링만 일으키고 재구독하지 않으므로, 20회 반복 후에도 활성 구독 수와 누적 구독 횟수가 변하지 않습니다. 언마운트하면 구독과 등록이 모두 해제됩니다. 개발 모드 StrictMode는 마운트 시 구독을 한 번 더 했다가 해제하므로, 검증은 누적 횟수가 아닌 활성 구독 수로 합니다.
+- **Playground 시연:** 원본 UI와 Image B 안에 각각 `Shared count`와 `Increment` 버튼이 있고, 둘 다 앱 저장소의 `increment()`를 호출합니다. 원본 UI의 `Image B data` 컨트롤로 이미지 변형·캡션을 바꾸면 분리된 Image B가 같은 `<img>` 요소에서 갱신됩니다. `Domain diagnostics`에서 액션 호출 수와 활성 구독 수를, Image B의 `Local count`·`Instance`·`Mounts / unmounts`에서 로컬 상태와 인스턴스 유지를 확인할 수 있습니다. 진단용 저장소 계측은 Playground에만 있으며 SDK API가 아닙니다.
+- **검증:** [`apps/playground/src/live.test.tsx`](apps/playground/src/live.test.tsx)가 실제 Playground `App`을 렌더링해 위 내용을 확인합니다.
+
+**한계:** 이 보장은 CSS 위치 변경으로 같은 문서 안에서 분리하는 현재 방식에서만 성립합니다. 임의의 호스트(별도 창, iframe, XR 런타임)로 독립해도 기능이 유지된다는 뜻이 아닙니다. 별도 호스트 사이의 상태 스냅샷·액션 요청·승인/오류·연결 단절·재동기화를 다루는 Cross-Host Live Bridge는 구현되지 않았으며 [#7](https://github.com/ppsssj/SpatialFlex/issues/7)에서 다룹니다. 원본 앱이 종료되면 분리된 뷰의 기능도 유지되지 않습니다.
+
 ```text
 packages/
 ├── core/        @spatialflex/core — 프레임워크·렌더러 독립 TypeScript 패키지
 └── react/       @spatialflex/react — React 통합 (core를 workspace 의존성으로 사용)
 apps/
-└── playground/  Vite + React 개발/검증 앱 (Image A/B/C, Image B Detach/이동/Attach, Registry 디버그 뷰)
+└── playground/  Vite + React 개발/검증 앱 (Image A/B/C, Image B Detach/이동/Attach, 공유 도메인 상태·액션 진단, Registry 디버그 뷰)
 ```
 
 **요구 사항:** Node.js 22 이상, pnpm (`package.json`의 `packageManager` 버전; `corepack enable`로 활성화 가능)
