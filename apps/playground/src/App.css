@@ -93,3 +93,27 @@ td {
 .live-counter dd {
   margin: 0;
 }
+
+fieldset.controls {
+  margin: 12px 0 0;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+
+.shared-counter {
+  margin-top: 12px;
+}
+
+[data-spatialflex-panel] .shared-counter {
+  margin-top: 4px;
+}
+
+.diagnostics {
+  display: grid;
+  grid-template-columns: max-content auto;
+  gap: 2px 12px;
+}
+
+.diagnostics dd {
+  margin: 0;
+}
