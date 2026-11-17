@@ -1,3 +1,15 @@
 packages:
   - packages/*
   - apps/*
+
+overrides:
+  # @react-three/xr 6.6's bundled WebXR emulator pins @iwer/devui 1.x and
+  # @iwer/sem 0.2 next to iwer 2.8. That mix loads a second three and leaves
+  # devui 1.x overriding controller poses, so emulated controllers cannot be
+  # aimed. Align the emulator packages on the same IWER release.
+  "@pmndrs/xr>@iwer/devui": "2.8.0"
+  "@pmndrs/xr>@iwer/sem": "2.8.0"
+  # The emulator packages declare three as a regular dependency; share the
+  # app's three so only one instance is loaded.
+  "@iwer/devui>three": "~0.187.0"
+  "@iwer/sem>three": "~0.187.0"

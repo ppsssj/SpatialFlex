@@ -35,7 +35,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
 
@@ -52,14 +52,20 @@ jobs:
       # the lockfile.
       - run: pnpm --filter @spatialflex/playground exec playwright install --with-deps chromium firefox
 
-      # Builds the playground and tests it through `vite preview`.
-      - run: pnpm test:e2e
+      # Builds the playground and the XR Lab and tests each through
+      # `vite preview` (Chromium and Firefox; the XR Lab includes desktop 3D,
+      # emulated immersive VR and comparative measurements).
+      # Firefox has no WebGL in headless mode on this GPU-less runner, so the
+      # XR Lab's Firefox project runs headed under Xvfb (installed above).
+      - run: xvfb-run --auto-servernum pnpm test:e2e
+        env:
+          XR_LAB_FIREFOX_HEADED: "1"
 
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: |
-            apps/playground/playwright-report/
-            apps/playground/test-results/
+            apps/*/playwright-report/
+            apps/*/test-results/
           retention-days: 7
