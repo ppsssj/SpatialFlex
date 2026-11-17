@@ -594,14 +594,35 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 ## 13. Local Development
 
-P0-01([#1](https://github.com/ppsssj/SpatialFlex/issues/1))에서 모노레포 개발 기반만 구성했습니다. 아래 패키지는 **빌드·테스트 파이프라인 검증용 최소 export**만 제공하며, SpatialItem 계약과 Registry 등 실제 API는 [#2](https://github.com/ppsssj/SpatialFlex/issues/2) 이후에 구현합니다.
+현재 구현된 범위는 모노레포 기반([#1](https://github.com/ppsssj/SpatialFlex/issues/1))과 SpatialItem 계약·Registry([#2](https://github.com/ppsssj/SpatialFlex/issues/2))입니다. 실제 Detach/Attach, 이동·크기 조절, XR 렌더링은 아직 구현되지 않았으며 npm에 배포되지 않았습니다.
+
+### SpatialItem Registry (v0.1)
+
+```tsx
+import { SpatialItem, SpatialWorkspace, useSpatialItems } from "@spatialflex/react";
+
+<SpatialWorkspace>
+  <SpatialItem id="image-a" detachable movable resizable>
+    <ImageA />
+  </SpatialItem>
+</SpatialWorkspace>;
+```
+
+- **개발자 정의 등록:** `<SpatialItem>`으로 명시적으로 감싼 컴포넌트만 등록됩니다. DOM을 자동으로 탐색하지 않습니다.
+- **Workspace 범위:** 각 `<SpatialWorkspace>`가 자신의 `SpatialRegistry`를 소유합니다. 전역 싱글턴은 없으며, 서로 다른 Workspace는 같은 ID를 사용해도 격리됩니다.
+- **생명주기:** 마운트 시 등록, 언마운트 시 해제됩니다. React StrictMode의 이중 effect 실행에서도 등록이 남거나 중복 오류가 발생하지 않습니다.
+- **중복 ID:** 같은 Workspace에서 중복 ID는 덮어쓰지 않고 `SpatialFlexError`(`DUPLICATE_ITEM_ID`)를 발생시키며, 가장 가까운 Error Boundary가 이를 받습니다.
+- **렌더링:** 자식은 래퍼 요소 없이 원래 위치에 그대로 렌더링됩니다.
+- **Registry가 다루는 것:** 아이템 ID, 기능 메타데이터(`detachable`·`movable`·`resizable`), 연결 상태(`attached`/`detached`; 현재는 항상 `attached`), 직렬화 가능한 레이아웃(`position`·`size`·`visible`). 레코드는 불변이며 JSON으로 직렬화할 수 있습니다.
+- **Registry가 다루지 않는 것:** 애플리케이션 도메인 상태, 비즈니스 로직, 액션. 이는 원본 앱이 계속 소유합니다. 레코드에는 DOM 요소, React 인스턴스, 콜백이 들어가지 않습니다.
+- **조회:** `useSpatialItems()`, `useSpatialItem(id)`, `useSpatialRegistry()` 또는 core의 `registry.get/list/subscribe`.
 
 ```text
 packages/
 ├── core/        @spatialflex/core — 프레임워크·렌더러 독립 TypeScript 패키지
 └── react/       @spatialflex/react — React 통합 (core를 workspace 의존성으로 사용)
 apps/
-└── playground/  Vite + React 개발/검증 앱 (core, react 사용)
+└── playground/  Vite + React 개발/검증 앱 (Image A/B/C 등록 + Registry 디버그 뷰)
 ```
 
 **요구 사항:** Node.js 22 이상, pnpm (`package.json`의 `packageManager` 버전; `corepack enable`로 활성화 가능)
