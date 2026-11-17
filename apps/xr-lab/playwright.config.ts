@@ -37,9 +37,11 @@ export default defineConfig({
       use: {
         ...devices["Desktop Firefox"],
         viewport: { width: 1280, height: 900 },
+        // Headless Firefox on GPU-less Linux cannot create a WebGL context.
+        // CI runs this project headed under Xvfb (XR_LAB_FIREFOX_HEADED=1).
+        // Test environment only, identical for every integration mode.
+        headless: !process.env.XR_LAB_FIREFOX_HEADED,
         launchOptions: {
-          // Headless Firefox on GPU-less Linux (CI) blocks software WebGL by
-          // default, so no context can be created. Test environment only.
           firefoxUserPrefs: { "webgl.force-enabled": true },
         },
       },

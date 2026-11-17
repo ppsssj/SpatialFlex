@@ -55,7 +55,11 @@ jobs:
       # Builds the playground and the XR Lab and tests each through
       # `vite preview` (Chromium and Firefox; the XR Lab includes desktop 3D,
       # emulated immersive VR and comparative measurements).
-      - run: pnpm test:e2e
+      # Firefox has no WebGL in headless mode on this GPU-less runner, so the
+      # XR Lab's Firefox project runs headed under Xvfb (installed above).
+      - run: xvfb-run --auto-servernum pnpm test:e2e
+        env:
+          XR_LAB_FIREFOX_HEADED: "1"
 
       - if: failure()
         uses: actions/upload-artifact@v7
