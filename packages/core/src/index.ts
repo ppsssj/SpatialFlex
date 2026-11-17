@@ -5,6 +5,12 @@
  * React, the DOM, or any XR/3D runtime.
  */
 export const VERSION = "0.0.0";
+export type {
+  SpatialViewBody,
+  SpatialViewAction,
+  SpatialViewBinding,
+  SpatialViewRecord,
+} from "./spatialView";
 
 export { SpatialFlexError, type SpatialFlexErrorCode } from "./errors";
 export {

@@ -11,6 +11,13 @@ export function useSpatialFlexVersion(): string {
 export { useSpatialController, useSpatialRegistry } from "./context";
 export { MIN_PANEL_SIZE, type SpatialController } from "./controller";
 export { useSpatialItem, useSpatialItems } from "./hooks";
+export { useSpatialViews } from "./hooks";
+export type {
+  SpatialViewBody,
+  SpatialViewAction,
+  SpatialViewBinding,
+  SpatialViewRecord,
+} from "@spatialflex/core";
 export { SpatialItem, type SpatialItemProps } from "./SpatialItem";
 export {
   SpatialWorkspace,

@@ -32,9 +32,9 @@ function BridgeView() {
   const [result, setResult] = useState("none");
   const [hidden, setHidden] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
-  const request = useRef<((itemId: string, action: string) => void) | null>(
-    null,
-  );
+  const request = useRef<
+    ((itemId: string, action: string, observedRevision: number) => void) | null
+  >(null);
   useEffect(() => {
     let active = false;
     let connectionId = "pending";
@@ -59,16 +59,22 @@ function BridgeView() {
       pending.clear();
       setState({ ...current, connected: false });
     };
-    request.current = (itemId: string, action: string) => {
+    request.current = (
+      itemId: string,
+      action: string,
+      observedRevision: number,
+    ) => {
       if (
         !active ||
+        observedRevision < 0 ||
+        observedRevision > current.revision ||
         Date.now() - lastSeen > LEASE_MS ||
         Date.now() - lastStateAt > LEASE_MS ||
         pending.size >= 32
       )
         return;
       const m: BridgeMessage = {
-        ...base(),
+        ...envelope(appSessionId, viewId, observedRevision, connectionId),
         type: "action-request",
         itemId,
         action,
@@ -153,7 +159,11 @@ function BridgeView() {
                 .map((p) => ({ ...p, selected: selected === p.id }))
             : []
         }
-        onPanelButton={(id, action) => request.current?.(id, action)}
+        // An event belongs to this committed Host view, even if a newer
+        // network snapshot has arrived before React commits its replacement.
+        onPanelButton={(id, action) =>
+          request.current?.(id, action, state.revision)
+        }
         onPanelSelect={setSelected}
         onPanelClose={(id) => setHidden((ids) => [...ids, id])}
       />

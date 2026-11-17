@@ -16,12 +16,21 @@ export interface LabState {
   readonly imageVariant: ImageVariant;
   /** Whether the dashboard currently shows the image widget. */
   readonly imageMounted: boolean;
+  /** Manual baseline lifecycle accounting; SpatialFlex uses actual registrations. */
+  readonly imageEpoch: number;
+  readonly thermostatMounted: boolean;
+  readonly thermostatEpoch: number;
+  readonly temperature: number;
+  readonly heatStep: number;
 }
 
 export interface LabActions {
   increment(): void;
   setImageVariant(variant: ImageVariant): void;
   setImageMounted(mounted: boolean): void;
+  heat(step: number): void;
+  setHeatStep(step: number): void;
+  setThermostatMounted(mounted: boolean): void;
 }
 
 export interface LabDiagnostics {
@@ -50,6 +59,11 @@ export const INITIAL_LAB_STATE: LabState = {
   history: [0],
   imageVariant: "sunrise",
   imageMounted: true,
+  imageEpoch: 1,
+  thermostatMounted: false,
+  thermostatEpoch: 0,
+  temperature: 20,
+  heatStep: 1,
 };
 
 export function createLabStore(
@@ -59,7 +73,14 @@ export function createLabStore(
   const listeners = new Set<() => void>();
   const diagnosticListeners = new Set<() => void>();
   const counts = {
-    actionCalls: { increment: 0, setImageVariant: 0, setImageMounted: 0 },
+    actionCalls: {
+      increment: 0,
+      setImageVariant: 0,
+      setImageMounted: 0,
+      heat: 0,
+      setHeatStep: 0,
+      setThermostatMounted: 0,
+    },
     totalSubscribes: 0,
     totalUnsubscribes: 0,
     lastIncrementAt: null as number | null,
@@ -127,7 +148,30 @@ export function createLabStore(
           "setImageMounted",
           imageMounted === state.imageMounted
             ? state
-            : { ...state, imageMounted },
+            : {
+                ...state,
+                imageMounted,
+                imageEpoch: state.imageEpoch + (imageMounted ? 1 : 0),
+              },
+        );
+      },
+      heat(step) {
+        run("heat", { ...state, temperature: state.temperature + step });
+      },
+      setHeatStep(heatStep) {
+        run("setHeatStep", { ...state, heatStep });
+      },
+      setThermostatMounted(thermostatMounted) {
+        run(
+          "setThermostatMounted",
+          thermostatMounted === state.thermostatMounted
+            ? state
+            : {
+                ...state,
+                thermostatMounted,
+                thermostatEpoch:
+                  state.thermostatEpoch + (thermostatMounted ? 1 : 0),
+              },
         );
       },
     },

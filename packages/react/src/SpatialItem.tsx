@@ -2,9 +2,11 @@ import type {
   SpatialItemId,
   SpatialItemRegistration,
   SpatialSize,
+  SpatialViewBinding,
 } from "@spatialflex/core";
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -24,6 +26,8 @@ export interface SpatialItemProps {
   /** Title of the detached panel. Defaults to `id`. */
   label?: string;
   children?: ReactNode;
+  /** @experimental Explicit XR mirror data and parent-owned semantic actions. */
+  xr?: SpatialViewBinding | undefined;
 }
 
 /** The pointer interaction in progress, if any. Only one at a time. */
@@ -58,6 +62,7 @@ export function SpatialItem({
   resizable = false,
   label,
   children,
+  xr,
 }: SpatialItemProps) {
   const { registry, controller } = useWorkspace();
   const record = useSpatialItem(id);
@@ -67,6 +72,14 @@ export function SpatialItem({
   );
   const capabilitiesRef = useRef(capabilities);
   const registrationRef = useRef<SpatialItemRegistration | null>(null);
+  const viewRef = useRef<SpatialViewBinding | undefined>(undefined);
+  useLayoutEffect(() => {
+    viewRef.current = xr
+      ? { ...xr, title: xr.title ?? label ?? id }
+      : undefined;
+    if (registrationRef.current?.id === id)
+      registrationRef.current.setView(viewRef.current);
+  }, [xr, label, id]);
   const slotRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const interactionRef = useRef<Interaction | null>(null);
@@ -87,6 +100,13 @@ export function SpatialItem({
       capabilities: capabilitiesRef.current,
     });
     registrationRef.current = registration;
+    try {
+      registration.setView(viewRef.current);
+    } catch (error) {
+      registration.unregister();
+      registrationRef.current = null;
+      throw error;
+    }
     const disconnect = controller.connect(id, {
       slot: slotRef.current!,
       panel: panelRef.current!,

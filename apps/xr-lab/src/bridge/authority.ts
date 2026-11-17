@@ -19,6 +19,7 @@ export class ActionLedger {
     request: Request,
     panels: readonly HostPanel[],
     events: HostEvents,
+    authorized = true,
   ): Result {
     const fingerprint = JSON.stringify([
       request.viewId,
@@ -54,7 +55,11 @@ export class ActionLedger {
     // accidentally execute an old retry. Capacity exhaustion fails closed.
     this.records.set(key, { fingerprint, result });
     const panel = panels.find((p) => p.id === request.itemId);
-    if (!panel || !panel.buttons.some((b) => b.id === request.action))
+    if (
+      !authorized ||
+      !panel ||
+      !panel.buttons.some((b) => b.id === request.action)
+    )
       return result;
     try {
       events.onPanelButton(request.itemId, request.action);
