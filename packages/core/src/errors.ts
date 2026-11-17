@@ -4,6 +4,7 @@ export type SpatialFlexErrorCode =
   | "UNKNOWN_ITEM_ID"
   | "NOT_DETACHABLE"
   | "NOT_MOVABLE"
+  | "NOT_RESIZABLE"
   | "NOT_DETACHED"
   | "INVALID_LAYOUT"
   | "MISSING_WORKSPACE";

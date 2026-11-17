@@ -594,7 +594,43 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 ## 13. Local Development
 
-현재 구현된 범위는 모노레포 기반([#1](https://github.com/ppsssj/SpatialFlex/issues/1)), SpatialItem 계약·Registry([#2](https://github.com/ppsssj/SpatialFlex/issues/2)), 동일 페이지 안의 2D Detach/Attach·이동([#3](https://github.com/ppsssj/SpatialFlex/issues/3)), Same-Host Live 동작 검증([#4](https://github.com/ppsssj/SpatialFlex/issues/4))입니다. 크기 조절, XR 렌더링, 별도 호스트 간 Live Bridge는 아직 구현되지 않았으며 npm에 배포되지 않았습니다.
+현재 구현된 범위는 모노레포 기반([#1](https://github.com/ppsssj/SpatialFlex/issues/1)), SpatialItem 계약·Registry([#2](https://github.com/ppsssj/SpatialFlex/issues/2)), 동일 페이지 안의 2D Detach/Attach·이동([#3](https://github.com/ppsssj/SpatialFlex/issues/3)), Same-Host Live 동작 검증([#4](https://github.com/ppsssj/SpatialFlex/issues/4)), 크기 조절·Playground 완성·브라우저 E2E([#5](https://github.com/ppsssj/SpatialFlex/issues/5))입니다. 즉 **P0 Same-Host PoC**(같은 페이지 안의 2D 분리)가 동작합니다. XR 렌더링과 별도 호스트 간 Cross-Host XR Live Bridge([#7](https://github.com/ppsssj/SpatialFlex/issues/7))는 아직 구현되지 않았으며 npm에 배포되지 않았습니다.
+
+### Quick Start
+
+```bash
+pnpm install
+pnpm dev            # http://localhost:5173 에서 Playground 실행
+```
+
+### 3-Image Demo Walkthrough
+
+Playground 상단의 **What to try** 안내와 같은 순서입니다.
+
+1. Image A·B·C가 갤러리에 표시됩니다. Image B 안의 **Local count**를 몇 번 누릅니다(Image B 내부의 React 로컬 상태).
+2. **Detach Image B**를 누릅니다. Image B가 떠 있는 패널이 되고, 원래 자리에는 점선 placeholder가 같은 크기로 남아 Image A·C가 움직이지 않습니다.
+3. 패널 제목 바를 끌어 이동하고, 오른쪽 아래 모서리를 끌어 크기를 바꿉니다. Registry 표의 **Panel position**·**Panel size**가 함께 바뀝니다.
+4. 원본 UI 또는 패널 안의 **Increment**를 누릅니다. 두 곳의 **Shared count**가 같이 바뀌고, **Domain diagnostics**의 `increment() calls`는 클릭당 1씩만 늘어납니다. **Image B data**에서 variant·caption을 바꾸면 분리된 Image B가 그대로 갱신됩니다.
+5. 패널의 **Attach**(또는 **Attach Image B**)를 누릅니다. Image B가 원래 자리·크기로 돌아오고, **Local count**·**Instance**·**Mounts / unmounts**는 그대로입니다.
+6. **Detach Image C**: Image C는 `detachable`만 허용하므로 이동·크기 조절 핸들이 없습니다.
+
+알려진 CSS 제한은 `http://localhost:5173/#containing-block-fixture`에서 재현할 수 있습니다(아래 "알려진 제한" 참조).
+
+### API 요약 (v0.1)
+
+| 패키지 | API | 설명 |
+| --- | --- | --- |
+| `@spatialflex/core` | `new SpatialRegistry()` | Workspace 범위 Registry |
+| | `register(definition)` → handle(`update`, `unregister`) | 등록, 기능 갱신, 해제 |
+| | `get` · `has` · `list` · `subscribe` · `unregister(id)` | 조회·구독 |
+| | `detach(id, { position?, size? })` · `attach(id)` | 표시 상태 전환 |
+| | `move(id, position)` · `resize(id, size)` | 분리된 패널의 위치·크기 |
+| | `SpatialFlexError`(`code`) | 계약 위반 오류 |
+| `@spatialflex/react` | `<SpatialWorkspace registry?>` | Registry 제공 |
+| | `<SpatialItem id detachable movable resizable label?>` | 등록과 attached/detached 표시 |
+| | `useSpatialController()` → `detach` · `attach` · `move` · `resize` | DOM 측정·뷰포트 제한을 포함한 동작 |
+| | `useSpatialItems()` · `useSpatialItem(id)` · `useSpatialRegistry()` | 조회(SSR 안전) |
+| | `MIN_PANEL_SIZE` | 크기 조절 최소값(160 × 120) |
 
 ### SpatialItem Registry (v0.1)
 
@@ -634,8 +670,8 @@ function DetachButton() {
 }
 ```
 
-- **Core:** `registry.detach(id, { position?, size? })`, `registry.attach(id)`, `registry.move(id, position)`. `detachable`·`movable` 기능을 강제하고(`NOT_DETACHABLE`·`NOT_MOVABLE`), 모르는 ID(`UNKNOWN_ITEM_ID`), 분리되지 않은 아이템의 이동(`NOT_DETACHED`), 유한하지 않은 값(`INVALID_LAYOUT`)을 거부합니다. 이미 분리/부착된 아이템에 같은 호출을 반복하면 `false`를 반환하고 구독자에게 알리지 않습니다. 레이아웃은 Attach 후에도 유지되어 다시 Detach하면 마지막 위치에서 열립니다. `detachable`을 끄면 분리된 아이템은 자동으로 Attach됩니다.
-- **React:** `useSpatialController()`는 Workspace 범위의 `detach`·`attach`·`move`를 제공합니다. `detach`는 원래 자리의 크기를 측정해 placeholder 크기로 쓰고, 처음에는 원래 위치 위에, 이후에는 마지막 위치에 패널을 엽니다. 분리된 패널에는 제목과 `Attach` 버튼이 있는 바가 표시되며, `movable` 아이템은 이 바를 포인터로 끌어 이동할 수 있습니다.
+- **Core:** `registry.detach(id, { position?, size? })`, `registry.attach(id)`, `registry.move(id, position)`, `registry.resize(id, size)`. `detachable`·`movable`·`resizable` 기능을 강제하고(`NOT_DETACHABLE`·`NOT_MOVABLE`·`NOT_RESIZABLE`), 모르는 ID(`UNKNOWN_ITEM_ID`), 분리되지 않은 아이템의 이동·크기 조절(`NOT_DETACHED`), 유한하지 않은 값이나 0 이하의 크기(`INVALID_LAYOUT`)를 거부합니다. 이미 분리/부착된 아이템에 같은 호출을 반복하면 `false`를 반환하고 구독자에게 알리지 않습니다. 레이아웃은 Attach 후에도 유지되어 다시 Detach하면 마지막 위치·크기로 열립니다. `detachable`을 끄면 분리된 아이템은 자동으로 Attach됩니다.
+- **React:** `useSpatialController()`는 Workspace 범위의 `detach`·`attach`·`move`·`resize`를 제공합니다. `detach`는 원래 자리의 크기를 측정해 placeholder 크기로 쓰고, 처음에는 원래 위치 위에 자연 크기로, 이후에는 마지막 위치·크기로 패널을 엽니다. 분리된 패널에는 제목과 `Attach` 버튼이 있는 바가 표시되며, `movable` 아이템은 이 바를, `resizable` 아이템은 오른쪽 아래 핸들(`data-spatialflex-resize-handle`)을 포인터로 끌어 이동·크기 조절할 수 있습니다. 한 번에 하나의 포인터 동작만 진행되며(드래그 중에는 크기 조절이 시작되지 않고 그 반대도 마찬가지), 포인터 캡처를 사용하고 놓을 때 해제합니다. 놓는 이벤트를 놓친 경우(창 밖에서 놓기 등)에도 버튼이 눌리지 않은 다음 이동에서 동작을 끝냅니다. 동작 중에는 패널 안 콘텐츠의 네이티브 드래그 앤 드롭을 막습니다(Chromium에서 이미지가 누른 위치 아래로 지나가면 포인터가 취소되던 문제 방지).
 - **기능 소유권:** Detach는 표현과 배치만 바꿉니다. 도메인 상태, 비즈니스 로직, API 호출, 액션은 계속 원본 앱이 소유합니다.
 
 #### 렌더링 메커니즘: 같은 요소의 CSS 위치 변경
@@ -653,16 +689,31 @@ function DetachButton() {
 
 #### 좌표계와 Placeholder 정책
 
-- **좌표:** CSS 픽셀, 뷰포트 왼쪽 위가 원점(`position: fixed`의 기준), x는 오른쪽, y는 아래쪽. `position`은 패널의 왼쪽 위 모서리입니다. 값은 정수로 반올림됩니다.
-- **뷰포트 경계:** Detach·이동 시 패널이 뷰포트 안에 들어가도록 위치를 제한합니다. 패널이 뷰포트보다 크면 왼쪽 위에 맞춥니다. `movable` 아이템은 창 크기가 바뀌면 다시 제한됩니다.
-- **Placeholder:** 분리된 아이템의 원래 자리는 측정한 크기를 유지하므로 다른 아이템의 위치가 바뀌지 않습니다(reflow 없음). 슬롯과 패널에는 `data-status="attached|detached"`가 있어 앱이 스타일을 지정할 수 있습니다. SDK는 기능에 필요한 인라인 스타일(위치·크기)만 적용하며, `z-index`·배경 등은 앱이 정합니다.
+- **좌표:** CSS 픽셀, 뷰포트 왼쪽 위가 원점(`position: fixed`의 기준), x는 오른쪽, y는 아래쪽. `position`은 패널의 왼쪽 위 모서리, `size`는 패널의 border-box 크기입니다. 값은 정수로 반올림됩니다.
+- **뷰포트 경계:** Detach·이동 시 패널이 뷰포트 안에 들어가도록 위치를 제한합니다. 패널이 뷰포트보다 크면 왼쪽 위에 맞춥니다. 크기 조절은 최소 `MIN_PANEL_SIZE`(160 × 120), 최대 패널 위치에서 뷰포트 오른쪽 아래까지입니다. 창 크기가 바뀌면 `movable` 아이템의 위치와 `resizable` 아이템의 크기를 다시 제한합니다.
+- **Placeholder:** 분리된 아이템의 원래 자리는 측정한 크기를 유지하므로 다른 아이템의 위치가 바뀌지 않습니다(reflow 없음). 슬롯과 패널에는 `data-status="attached|detached"`가 있어 앱이 스타일을 지정할 수 있습니다. SDK는 기능에 필요한 인라인 스타일(위치·크기)만 적용하며, `z-index`·배경·핸들 모양 등은 앱이 정합니다.
+
+#### Resize와 레이아웃: Placeholder 크기 ≠ 패널 크기
+
+두 크기는 소유자가 다르며 서로 덮어쓰지 않습니다.
+
+| | 원래 자리(placeholder) 크기 | 분리된 패널 크기 |
+| --- | --- | --- |
+| 소유자 | React 호스트(`<SpatialItem>` 내부 상태) | Registry `layout.size` |
+| 정해지는 시점 | 매 Detach 때 원래 자리를 측정 | Resize할 때. `null`이면 자연 크기(원래 너비, 높이 자동) |
+| Attach 후 | 사용하지 않음(원래 레이아웃 그대로) | 유지 → 다음 Detach에서 복원 |
+
+- 패널을 아무리 크게/작게 조절해도 원래 자리의 크기와 Image A·C의 위치는 바뀌지 않고, Attach하면 원래 페이지 레이아웃으로 돌아갑니다.
+- 다시 Detach하면 원래 자리는 다시 측정하고(그 사이 페이지 레이아웃이 바뀌었을 수 있음), 패널은 마지막 위치·크기로 열립니다.
+- 크기를 지정한 패널은 `overflow: hidden`입니다. 패널보다 큰 콘텐츠는 잘리므로, 분리될 콘텐츠는 패널 크기에 맞춰 반응형으로 만드는 것이 좋습니다(Playground는 이미지 너비를 패널에 맞춥니다). 자식을 감싸는 스크롤 요소를 분리할 때만 추가하면 자식이 재마운트되므로 이 방식을 택했습니다.
+- **API 변경(P0-03 대비):** `layout.size`는 이제 원래 자리의 크기가 아니라 분리된 패널의 크기입니다.
 
 #### 알려진 제한
 
-- 패널은 원래 DOM 위치에 남아 있으므로 조상 요소의 CSS 영향을 받습니다. `transform`·`filter`·`perspective`·`contain`·`will-change`가 있는 조상은 `position: fixed`의 기준이 되어 패널 위치가 어긋나고, `overflow: hidden`이나 쌓임 맥락(stacking context)에 의해 잘리거나 가려질 수 있습니다.
+- **해결되지 않은 제한:** 패널은 원래 DOM 위치에 남아 있으므로 조상 요소의 CSS 영향을 받습니다. `transform`·`filter`·`perspective`·`contain`·`will-change`가 있는 조상은 `position: fixed`의 기준이 되어 패널 위치가 어긋나고, `overflow: hidden`이나 쌓임 맥락(stacking context)에 의해 잘리거나 가려질 수 있습니다. `#containing-block-fixture` 페이지가 이를 재현하며, E2E 테스트가 "알려진 제한"으로 위치 어긋남과 잘림을 확인합니다. **지원 범위:** SpatialItem의 조상에 이런 속성이 없는 레이아웃만 지원합니다.
 - 래퍼 `div` 때문에 `<tr>`·`<li>` 내부나 인라인 문맥처럼 `div`가 올 수 없는 위치에서는 사용할 수 없습니다.
-- 이동은 포인터 드래그만 지원합니다. 키보드 이동, 크기 조절, 여러 패널의 쌓임 순서 관리는 아직 없습니다.
-- `registry.detach()`를 직접 호출하면 DOM을 측정하지 않으므로 placeholder 크기가 없어 reflow가 발생합니다. React에서는 `useSpatialController()`를 사용하세요.
+- 이동·크기 조절은 포인터(마우스)로만 검증했습니다. 키보드 이동·크기 조절, 터치·펜 입력 검증, 여러 패널의 쌓임 순서 관리는 아직 없습니다. 크기 조절 핸들은 오른쪽 아래 하나뿐입니다.
+- `registry.detach()`를 직접 호출하면 DOM을 측정하지 않으므로 placeholder 크기가 없어 reflow가 발생하고, `registry.move()`·`resize()`는 뷰포트 제한을 적용하지 않습니다. React에서는 `useSpatialController()`를 사용하세요.
 - 같은 브라우저 페이지 안에서만 동작합니다. 별도 XR 호스트로의 이동은 [#7](https://github.com/ppsssj/SpatialFlex/issues/7) 범위입니다.
 
 ### Same-Host Live 동작 (v0.1)
@@ -689,7 +740,7 @@ packages/
 ├── core/        @spatialflex/core — 프레임워크·렌더러 독립 TypeScript 패키지
 └── react/       @spatialflex/react — React 통합 (core를 workspace 의존성으로 사용)
 apps/
-└── playground/  Vite + React 개발/검증 앱 (Image A/B/C, Image B Detach/이동/Attach, 공유 도메인 상태·액션 진단, Registry 디버그 뷰)
+└── playground/  Vite + React 개발/검증 앱 (Image A/B/C, Image B Detach/이동/크기 조절/Attach, 공유 도메인 상태·액션 진단, Registry 디버그 뷰; e2e/ 브라우저 테스트)
 ```
 
 **요구 사항:** Node.js 22 이상, pnpm (`package.json`의 `packageManager` 버전; `corepack enable`로 활성화 가능)
@@ -699,14 +750,17 @@ pnpm install        # 의존성 설치
 pnpm dev            # playground 개발 서버 (http://localhost:5173)
 pnpm typecheck      # 모든 workspace 타입 검사
 pnpm build          # packages/* → dist, playground → dist
-pnpm test           # Vitest 단위 테스트
+pnpm test           # Vitest 단위·통합 테스트 (core, react, playground)
+pnpm test:e2e       # Playwright 브라우저 E2E (Chromium, Firefox)
 pnpm lint           # ESLint
 pnpm format:check   # Prettier 검사 (pnpm format으로 자동 수정)
 ```
 
 workspace 패키지는 `source` export 조건으로 TypeScript 소스를 직접 가리키므로, `pnpm dev`·`pnpm typecheck`·`pnpm test`는 패키지를 먼저 빌드하지 않아도 동작합니다. `pnpm build`는 의존 순서대로(core → react → playground) 실행됩니다.
 
-CI(`.github/workflows/ci.yml`)는 PR과 `main` push에서 install → lint → format check → typecheck → build → test를 실행합니다.
+**브라우저 E2E:** 처음 한 번 `pnpm --filter @spatialflex/playground exec playwright install chromium firefox`로 브라우저를 설치합니다. `pnpm test:e2e`는 Playground를 production 빌드한 뒤 `vite preview`(`127.0.0.1:4179`, `--strictPort`)로 띄워 테스트합니다. 기존 서버를 재사용하지 않으므로 포트가 사용 중이면 실패합니다. 실패 시 trace와 스크린샷이 `apps/playground/test-results/`에 남습니다.
+
+CI(`.github/workflows/ci.yml`)는 PR과 `main` push에서 `check` job(install → lint → format check → typecheck → build → test)과 별도의 `e2e` job(Chromium·Firefox 설치 → `pnpm test:e2e`, 실패 시 리포트 업로드)을 실행합니다.
 
 ---
 

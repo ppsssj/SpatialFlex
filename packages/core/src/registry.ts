@@ -115,14 +115,14 @@ export class SpatialRegistry {
   }
 
   /**
-   * Shows the item as an independent panel. `options` sets its position and
-   * original size; omitted values keep the previous layout.
+   * Shows the item as an independent panel. `options` sets the panel's
+   * position and size; omitted values keep the previous layout.
    *
    * Changes presentation only: the application keeps owning the item's data
    * and actions. Returns `false` without notifying if already detached.
    *
    * @throws {SpatialFlexError} `UNKNOWN_ITEM_ID`, `NOT_DETACHABLE`, or
-   *   `INVALID_LAYOUT` for non-finite or negative values.
+   *   `INVALID_LAYOUT` for non-finite values or a non-positive size.
    */
   detach(id: SpatialItemId, options: SpatialDetachOptions = {}): boolean {
     const record = this.#require(id);
@@ -185,6 +185,41 @@ export class SpatialRegistry {
       return false;
     }
     this.#replace(record, "detached", { ...record.layout, position });
+    return true;
+  }
+
+  /**
+   * Resizes a detached item's panel. Returns `false` without notifying if
+   * the size is unchanged.
+   *
+   * @throws {SpatialFlexError} `UNKNOWN_ITEM_ID`, `NOT_RESIZABLE`,
+   *   `NOT_DETACHED`, or `INVALID_LAYOUT` for non-finite or non-positive
+   *   dimensions.
+   */
+  resize(id: SpatialItemId, size: SpatialSize): boolean {
+    const record = this.#require(id);
+    if (!record.capabilities.resizable) {
+      throw new SpatialFlexError(
+        "NOT_RESIZABLE",
+        `SpatialItem "${id}" is not resizable.`,
+      );
+    }
+    if (record.status !== "detached") {
+      throw new SpatialFlexError(
+        "NOT_DETACHED",
+        `SpatialItem "${id}" must be detached before it can be resized.`,
+      );
+    }
+    assertSize(size);
+    const previous = record.layout.size;
+    if (
+      previous &&
+      previous.width === size.width &&
+      previous.height === size.height
+    ) {
+      return false;
+    }
+    this.#replace(record, "detached", { ...record.layout, size });
     return true;
   }
 
@@ -286,12 +321,12 @@ function assertSize(size: SpatialSize): void {
   if (
     !Number.isFinite(size.width) ||
     !Number.isFinite(size.height) ||
-    size.width < 0 ||
-    size.height < 0
+    size.width <= 0 ||
+    size.height <= 0
   ) {
     throw new SpatialFlexError(
       "INVALID_LAYOUT",
-      `Size must have finite, non-negative width and height, received ${JSON.stringify(size)}.`,
+      `Size must have finite, positive width and height, received ${JSON.stringify(size)}.`,
     );
   }
 }

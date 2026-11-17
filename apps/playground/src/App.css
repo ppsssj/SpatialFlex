@@ -117,3 +117,61 @@ fieldset.controls {
 .diagnostics dd {
   margin: 0;
 }
+
+.hint {
+  color: #57606a;
+  font-size: 0.875rem;
+}
+
+.demo-guide {
+  margin: 12px 0;
+  padding: 8px 12px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #f6f8fa;
+}
+
+.demo-guide summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.demo-guide ol {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+/* Resize handle drawn by the app; the SDK only positions it. */
+[data-spatialflex-resize-handle] {
+  background: linear-gradient(
+    135deg,
+    transparent 50%,
+    #8c959f 50%,
+    #8c959f 60%,
+    transparent 60%,
+    transparent 70%,
+    #8c959f 70%,
+    #8c959f 80%,
+    transparent 80%
+  );
+}
+
+/* Let content follow the panel size when the panel is resized. */
+[data-spatialflex-panel][data-status="detached"] .gallery-image img {
+  width: 100%;
+  height: auto;
+}
+
+[data-spatialflex-panel][data-status="detached"]
+  > :not([data-spatialflex-panel-bar]):not([data-spatialflex-resize-handle]) {
+  padding-inline: 8px;
+}
+
+.problem-ancestor {
+  margin: 24px 0 0 160px;
+  width: 300px;
+  height: 220px;
+  overflow: hidden;
+  transform: translateZ(0);
+  border: 2px solid #cf222e;
+}

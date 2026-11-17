@@ -42,7 +42,14 @@ export interface SpatialItemLayout {
    * again restores the last position. `null` until first detached.
    */
   readonly position: SpatialPosition | null;
-  /** Size of the item in its original layout, measured when detached. */
+  /**
+   * Size of the detached panel. Kept while attached, so detaching again
+   * restores the last size. `null` means the host's natural panel size.
+   *
+   * This is never the size of the original, attached layout: hosts measure
+   * that themselves (for example for a placeholder), so resizing a panel
+   * cannot change the page layout the item returns to.
+   */
   readonly size: SpatialSize | null;
   readonly visible: boolean;
 }
