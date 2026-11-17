@@ -8,6 +8,11 @@ import {
   useSpatialItems,
 } from "./index";
 
+/** Server markup of an attached <SpatialItem>. */
+const attachedItem = (id: string, children = "") =>
+  `<div data-spatialflex-item="${id}" data-status="attached">` +
+  `<div data-spatialflex-panel="" data-status="attached">${children}</div></div>`;
+
 function ItemIds() {
   const ids = useSpatialItems().map((item) => item.id);
   return <output>{`items:[${ids.join(",")}]`}</output>;
@@ -29,7 +34,10 @@ describe("server rendering", () => {
       </SpatialWorkspace>,
     );
 
-    expect(html).toBe('<img alt="Image A"/><output>items:[]</output>');
+    expect(html).toBe(
+      attachedItem("image-a", '<img alt="Image A"/>') +
+        "<output>items:[]</output>",
+    );
   });
 
   it("renders useSpatialItem(id) as not registered", () => {
@@ -40,7 +48,7 @@ describe("server rendering", () => {
       </SpatialWorkspace>,
     );
 
-    expect(html).toBe("<output>b:none</output>");
+    expect(html).toBe(attachedItem("image-b") + "<output>b:none</output>");
   });
 
   it("ignores items already in an injected registry", () => {
@@ -68,5 +76,23 @@ describe("server rendering", () => {
     );
 
     expect(registry.list()).toEqual([]);
+  });
+
+  it("renders a detached item as attached without browser APIs", () => {
+    const registry = new SpatialRegistry();
+    registry.register({ id: "image-b", capabilities: { detachable: true } });
+    registry.detach("image-b", { position: { x: 10, y: 20 } });
+
+    // This file runs in Node: any access to window or document would throw.
+    expect(typeof window).toBe("undefined");
+    const html = renderToString(
+      <SpatialWorkspace registry={registry}>
+        <SpatialItem id="image-b" detachable movable>
+          <p>B</p>
+        </SpatialItem>
+      </SpatialWorkspace>,
+    );
+
+    expect(html).toBe(attachedItem("image-b", "<p>B</p>"));
   });
 });

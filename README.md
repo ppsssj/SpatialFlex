@@ -594,7 +594,7 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 ## 13. Local Development
 
-현재 구현된 범위는 모노레포 기반([#1](https://github.com/ppsssj/SpatialFlex/issues/1))과 SpatialItem 계약·Registry([#2](https://github.com/ppsssj/SpatialFlex/issues/2))입니다. 실제 Detach/Attach, 이동·크기 조절, XR 렌더링은 아직 구현되지 않았으며 npm에 배포되지 않았습니다.
+현재 구현된 범위는 모노레포 기반([#1](https://github.com/ppsssj/SpatialFlex/issues/1)), SpatialItem 계약·Registry([#2](https://github.com/ppsssj/SpatialFlex/issues/2)), 동일 페이지 안의 2D Detach/Attach·이동([#3](https://github.com/ppsssj/SpatialFlex/issues/3))입니다. 크기 조절, XR 렌더링, 별도 호스트 간 Live Bridge는 아직 구현되지 않았으며 npm에 배포되지 않았습니다.
 
 ### SpatialItem Registry (v0.1)
 
@@ -612,18 +612,65 @@ import { SpatialItem, SpatialWorkspace, useSpatialItems } from "@spatialflex/rea
 - **Workspace 범위:** 각 `<SpatialWorkspace>`가 자신의 `SpatialRegistry`를 소유합니다. 전역 싱글턴은 없으며, 서로 다른 Workspace는 같은 ID를 사용해도 격리됩니다.
 - **생명주기:** 마운트 시 등록, 언마운트 시 해제됩니다. React StrictMode의 이중 effect 실행에서도 등록이 남거나 중복 오류가 발생하지 않습니다.
 - **중복 ID:** 같은 Workspace에서 중복 ID는 덮어쓰지 않고 `SpatialFlexError`(`DUPLICATE_ITEM_ID`)를 발생시키며, 가장 가까운 Error Boundary가 이를 받습니다.
-- **렌더링:** 자식은 래퍼 요소 없이 원래 위치에 그대로 렌더링됩니다.
-- **Registry가 다루는 것:** 아이템 ID, 기능 메타데이터(`detachable`·`movable`·`resizable`), 연결 상태(`attached`/`detached`; 현재는 항상 `attached`), 직렬화 가능한 레이아웃(`position`·`size`·`visible`). 레코드는 불변이며 JSON으로 직렬화할 수 있습니다.
+- **렌더링:** 자식은 원래 위치에서 렌더링되며, `<SpatialItem>`은 두 개의 `div`(`data-spatialflex-item` 슬롯과 `data-spatialflex-panel` 패널)로 감쌉니다. Detach에 필요한 고정 구조로, 상태와 관계없이 항상 같은 요소를 렌더링합니다. (P0-02에서는 래퍼가 없었습니다.)
+- **Registry가 다루는 것:** 아이템 ID, 기능 메타데이터(`detachable`·`movable`·`resizable`), 연결 상태(`attached`/`detached`), 직렬화 가능한 레이아웃(`position`·`size`·`visible`). 레코드는 불변이며 JSON으로 직렬화할 수 있습니다.
 - **Registry가 다루지 않는 것:** 애플리케이션 도메인 상태, 비즈니스 로직, 액션. 이는 원본 앱이 계속 소유합니다. 레코드에는 DOM 요소, React 인스턴스, 콜백이 들어가지 않습니다.
 - **조회:** `useSpatialItems()`, `useSpatialItem(id)`, `useSpatialRegistry()` 또는 core의 `registry.get/list/subscribe`.
-- **서버 렌더링(SSR):** 지원합니다. 등록은 effect에서 일어나고 서버에서는 effect가 실행되지 않으므로, 서버 렌더링과 하이드레이션 중에는 `useSpatialItems()`가 항상 빈 목록, `useSpatialItem(id)`가 `undefined`를 반환합니다. 주입한 Registry에 이미 아이템이 있어도 마찬가지이며, 이 덕분에 서버 마크업과 클라이언트 하이드레이션 결과가 항상 일치합니다. 등록된 아이템은 하이드레이션 직후 재렌더링에서 나타납니다. 서버에서는 `<SpatialItem>`이 Registry에 등록하지 않고 자식만 렌더링합니다.
+- **서버 렌더링(SSR):** 지원합니다. 등록은 effect에서 일어나고 서버에서는 effect가 실행되지 않으므로, 서버 렌더링과 하이드레이션 중에는 `useSpatialItems()`가 항상 빈 목록, `useSpatialItem(id)`가 `undefined`를 반환합니다. 주입한 Registry에 이미 아이템이 있어도 마찬가지이며, 이 덕분에 서버 마크업과 클라이언트 하이드레이션 결과가 항상 일치합니다. 등록된 아이템은 하이드레이션 직후 재렌더링에서 나타납니다. 서버에서는 `<SpatialItem>`이 Registry에 등록하지 않고 항상 attached 상태로 렌더링하며, `window`·`document` 등 브라우저 API를 사용하지 않습니다.
+
+### Detach / Attach (v0.1, 2D Same-Host)
+
+```tsx
+import { useSpatialController, useSpatialItem } from "@spatialflex/react";
+
+function DetachButton() {
+  const controller = useSpatialController();
+  const detached = useSpatialItem("image-b")?.status === "detached";
+  return (
+    <button onClick={() => (detached ? controller.attach("image-b") : controller.detach("image-b"))}>
+      {detached ? "Attach" : "Detach"}
+    </button>
+  );
+}
+```
+
+- **Core:** `registry.detach(id, { position?, size? })`, `registry.attach(id)`, `registry.move(id, position)`. `detachable`·`movable` 기능을 강제하고(`NOT_DETACHABLE`·`NOT_MOVABLE`), 모르는 ID(`UNKNOWN_ITEM_ID`), 분리되지 않은 아이템의 이동(`NOT_DETACHED`), 유한하지 않은 값(`INVALID_LAYOUT`)을 거부합니다. 이미 분리/부착된 아이템에 같은 호출을 반복하면 `false`를 반환하고 구독자에게 알리지 않습니다. 레이아웃은 Attach 후에도 유지되어 다시 Detach하면 마지막 위치에서 열립니다. `detachable`을 끄면 분리된 아이템은 자동으로 Attach됩니다.
+- **React:** `useSpatialController()`는 Workspace 범위의 `detach`·`attach`·`move`를 제공합니다. `detach`는 원래 자리의 크기를 측정해 placeholder 크기로 쓰고, 처음에는 원래 위치 위에, 이후에는 마지막 위치에 패널을 엽니다. 분리된 패널에는 제목과 `Attach` 버튼이 있는 바가 표시되며, `movable` 아이템은 이 바를 포인터로 끌어 이동할 수 있습니다.
+- **기능 소유권:** Detach는 표현과 배치만 바꿉니다. 도메인 상태, 비즈니스 로직, API 호출, 액션은 계속 원본 앱이 소유합니다.
+
+#### 렌더링 메커니즘: 같은 요소의 CSS 위치 변경
+
+분리 시 React 트리나 DOM 위치를 바꾸지 않고, 패널 요소에 `position: fixed`만 적용합니다. 자식 컴포넌트는 한 번만 마운트된 채 그대로 유지됩니다. 선택 근거는 [`rendering-strategies.test.tsx`](packages/react/src/rendering-strategies.test.tsx)의 비교 실험입니다(카운터를 5로 올린 뒤 Detach → 클릭 → Attach).
+
+| 방식 | 재마운트 | useState | Context·클릭 핸들러 | 포커스 | 비고 |
+| --- | --- | --- | --- | --- | --- |
+| Portal 대상 컨테이너 변경 | 발생 (mount 3 / unmount 2) | 초기화 (5 → 0) | 새 인스턴스 | 소실 | React 문서의 경고와 일치 |
+| 다른 부모 요소로 조건부 렌더링 | 발생 (3 / 2) | 초기화 | 새 인스턴스 | 소실 | |
+| 고정 Portal 호스트를 `appendChild`로 이동 | 없음 (1 / 0) | 유지 | 유지 | **소실** | 서버 렌더링 불가(`document`로 만든 호스트), DOM 이동 시 iframe 재로드(브라우저 동작, 테스트로 측정하지 않음) |
+| **같은 요소의 CSS 위치 변경 (채택)** | 없음 (1 / 0) | 유지 | 유지 | 유지 | SSR 호환, DOM 이동 없음 |
+
+**React 로컬 상태는 실제로 보존됩니다.** 부모 상태가 아닌 컴포넌트 내부 `useState` 값, 동일 DOM 노드, mount/unmount 횟수로 검증하며 StrictMode에서도 마찬가지입니다([`detach.test.tsx`](packages/react/src/detach.test.tsx)).
+
+#### 좌표계와 Placeholder 정책
+
+- **좌표:** CSS 픽셀, 뷰포트 왼쪽 위가 원점(`position: fixed`의 기준), x는 오른쪽, y는 아래쪽. `position`은 패널의 왼쪽 위 모서리입니다. 값은 정수로 반올림됩니다.
+- **뷰포트 경계:** Detach·이동 시 패널이 뷰포트 안에 들어가도록 위치를 제한합니다. 패널이 뷰포트보다 크면 왼쪽 위에 맞춥니다. `movable` 아이템은 창 크기가 바뀌면 다시 제한됩니다.
+- **Placeholder:** 분리된 아이템의 원래 자리는 측정한 크기를 유지하므로 다른 아이템의 위치가 바뀌지 않습니다(reflow 없음). 슬롯과 패널에는 `data-status="attached|detached"`가 있어 앱이 스타일을 지정할 수 있습니다. SDK는 기능에 필요한 인라인 스타일(위치·크기)만 적용하며, `z-index`·배경 등은 앱이 정합니다.
+
+#### 알려진 제한
+
+- 패널은 원래 DOM 위치에 남아 있으므로 조상 요소의 CSS 영향을 받습니다. `transform`·`filter`·`perspective`·`contain`·`will-change`가 있는 조상은 `position: fixed`의 기준이 되어 패널 위치가 어긋나고, `overflow: hidden`이나 쌓임 맥락(stacking context)에 의해 잘리거나 가려질 수 있습니다.
+- 래퍼 `div` 때문에 `<tr>`·`<li>` 내부나 인라인 문맥처럼 `div`가 올 수 없는 위치에서는 사용할 수 없습니다.
+- 이동은 포인터 드래그만 지원합니다. 키보드 이동, 크기 조절, 여러 패널의 쌓임 순서 관리는 아직 없습니다.
+- `registry.detach()`를 직접 호출하면 DOM을 측정하지 않으므로 placeholder 크기가 없어 reflow가 발생합니다. React에서는 `useSpatialController()`를 사용하세요.
+- 같은 브라우저 페이지 안에서만 동작합니다. 별도 XR 호스트로의 이동은 [#7](https://github.com/ppsssj/SpatialFlex/issues/7) 범위입니다.
 
 ```text
 packages/
 ├── core/        @spatialflex/core — 프레임워크·렌더러 독립 TypeScript 패키지
 └── react/       @spatialflex/react — React 통합 (core를 workspace 의존성으로 사용)
 apps/
-└── playground/  Vite + React 개발/검증 앱 (Image A/B/C 등록 + Registry 디버그 뷰)
+└── playground/  Vite + React 개발/검증 앱 (Image A/B/C, Image B Detach/이동/Attach, Registry 디버그 뷰)
 ```
 
 **요구 사항:** Node.js 22 이상, pnpm (`package.json`의 `packageManager` 버전; `corepack enable`로 활성화 가능)
