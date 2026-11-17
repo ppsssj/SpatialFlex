@@ -53,7 +53,7 @@ class ErrorBoundary extends Component<
 }
 
 describe("<SpatialItem>", () => {
-  it("registers on mount and renders children in place", () => {
+  it("registers on mount and renders children inside its slot and panel", () => {
     const registry = new SpatialRegistry();
     render(
       <SpatialWorkspace registry={registry}>
@@ -63,7 +63,11 @@ describe("<SpatialItem>", () => {
       </SpatialWorkspace>,
     );
 
-    expect(container.innerHTML).toBe('<img alt="Image A">');
+    expect(container.innerHTML).toBe(
+      '<div data-spatialflex-item="image-a" data-status="attached">' +
+        '<div data-spatialflex-panel="" data-status="attached">' +
+        '<img alt="Image A"></div></div>',
+    );
     expect(registry.get("image-a")).toMatchObject({
       status: "attached",
       capabilities: { detachable: true, movable: true, resizable: true },

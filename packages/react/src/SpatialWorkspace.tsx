@@ -1,6 +1,7 @@
 import { SpatialRegistry } from "@spatialflex/core";
-import { useState, type ReactNode } from "react";
-import { SpatialRegistryContext } from "./context";
+import { useMemo, useState, type ReactNode } from "react";
+import { WorkspaceContext } from "./context";
+import { createController } from "./controller";
 
 export interface SpatialWorkspaceProps {
   /**
@@ -17,10 +18,14 @@ export function SpatialWorkspace({
   children,
 }: SpatialWorkspaceProps) {
   const [ownRegistry] = useState(() => new SpatialRegistry());
-
-  return (
-    <SpatialRegistryContext value={registry ?? ownRegistry}>
-      {children}
-    </SpatialRegistryContext>
+  const activeRegistry = registry ?? ownRegistry;
+  const workspace = useMemo(
+    () => ({
+      registry: activeRegistry,
+      controller: createController(activeRegistry),
+    }),
+    [activeRegistry],
   );
+
+  return <WorkspaceContext value={workspace}>{children}</WorkspaceContext>;
 }

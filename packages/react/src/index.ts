@@ -8,7 +8,8 @@ export function useSpatialFlexVersion(): string {
   return VERSION;
 }
 
-export { useSpatialRegistry } from "./context";
+export { useSpatialController, useSpatialRegistry } from "./context";
+export type { SpatialController } from "./controller";
 export { useSpatialItem, useSpatialItems } from "./hooks";
 export { SpatialItem, type SpatialItemProps } from "./SpatialItem";
 export {

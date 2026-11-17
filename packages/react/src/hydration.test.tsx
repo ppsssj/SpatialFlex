@@ -15,6 +15,11 @@ import {
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
 
+/** Markup of an attached <SpatialItem>. */
+const attachedItem = (id: string, children = "") =>
+  `<div data-spatialflex-item="${id}" data-status="attached">` +
+  `<div data-spatialflex-panel="" data-status="attached">${children}</div></div>`;
+
 function ItemIds() {
   const ids = useSpatialItems().map((item) => item.id);
   return <output>{`items:[${ids.join(",")}]`}</output>;
@@ -69,12 +74,15 @@ describe("hydration", () => {
       gallery(),
     );
 
+    const items =
+      attachedItem("image-a", '<img alt="Image A">') + attachedItem("image-b");
     expect(serverHtml).toBe(
-      '<img alt="Image A"><output>items:[]</output><output>b:none</output>',
+      items + "<output>items:[]</output><output>b:none</output>",
     );
     expect(recoverableErrors).toEqual([]);
     expect(container.innerHTML).toBe(
-      '<img alt="Image A"><output>items:[image-a,image-b]</output><output>b:attached</output>',
+      items +
+        "<output>items:[image-a,image-b]</output><output>b:attached</output>",
     );
   });
 
@@ -94,5 +102,36 @@ describe("hydration", () => {
 
     expect(recoverableErrors).toEqual([]);
     expect(container.innerHTML).toBe("<output>items:[image-z]</output>");
+  });
+
+  it("detaches and attaches a hydrated item without duplicating it", () => {
+    const registry = new SpatialRegistry();
+    const view = (registry?: SpatialRegistry) => (
+      <SpatialWorkspace {...(registry && { registry })}>
+        <SpatialItem id="image-b" detachable>
+          <p>B</p>
+        </SpatialItem>
+      </SpatialWorkspace>
+    );
+    const { container, serverHtml, recoverableErrors } = serverRenderAndHydrate(
+      view(),
+      view(registry),
+    );
+    const paragraph = container.querySelector("p");
+
+    expect(serverHtml).toBe(attachedItem("image-b", "<p>B</p>"));
+    expect(recoverableErrors).toEqual([]);
+
+    act(() => registry.detach("image-b", { position: { x: 10, y: 20 } }));
+    const panel = container.querySelector<HTMLElement>(
+      "[data-spatialflex-panel]",
+    )!;
+    expect(panel.dataset.status).toBe("detached");
+    expect(panel.style.position).toBe("fixed");
+
+    act(() => registry.attach("image-b"));
+    expect(panel.dataset.status).toBe("attached");
+    expect(container.querySelectorAll("p")).toHaveLength(1);
+    expect(container.querySelector("p")).toBe(paragraph);
   });
 });

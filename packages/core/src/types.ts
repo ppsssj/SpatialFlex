@@ -14,9 +14,9 @@ export interface SpatialItemCapabilities {
 }
 
 /**
- * Logical presentation state. Items always start `attached` (rendered in
- * their original layout); switching to `detached` is the responsibility of
- * the detach/attach lifecycle and is not implemented yet.
+ * Where an item is presented. `attached` items render in their original
+ * layout; `detached` items render as an independent panel positioned by the
+ * workspace. Items always start `attached`.
  */
 export type AttachmentStatus = "attached" | "detached";
 
@@ -33,11 +33,16 @@ export interface SpatialSize {
 /**
  * Serializable layout data owned by the workspace, never by the application.
  *
- * Units are interpreted by the host that renders the item. `null` means the
- * host has not assigned a value and the item follows its original layout.
+ * Units and origin are defined by the host that renders the item. The React
+ * DOM host uses CSS pixels relative to the top-left corner of the viewport.
  */
 export interface SpatialItemLayout {
+  /**
+   * Top-left corner of the detached panel. Kept while attached, so detaching
+   * again restores the last position. `null` until first detached.
+   */
   readonly position: SpatialPosition | null;
+  /** Size of the item in its original layout, measured when detached. */
   readonly size: SpatialSize | null;
   readonly visible: boolean;
 }
@@ -58,4 +63,10 @@ export interface SpatialItemRecord {
 export interface SpatialItemDefinition {
   readonly id: SpatialItemId;
   readonly capabilities?: Partial<SpatialItemCapabilities>;
+}
+
+/** Layout values a host can provide when detaching an item. */
+export interface SpatialDetachOptions {
+  readonly position?: SpatialPosition;
+  readonly size?: SpatialSize;
 }

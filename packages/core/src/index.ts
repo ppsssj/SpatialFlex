@@ -14,6 +14,7 @@ export {
 } from "./registry";
 export type {
   AttachmentStatus,
+  SpatialDetachOptions,
   SpatialItemCapabilities,
   SpatialItemDefinition,
   SpatialItemId,

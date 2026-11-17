@@ -1,9 +1,13 @@
 import { SpatialFlexError } from "./errors";
 import type {
+  SpatialDetachOptions,
   SpatialItemCapabilities,
   SpatialItemDefinition,
   SpatialItemId,
+  SpatialItemLayout,
   SpatialItemRecord,
+  SpatialPosition,
+  SpatialSize,
 } from "./types";
 
 export type SpatialRegistryListener = () => void;
@@ -15,7 +19,10 @@ export type SpatialRegistryListener = () => void;
  */
 export interface SpatialItemRegistration {
   readonly id: SpatialItemId;
-  /** Updates capabilities of this registration. */
+  /**
+   * Updates capabilities of this registration. Removing `detachable` from a
+   * detached item attaches it.
+   */
   update(capabilities: Partial<SpatialItemCapabilities>): void;
   /** Removes this registration. Safe to call more than once. */
   unregister(): void;
@@ -36,6 +43,7 @@ const DEFAULT_CAPABILITIES: SpatialItemCapabilities = {
  */
 export class SpatialRegistry {
   readonly #items = new Map<SpatialItemId, SpatialItemRecord>();
+  readonly #owners = new Map<SpatialItemId, object>();
   readonly #listeners = new Set<SpatialRegistryListener>();
   #snapshot: readonly SpatialItemRecord[] = Object.freeze([]);
 
@@ -68,27 +76,32 @@ export class SpatialRegistry {
     this.#commit();
 
     // Identifies this registration, so its handle cannot touch a later
-    // registration that reuses the same ID.
-    let current: SpatialItemRecord | undefined = record;
+    // registration that reuses the same ID. Records are replaced on every
+    // change, so ownership is tracked by token rather than record identity.
+    const token = {};
+    this.#owners.set(id, token);
+    const isCurrent = () => this.#owners.get(id) === token;
 
     return {
       id,
       update: (capabilities) => {
-        if (!current || this.#items.get(id) !== current) return;
-        const next = { ...current.capabilities, ...capabilities };
-        if (sameCapabilities(current.capabilities, next)) return;
-        current = Object.freeze({
-          ...current,
-          capabilities: Object.freeze(next),
-        });
-        this.#items.set(id, current);
+        const record = this.#items.get(id);
+        if (!record || !isCurrent()) return;
+        const next = { ...record.capabilities, ...capabilities };
+        if (sameCapabilities(record.capabilities, next)) return;
+        this.#items.set(
+          id,
+          Object.freeze({
+            ...record,
+            capabilities: Object.freeze(next),
+            status: next.detachable ? record.status : "attached",
+          }),
+        );
         this.#commit();
       },
       unregister: () => {
-        if (!current || this.#items.get(id) !== current) return;
-        current = undefined;
-        this.#items.delete(id);
-        this.#commit();
+        if (!isCurrent()) return;
+        this.unregister(id);
       },
     };
   }
@@ -96,7 +109,82 @@ export class SpatialRegistry {
   /** Removes the item with this ID. Returns whether an item was removed. */
   unregister(id: SpatialItemId): boolean {
     if (!this.#items.delete(id)) return false;
+    this.#owners.delete(id);
     this.#commit();
+    return true;
+  }
+
+  /**
+   * Shows the item as an independent panel. `options` sets its position and
+   * original size; omitted values keep the previous layout.
+   *
+   * Changes presentation only: the application keeps owning the item's data
+   * and actions. Returns `false` without notifying if already detached.
+   *
+   * @throws {SpatialFlexError} `UNKNOWN_ITEM_ID`, `NOT_DETACHABLE`, or
+   *   `INVALID_LAYOUT` for non-finite or negative values.
+   */
+  detach(id: SpatialItemId, options: SpatialDetachOptions = {}): boolean {
+    const record = this.#require(id);
+    if (!record.capabilities.detachable) {
+      throw new SpatialFlexError(
+        "NOT_DETACHABLE",
+        `SpatialItem "${id}" is not detachable.`,
+      );
+    }
+    if (options.position) assertPosition(options.position);
+    if (options.size) assertSize(options.size);
+    if (record.status === "detached") return false;
+
+    this.#replace(record, "detached", {
+      ...record.layout,
+      position: options.position ?? record.layout.position,
+      size: options.size ?? record.layout.size,
+    });
+    return true;
+  }
+
+  /**
+   * Returns the item to its original layout. The layout is kept, so detaching
+   * again restores the panel position. Returns `false` without notifying if
+   * already attached.
+   *
+   * @throws {SpatialFlexError} `UNKNOWN_ITEM_ID`.
+   */
+  attach(id: SpatialItemId): boolean {
+    const record = this.#require(id);
+    if (record.status === "attached") return false;
+    this.#replace(record, "attached", record.layout);
+    return true;
+  }
+
+  /**
+   * Moves a detached item's panel. Returns `false` without notifying if the
+   * position is unchanged.
+   *
+   * @throws {SpatialFlexError} `UNKNOWN_ITEM_ID`, `NOT_MOVABLE`,
+   *   `NOT_DETACHED`, or `INVALID_LAYOUT`.
+   */
+  move(id: SpatialItemId, position: SpatialPosition): boolean {
+    const record = this.#require(id);
+    if (!record.capabilities.movable) {
+      throw new SpatialFlexError(
+        "NOT_MOVABLE",
+        `SpatialItem "${id}" is not movable.`,
+      );
+    }
+    if (record.status !== "detached") {
+      throw new SpatialFlexError(
+        "NOT_DETACHED",
+        `SpatialItem "${id}" must be detached before it can move.`,
+      );
+    }
+    assertPosition(position);
+    const previous = record.layout.position;
+    if (previous && previous.x === position.x && previous.y === position.y) {
+      return false;
+    }
+    this.#replace(record, "detached", { ...record.layout, position });
     return true;
   }
 
@@ -122,6 +210,38 @@ export class SpatialRegistry {
     return () => {
       this.#listeners.delete(listener);
     };
+  }
+
+  #require(id: SpatialItemId): SpatialItemRecord {
+    const record = this.#items.get(id);
+    if (!record) {
+      throw new SpatialFlexError(
+        "UNKNOWN_ITEM_ID",
+        `SpatialItem "${id}" is not registered in this workspace.`,
+      );
+    }
+    return record;
+  }
+
+  // Replaces the record, keeping its position in registration order.
+  #replace(
+    record: SpatialItemRecord,
+    status: SpatialItemRecord["status"],
+    layout: SpatialItemLayout,
+  ): void {
+    this.#items.set(
+      record.id,
+      Object.freeze({
+        ...record,
+        status,
+        layout: Object.freeze({
+          position: layout.position && Object.freeze({ ...layout.position }),
+          size: layout.size && Object.freeze({ ...layout.size }),
+          visible: layout.visible,
+        }),
+      }),
+    );
+    this.#commit();
   }
 
   #commit(): void {
@@ -151,4 +271,27 @@ function sameCapabilities(
     a.movable === b.movable &&
     a.resizable === b.resizable
   );
+}
+
+function assertPosition(position: SpatialPosition): void {
+  if (!Number.isFinite(position.x) || !Number.isFinite(position.y)) {
+    throw new SpatialFlexError(
+      "INVALID_LAYOUT",
+      `Position must have finite x and y, received ${JSON.stringify(position)}.`,
+    );
+  }
+}
+
+function assertSize(size: SpatialSize): void {
+  if (
+    !Number.isFinite(size.width) ||
+    !Number.isFinite(size.height) ||
+    size.width < 0 ||
+    size.height < 0
+  ) {
+    throw new SpatialFlexError(
+      "INVALID_LAYOUT",
+      `Size must have finite, non-negative width and height, received ${JSON.stringify(size)}.`,
+    );
+  }
 }
