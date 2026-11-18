@@ -23,7 +23,7 @@ import {
 export interface SpatialController {
   /**
    * Detaches the item. The original placement is measured for the
-   * placeholder, and the panel opens at its last position and size, or over
+   * default placeholder (or released by Collapse), and the panel opens at its last position and size, or over
    * the original placement at its natural size the first time.
    */
   detach(id: SpatialItemId, strategy?: DetachmentStrategy): boolean;

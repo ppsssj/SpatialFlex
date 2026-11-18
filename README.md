@@ -4,7 +4,7 @@
 
 > 개발자는 공간형 UI와 제약 조건을 정의하고, 사용자는 필요한 웹 요소를 독립시켜 자신만의 작업 공간을 구성합니다.
 
-**Status:** P0 Detach + P1 Cross-Context XR Mirror Implemented — P1-04 Declarative View API Experimental
+**Status:** P0 Detach + P1 Cross-Context XR Mirror — P1-05 Interactive Detachment Strategies (Experimental)
 
 **Type:** Open-source Spatial Layout & Element Detachment SDK  
 **Focus:** Adaptive Layout · Element Detachment · Live Components · User Composition · Layout Persistence
@@ -573,7 +573,7 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 ## 12. Project Status
 
-**Current stage: P0 Detach + P1 Cross-Context XR Mirror Implemented — P1-04 Declarative View API Experimental**
+**Current stage: P1-05 Interactive Detachment Strategies (Experimental)**
 
 P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.com/ppsssj/SpatialFlex/issues/5))에서 **같은 브라우저 페이지 안의 2D 개념 증명(PoC)** 을 구현하고 자동화 테스트로 검증했습니다. 이는 위에서 설명한 SpatialFlex 비전의 첫 단계이며, XR 환경에서의 동작이나 SDK 전체의 완성을 뜻하지 않습니다. 실행 방법과 세부 동작은 [13. Local Development](#13-local-development)에 있습니다.
 
@@ -590,6 +590,7 @@ P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.co
 - **두 XR 엔진:** Three.js와 Babylon.js의 renderer-neutral Host 계약, desktop 3D 및 기존 same-context IWER 검증.
 - **P1-03 Cross-Context Mirror:** 별도 JavaScript realm의 same-origin iframe에 검증된 데이터와 semantic action ID만 전달하며, 앱이 상태와 액션을 소유합니다. [Live Bridge](docs/live-bridge.md).
 - **P1-04 선언형 View (실험적):** `SpatialItem xr`로 컴포넌트 근처에서 representation과 허용 액션을 선언합니다. 실제 등록·해제와 최신 handler를 추적하며 앱별 XR adapter entry 없이 발견합니다. [API / DX 비교](docs/declarative-spatial-view.md).
+- **P1-05 Interactive Detachment (실험적):** XR Lab에서 실제 Counter·Live Chart·Image를 선택하고 Move + Placeholder, Move + Collapse, Mirror + Visible을 비교합니다. Move는 원래 React/DOM 인스턴스를 유지하고, XR Mirror는 별도로 선언된 3D 표현입니다. 지원하지 않는 조합은 이유와 함께 거부합니다. [전략 API / 시연 / 검증](docs/detachment-strategies.md).
 
 ### 아직 구현되지 않은 것
 
@@ -740,6 +741,8 @@ function DetachButton() {
 ```bash
 pnpm dev:xr-lab     # http://localhost:5173/?engine=three|babylon&integration=baseline|spatialflex
 ```
+
+**P1-05 interactive demo:** `http://localhost:5173/?integration=spatialflex&engine=three&bridge=iframe&xr-emulator=off`. Use **Interactive detachment** to select an existing widget, reserve or collapse its source space during Move, then attach it and show a live XR mirror. The header switches engines and execution contexts. See the [complete demonstration and supported matrix](docs/detachment-strategies.md).
 
 ### Same-Host Live 동작 (v0.1)
 

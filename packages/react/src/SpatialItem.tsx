@@ -48,8 +48,8 @@ type Interaction =
  *
  * Detaching never remounts the children. The same elements stay in the same
  * place in the DOM and the React tree; the panel element only switches to
- * `position: fixed`, and its in-flow parent keeps the original size as a
- * placeholder. Local state, context, event handlers and focus are therefore
+ * `position: fixed`. Its parent reserves the original size by default, or
+ * generates no layout box under the Collapse policy. Local state, context, event handlers and focus are therefore
  * preserved. See the README for the limits of this approach.
  *
  * A duplicate ID throws a `DUPLICATE_ITEM_ID` error from the commit phase,

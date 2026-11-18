@@ -96,6 +96,7 @@ for (const engine of ENGINES)
       const chart = (await slot(page, "live-chart").boundingBox())!;
       const screenshot = async (name: string) => {
         if (
+          process.env.SPATIALFLEX_CAPTURE_EVIDENCE === "1" &&
           engine === "three" &&
           bridge === "iframe" &&
           testInfo.project.name === "chromium"
@@ -253,11 +254,13 @@ for (const engine of ENGINES)
           .getByTestId("strategy-presentation")
           .textContent(),
       };
-      await mkdir("../../docs/evidence", { recursive: true });
-      await writeFile(
-        `../../docs/evidence/p1-05-${engine}-${bridge}-${testInfo.project.name}.json`,
-        JSON.stringify(evidence, null, 2) + "\n",
-      );
+      if (process.env.SPATIALFLEX_CAPTURE_EVIDENCE === "1") {
+        await mkdir("../../docs/evidence", { recursive: true });
+        await writeFile(
+          `../../docs/evidence/p1-05-${engine}-${bridge}-${testInfo.project.name}.json`,
+          JSON.stringify(evidence, null, 2) + "\n",
+        );
+      }
       await testInfo.attach("strategy-evidence", {
         body: JSON.stringify(evidence, null, 2),
         contentType: "application/json",
