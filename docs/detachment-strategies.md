@@ -50,7 +50,7 @@ lab.show("shared-counter", {
 lab.hide("shared-counter");
 ```
 
-`lab.show(id)` remains compatible with the original XR Lab API and means a live XR mirror. The neutral shell receives a structural capability request and a validator supplied by the SpatialFlex adapter. It imports no SDK, and the baseline integration remains SDK-free. `SpatialItem xr` still declares only serializable value/bars/swatch data and parent-realm callbacks. XR Hosts and protocol v1 are unchanged by P1-05.
+`lab.show(id)` remains compatible with the original XR Lab API and means a live XR mirror. The neutral shell receives a structural capability request and a validator supplied by the SpatialFlex adapter. It imports no SDK, and the baseline integration remains SDK-free. `SpatialItem xr` still declares only serializable value/bars/swatch data and parent-realm callbacks. The renderer-neutral Host contract and Bridge protocol v1 remain unchanged. Integrated validation also corrects a Babylon desktop input boundary, described below.
 
 ### Source semantics and original mount preservation
 
@@ -149,6 +149,14 @@ These values were observed for both engines and contexts. Measurements use actua
 The UX adds one strategy control component and extends the existing generic SpatialFlex adapter. It reuses three existing application widgets, their store and declarative XR actions: **zero new authoritative application stores, React roots, per-widget adapter action tables, renderer implementations or protocol versions**. The Core addition is one strategy validation module; the DOM changes extend the existing controller and same-tree Host. The existing XR-controls path remains available and uses the same adapter operations.
 
 Requested install/lint/format/typecheck/build checks and **232 unit/integration cases** passed after integrating the Layout Fix. The complete browser regression and remote CI outcome are recorded in the PR after their final runs; focused evidence alone is not a full-suite claim.
+
+### Babylon desktop release correction
+
+The complete local regression exposed a repeatable lost action in the existing Babylon/baseline evaluation. Babylon 9.36's tap classifier uses elapsed time strictly greater than its double-click delay for a single tap and strictly less for a double tap. A deterministic browser regression using real mouse raycasts and controlling only `Date.now` proved the boundary: the original Host passed two-click scenarios at 299ms and 301ms but lost the second action at exactly 300ms, in both same-context and iframe operation. Timers, animation frames, `performance.now` and application state were not mocked or delayed.
+
+Desktop mouse activation now consumes one validated press/release gesture. Native movement latches cancellation beyond the public engine drag threshold, even if the pointer returns before the next rendering frame. Release requires the exact still-live pressed mesh, consumes the press before dispatch, and invokes the callback captured at press time. This prevents an old gesture from activating a replacement presentation. Native pointer cancellation, window blur and canvas focus loss clear pending presses (Babylon synthesizes a button release when its canvas blurs; that release is treated as cancellation, not activation); listeners are removed on scene disposal. Babylon's existing XR/touch/pen tap path remains in use, and neither global engine timing settings nor dependency versions change.
+
+`e2e/babylon-pointer.spec.ts` covers the 299/300/301ms boundary, real drag-out-and-back cancellation, held press across presentation replacement, and raw cancellation/blur notifications followed by a fresh real click. It tests Chromium and Firefox in same-context and iframe Hosts. All domain action-count assertions remain exact. The ordinary evaluation workload remains unchanged; the correction fixes input handling rather than padding the test cadence.
 
 ## Limitations and roadmap
 

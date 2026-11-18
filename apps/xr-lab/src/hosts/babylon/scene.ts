@@ -83,6 +83,7 @@ export class BabylonLabScene {
   readonly #camera: ArcRotateCamera;
   readonly #panels = new Map<string, PanelEntry>();
   readonly #resizeObserver: ResizeObserver;
+  readonly #disconnectPointerLifecycle: () => void;
   #events: HostEvents;
   #xr: WebXRDefaultExperience | null = null;
   /** The control under each pointer (mouse, each XR controller). */
@@ -138,33 +139,117 @@ export class BabylonLabScene {
 
     // Mouse input and XR controller selects (Babylon's pointer selection
     // feature turns them into scene pointer events) arrive here alike.
-    // Babylon picks on pointer down; tap events carry no pick of their own.
+    // Desktop actions consume a validated release exactly once. Babylon's
+    // tap classifier excludes exactly DoubleClickDelay from both single and
+    // double taps. XR/touch keep their existing engine-generated tap path.
     const pressed = new Map<number, PartMeta | null>();
+    const mousePressed = new Map<
+      number,
+      {
+        meta: PartMeta;
+        mesh: AbstractMesh;
+        x: number;
+        y: number;
+        button: number;
+        dragged: boolean;
+        events: HostEvents;
+      }
+    >();
+    const activate = (meta: PartMeta, events: HostEvents) => {
+      if (meta.buttonId) events.onPanelButton(meta.panelId, meta.buttonId);
+      else if (meta.part === "close") events.onPanelClose(meta.panelId);
+      else events.onPanelSelect(meta.panelId);
+    };
+    const trackMovement = (pointer: PointerEvent) => {
+      const press = mousePressed.get(pointer.pointerId);
+      if (
+        press &&
+        (Math.abs(pointer.clientX - press.x) > Scene.DragMovementThreshold ||
+          Math.abs(pointer.clientY - press.y) > Scene.DragMovementThreshold)
+      )
+        press.dragged = true;
+    };
+    const cancel = (event: PointerEvent) => {
+      mousePressed.delete(event.pointerId);
+      pressed.delete(event.pointerId);
+    };
+    const blur = () => {
+      mousePressed.clear();
+      pressed.clear();
+    };
+    // Babylon synthesizes a button release when the canvas loses focus. That
+    // is focus loss, not a user release: clear presses in the window capture
+    // phase, which always runs before the engine's own canvas blur listener.
+    const canvasBlur = (event: FocusEvent) => {
+      if (event.target === canvas) blur();
+    };
+    canvas.addEventListener("pointercancel", cancel, true);
+    // The engine coalesces move picking until a frame; latch native movement
+    // too, so a fast out-and-back can never become an accidental activation.
+    window.addEventListener("pointermove", trackMovement, true);
+    window.addEventListener("blur", blur);
+    window.addEventListener("blur", canvasBlur, true);
+    this.#disconnectPointerLifecycle = () => {
+      canvas.removeEventListener("pointercancel", cancel, true);
+      window.removeEventListener("pointermove", trackMovement, true);
+      window.removeEventListener("blur", blur);
+      window.removeEventListener("blur", canvasBlur, true);
+      blur();
+    };
     scene.onPointerObservable.add((info) => {
-      const pointerId = (info.event as PointerEvent).pointerId;
+      const pointer = info.event as PointerEvent;
+      const pointerId = pointer.pointerId;
+      const mouse = pointer.pointerType === "mouse";
       if (info.type === PointerEventTypes.POINTERDOWN) {
-        pressed.set(
-          pointerId,
-          metaOf(info.pickInfo?.hit ? info.pickInfo.pickedMesh : null),
-        );
+        const mesh = info.pickInfo?.hit ? info.pickInfo.pickedMesh : null;
+        const meta = metaOf(mesh);
+        if (mouse) {
+          mousePressed.delete(pointerId);
+          if (mesh && meta)
+            mousePressed.set(pointerId, {
+              meta,
+              mesh,
+              x: pointer.clientX,
+              y: pointer.clientY,
+              button: pointer.button,
+              dragged: false,
+              events: this.#events,
+            });
+        } else pressed.set(pointerId, meta);
       } else if (
         info.type === PointerEventTypes.POINTERTAP ||
         info.type === PointerEventTypes.POINTERDOUBLETAP
       ) {
+        if (mouse) return;
         // A tap is a press and release without dragging: activate what the
         // pointer was pressed on. Babylon reports a second quick tap as a
         // double tap instead (never both), and each one is a real click.
         const meta = pressed.get(pointerId) ?? null;
         pressed.delete(pointerId);
         if (!meta) return;
-        if (meta.buttonId)
-          this.#events.onPanelButton(meta.panelId, meta.buttonId);
-        else if (meta.part === "close") this.#events.onPanelClose(meta.panelId);
-        else this.#events.onPanelSelect(meta.panelId);
+        activate(meta, this.#events);
       } else if (info.type === PointerEventTypes.POINTERUP) {
+        if (mouse) {
+          trackMovement(pointer);
+          const press = mousePressed.get(pointerId);
+          // Consume before dispatch, including cancelled/removed-target releases.
+          mousePressed.delete(pointerId);
+          if (
+            press &&
+            !press.dragged &&
+            pointer.type !== "pointercancel" &&
+            pointer.button === press.button &&
+            !press.mesh.isDisposed() &&
+            info.pickInfo?.hit &&
+            info.pickInfo.pickedMesh === press.mesh
+          )
+            activate(press.meta, press.events);
+          return;
+        }
         // Released after a drag (no tap): forget the press.
         queueMicrotask(() => pressed.delete(pointerId));
       } else if (info.type === PointerEventTypes.POINTERMOVE) {
+        if (mouse) trackMovement(pointer);
         // Controls opt in to move picking (enablePointerMoveEvents).
         const meta = metaOf(
           info.pickInfo?.hit ? info.pickInfo.pickedMesh : null,
@@ -272,6 +357,7 @@ export class BabylonLabScene {
   dispose() {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#disconnectPointerLifecycle();
     this.#resizeObserver.disconnect();
     for (const [id, entry] of this.#panels) this.#disposePanel(id, entry);
     this.#xr?.dispose();
