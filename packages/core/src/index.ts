@@ -14,6 +14,19 @@ export {
   type SupportedDetachmentStrategy,
 } from "./strategies";
 export {
+  assertExtraction,
+  assertPresentationStrategy,
+  defaultPresentation,
+  presentationSupport,
+  validateExtraction,
+  validatePresentationStrategy,
+  type ExtractionContext,
+  type ExtractionRequest,
+  type ExtractionSource,
+  type PresentationStrategy,
+  type SupportedExtraction,
+} from "./presentation";
+export {
   assertSourceVisibility,
   validateSourceVisibility,
   type SourceVisibility,

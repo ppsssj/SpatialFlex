@@ -69,8 +69,10 @@ export function SurfaceInspector({
         HTML composited with a perspective transform that follows the 3D camera.
         It is not a screenshot and not WebGL geometry. Use{" "}
         <strong>Select elements</strong> on the surface to extract a registered
-        component; an extracted panel is a separate renderer-native live XR
-        mirror, while the application keeps owning state and actions.
+        component as <strong>Native DOM</strong> (the original element itself,
+        moved into space with its design and state) or{" "}
+        <strong>XR Adaptive</strong> (a separate renderer-native live XR panel).
+        The application keeps owning state and actions either way.
       </p>
       <dl className="diagnostics">
         <dt>Surface</dt>
@@ -146,11 +148,26 @@ export function SurfaceInspector({
           {extracted.map((item) => (
             <li key={item.id} data-testid={`surface-extraction-${item.id}`}>
               <strong>{item.label}</strong> —{" "}
-              {item.extraction!.presentationId ?? "presentation"} at (
-              {fmt(item.extraction!.position)}) m; original{" "}
-              {item.extraction!.source === "reserved"
-                ? "hidden, space reserved"
-                : "kept visible"}
+              {item.extraction!.presentation === "native" ? (
+                <>
+                  Native DOM (the original element),{" "}
+                  {item.extraction!.presentationId} at (
+                  {fmt(surface.anchors.get(item.id)?.position ?? [0, 0, 0])}) m;
+                  source{" "}
+                  {item.extraction!.source === "collapsed"
+                    ? "collapsed"
+                    : "space reserved"}
+                </>
+              ) : (
+                <>
+                  XR Adaptive,{" "}
+                  {item.extraction!.presentationId ?? "presentation"} at (
+                  {fmt(item.extraction!.position ?? [0, 0, 0])}) m; original{" "}
+                  {item.extraction!.source === "reserved"
+                    ? "hidden, space reserved"
+                    : "kept visible"}
+                </>
+              )}
             </li>
           ))}
         </ul>
@@ -158,8 +175,9 @@ export function SurfaceInspector({
       <h3>Not supported in this milestone</h3>
       <ul className="hint">
         <li>
-          Collapse source: the source stays mounted in place, so its footprint
-          is kept visible or reserved.
+          XR Adaptive + Collapse: the adaptive source stays mounted in place, so
+          its footprint is kept visible or reserved. Native DOM + Keep original:
+          there is only one original instance.
         </li>
         <li>
           Immersive WebXR display of the HTML surface: browsers do not composite

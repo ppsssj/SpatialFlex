@@ -57,8 +57,8 @@ interface SpatialWebSurfacePose {
   width: number; // meters
   height: number; // meters
 }
-// Default: position [-0.42, 1.42, -1.02], yaw 0.15 rad, 1.62 × 1.17 m,
-// page layout viewport 720 × 520 CSS px.
+// Default: position [-0.42, 1.42, -1.02], yaw 0.15 rad, 1.62 × 1.35 m,
+// page layout viewport 720 × 600 CSS px (520 before P1-06A).
 ```
 
 The `surfaceTransform(frame, pose, resolution)` and `occlusionClipPath(...)` functions in [`surfaceMath.ts`](../apps/xr-lab/src/surface/surfaceMath.ts) are pure. Unit tests check them against Three.js's own `Vector3.project` for several camera positions.
@@ -166,3 +166,5 @@ Validation totals for the PR head are recorded in the PR description.
 3. An iframe-capable surface: the Host posts camera frames over the validated bridge, and the parent composites over the iframe.
 4. An immersive path: a texture-based surface only once DOM-in-canvas APIs provide real event delivery, or declared XR views for all content.
 5. Collapse policy with reflow evidence, multiple surfaces, and persistence of poses and extractions.
+
+> **P1-06A follow-up:** extraction now offers two presentation strategies, Native DOM (the original element itself) and XR Adaptive (this document's XR panel). See [native-dom-spatial-extraction.md](native-dom-spatial-extraction.md).

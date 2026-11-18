@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { CAMERA, PANEL_SIZE, type HostCameraFrame } from "../contracts/xrHost";
 import {
   extractionPosition,
+  nativePanelTransform,
   occlusionClipPath,
+  pageClipPath,
   projectPoint,
   surfacePoint,
   surfaceTransform,
@@ -169,5 +171,90 @@ describe("spatial web surface projection", () => {
       // In front of the surface plane: never hidden behind the page.
       expect(z).toBeGreaterThan(pose.position[2]);
     }
+  });
+
+  for (const [name, position] of [
+    ["default camera", CAMERA.position],
+    ["orbited camera", [1.2, 1.8, 0.5]],
+  ] as const)
+    it(`native panel: page transform × panel transform = its own world projection (${name})`, () => {
+      const camera = deskCamera(position);
+      const frame = frameFrom(camera);
+      const page = surfaceTransform(frame, pose, res);
+      if (page.visibility !== "visible") throw new Error("page hidden");
+      const panelRes = { width: 276, height: 152 };
+      const mpp = pose.width / res.width;
+      const panelPose: SpatialWebSurfacePose = {
+        position: extractionPosition(pose, 0, {
+          width: panelRes.width * mpp,
+          height: panelRes.height * mpp,
+        }),
+        rotation: pose.rotation,
+        width: panelRes.width * mpp,
+        height: panelRes.height * mpp,
+      };
+      const border = 2;
+      const placed = nativePanelTransform(
+        frame,
+        { pose, resolution: res, border },
+        { pose: panelPose, resolution: panelRes },
+      );
+      if (placed.visibility !== "visible") throw new Error("not placed");
+      expect(placed.behindPage).toBe(false);
+      for (const [u, v] of [
+        [0, 0],
+        [panelRes.width, 0],
+        [0, panelRes.height],
+        [panelRes.width, panelRes.height],
+        [100, 40],
+      ] as const) {
+        // The element's own transform, then the containing-block offset,
+        // then the page's transform: what the browser composes.
+        const inPage = applyCss(placed.matrix3d, u, v);
+        const screen = applyCss(
+          page.matrix3d,
+          inPage.x + border,
+          inPage.y + border,
+        );
+        const expected = threeProject(
+          camera,
+          surfacePoint(panelPose, panelRes, u, v),
+        );
+        expect(screen.x).toBeCloseTo(expected.x, 3);
+        expect(screen.y).toBeCloseTo(expected.y, 3);
+      }
+      // Outside the page: the element extends beyond the page's own box.
+      expect(Math.min(...placed.pageQuad.map(([x]) => x))).toBeGreaterThan(
+        res.width,
+      );
+      // The page clip keeps that footprint (nonzero union).
+      const clip = pageClipPath(frame, pose, res, [], [placed.pageQuad]);
+      expect(clip).toMatch(
+        /^path\(nonzero, "M 0 0 L 720 0 L 720 \d+ L 0 \d+ Z M /,
+      );
+    });
+
+  it("native panel behind the page plane is reported for occlusion", () => {
+    const frame = frameFrom(deskCamera());
+    const panelRes = { width: 200, height: 100 };
+    const placed = nativePanelTransform(
+      frame,
+      { pose, resolution: res, border: 2 },
+      {
+        pose: {
+          position: [
+            pose.position[0],
+            pose.position[1],
+            pose.position[2] - 0.5,
+          ],
+          rotation: pose.rotation,
+          width: 0.4,
+          height: 0.2,
+        },
+        resolution: panelRes,
+      },
+    );
+    expect(placed).toMatchObject({ visibility: "visible", behindPage: true });
+    expect(pageClipPath(frame, pose, res, [], [])).toBe("none");
   });
 });

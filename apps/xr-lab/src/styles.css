@@ -232,7 +232,9 @@ html.xr-iframe-document,
   flex-direction: column;
   transform-origin: 0 0;
   pointer-events: auto;
-  overflow: hidden;
+  /* Not clipped: a natively extracted element has the page as its
+     containing block and is composited outside the page's box. */
+  overflow: visible;
   background: #fff;
   border: 2px solid #24292f;
   border-radius: 10px;
@@ -246,6 +248,19 @@ html.xr-iframe-document,
   background: #24292f;
   color: #f6f8fa;
   font-size: 0.8125rem;
+  border-radius: 8px 8px 0 0;
+}
+.web-surface-presentation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin: 0;
+  padding: 0 6px 2px;
+  border: 1px solid #57606a;
+  border-radius: 4px;
+}
+.web-surface-presentation legend {
+  padding: 0 4px;
 }
 .web-surface-chrome label {
   display: inline-flex;
@@ -266,6 +281,12 @@ html.xr-iframe-document,
   min-height: 0;
   overflow: auto;
   padding: 8px 14px;
+  border-radius: 0 0 8px 8px;
+}
+/* Native DOM extraction: not drawn until the compositor has placed it. */
+.web-surface-layer[data-active]
+  [data-spatialflex-placement="external"]:not([data-spatial-placed]) {
+  visibility: hidden;
 }
 .web-surface-content[inert] {
   opacity: 0.8;
