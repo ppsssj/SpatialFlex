@@ -124,6 +124,8 @@ export function SpatialItem({
   }, [registry, controller, id]);
 
   const detached = record?.status === "detached";
+  // Source visibility policy "reserved": hidden, footprint kept, still mounted.
+  const reserved = !detached && record?.layout.visible === false;
   const position = record?.layout.position;
   const size = record?.layout.size;
 
@@ -213,18 +215,20 @@ export function SpatialItem({
       : detached && placeholder
         ? { width: placeholder.width, height: placeholder.height }
         : undefined;
-  const panelStyle: CSSProperties | undefined = detached
-    ? {
-        position: "fixed",
-        left: position?.x ?? 0,
-        top: position?.y ?? 0,
-        // Natural size: the original width and automatic height.
-        width: size?.width ?? placeholder?.width,
-        height: size?.height,
-        boxSizing: "border-box",
-        overflow: size ? "hidden" : undefined,
-      }
-    : undefined;
+  const panelStyle: CSSProperties | undefined = reserved
+    ? { visibility: "hidden" }
+    : detached
+      ? {
+          position: "fixed",
+          left: position?.x ?? 0,
+          top: position?.y ?? 0,
+          // Natural size: the original width and automatic height.
+          width: size?.width ?? placeholder?.width,
+          height: size?.height,
+          boxSizing: "border-box",
+          overflow: size ? "hidden" : undefined,
+        }
+      : undefined;
   const title = label ?? id;
 
   // The element structure is identical in both states, and the panel bar and
@@ -236,6 +240,7 @@ export function SpatialItem({
       data-spatialflex-item={id}
       data-status={status}
       data-source-policy={detached ? sourcePolicy : undefined}
+      data-source-visibility={reserved ? "reserved" : undefined}
       style={slotStyle}
     >
       <div
@@ -245,6 +250,10 @@ export function SpatialItem({
         role={detached ? "dialog" : undefined}
         aria-label={detached ? title : undefined}
         style={panelStyle}
+        // A reserved source cannot be focused or activated while hidden; its
+        // DOM, React state and field values are kept for restoration.
+        inert={reserved || undefined}
+        aria-hidden={reserved || undefined}
         // While the panel is being dragged or resized, content that moves
         // under the original press point (such as an image) must not start a
         // native drag-and-drop, which would cancel the pointer stream.

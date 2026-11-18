@@ -13,6 +13,12 @@ export {
   type DetachmentStrategy,
   type SupportedDetachmentStrategy,
 } from "./strategies";
+export {
+  assertSourceVisibility,
+  validateSourceVisibility,
+  type SourceVisibility,
+  type SourceVisibilityRequest,
+} from "./sourceVisibility";
 export type {
   SpatialViewBody,
   SpatialViewAction,

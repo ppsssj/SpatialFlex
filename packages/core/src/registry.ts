@@ -1,5 +1,9 @@
 import { SpatialFlexError } from "./errors";
 import {
+  assertSourceVisibility,
+  type SourceVisibility,
+} from "./sourceVisibility";
+import {
   prepareView,
   type SpatialViewBinding,
   type SpatialViewRecord,
@@ -174,7 +178,35 @@ export class SpatialRegistry {
       ...record.layout,
       position: options.position ?? record.layout.position,
       size: options.size ?? record.layout.size,
+      // Moving the original component presents it; it cannot stay hidden.
+      visible: true,
     });
+    return true;
+  }
+
+  /**
+   * Sets the visual policy of an attached item's original placement while
+   * another presentation represents it. `reserved` hides the original but
+   * keeps its footprint; the component stays mounted. Returns `false`
+   * without notifying if unchanged.
+   *
+   * @throws {SpatialFlexError} `UNKNOWN_ITEM_ID`, or `UNSUPPORTED_STRATEGY`
+   *   for an invalid policy or for hiding a detached (moved) item.
+   */
+  setSourceVisibility(
+    id: SpatialItemId,
+    visibility: SourceVisibility,
+  ): boolean {
+    const policy = assertSourceVisibility(visibility);
+    const record = this.#require(id);
+    const visible = policy === "visible";
+    if (!visible && record.status === "detached")
+      throw new SpatialFlexError(
+        "UNSUPPORTED_STRATEGY",
+        `SpatialItem "${id}" is moved in its document; attach it before reserving its source.`,
+      );
+    if (record.layout.visible === visible) return false;
+    this.#replace(record, record.status, { ...record.layout, visible });
     return true;
   }
 

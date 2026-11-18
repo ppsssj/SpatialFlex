@@ -40,6 +40,47 @@ export interface LabIntegration extends HostEvents {
   move(id: string, delta: Vec3): boolean;
   /** Wraps dashboard widgets, if the integration needs to. */
   readonly renderWidget?: RenderWidget;
+  /**
+   * Registered components that can be selected on a spatial web surface,
+   * in registration order. Implemented only by SpatialFlex: eligibility
+   * comes from component registrations, never from page selectors.
+   */
+  readonly surfaceItems?: readonly SurfaceItem[];
+  /**
+   * Extracts a registered component into an independent live XR panel at a
+   * world position. `source` is the original's visibility policy. The
+   * original stays mounted in place; it is never moved, cloned or remounted.
+   */
+  extract?(id: string, options: ExtractOptions): boolean;
+  /** Removes the extracted presentation and shows the original again. */
+  restore?(id: string): boolean;
+  /** Element of a registered component, for read-only selection geometry. */
+  sourceElement?(id: string): HTMLElement | null;
+  validateSourceVisibility?(
+    value: unknown,
+  ):
+    | { readonly supported: true }
+    | { readonly supported: false; readonly reason: string };
+}
+
+export interface ExtractOptions {
+  /** Untrusted policy, validated by the integration. */
+  readonly source: unknown;
+  readonly position: Vec3;
+}
+
+export interface SurfaceItem {
+  readonly id: string;
+  readonly label: string;
+  /** Whether the registration declares an XR view that can be extracted. */
+  readonly extractable: boolean;
+  /** Why the component cannot be extracted, if it cannot. */
+  readonly reason?: string;
+  readonly extraction: {
+    readonly source: "visible" | "reserved";
+    readonly presentationId?: string;
+    readonly position: Vec3;
+  } | null;
 }
 
 export interface XRItemOption {

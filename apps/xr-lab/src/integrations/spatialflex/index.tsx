@@ -8,9 +8,11 @@ import {
 } from "@spatialflex/react";
 import {
   assertDetachmentStrategy,
+  assertSourceVisibility,
   SpatialFlexError,
   XR_MIRROR_STRATEGY,
   validateDetachmentStrategy,
+  validateSourceVisibility,
 } from "@spatialflex/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RenderWidget } from "../../fixtures";
@@ -60,7 +62,7 @@ function useSpatialFlexIntegration(): LabIntegration {
     const view = views[index];
     if (!view) return [];
     const id = view.id;
-    const [x, y, z] = slot(index);
+    const [x, y, z] = presentation.anchors?.[registrationId] ?? slot(index);
     const [ox, oy, oz] = presentation.offsets[registrationId] ?? [0, 0, 0];
     return [
       {
@@ -85,6 +87,34 @@ function useSpatialFlexIntegration(): LabIntegration {
       registry.getView(id)?.registrationId === view.registrationId
     )
       return view;
+  };
+  // Ending a presentation always presents the original again.
+  const showSource = (id: string) => {
+    if (registry.get(id)?.layout.visible === false)
+      controller.setSourceVisibility(id, "visible");
+  };
+  const beginPresentation = (registrationId: string) => {
+    if (!instances.current.has(registrationId)) {
+      instances.current.set(
+        registrationId,
+        `presentation-${++generation.current}`,
+      );
+      publishInstances();
+    }
+  };
+  const endPresentation = (id: string, registrationId: string) => {
+    showSource(id);
+    instances.current.delete(registrationId);
+    publishInstances();
+    return hide(registrationId);
+  };
+  const hideItem = (id: string) => {
+    const view = registry.getView(id);
+    if (!view) {
+      showSource(id);
+      return false;
+    }
+    return endPresentation(id, view.registrationId);
   };
   return {
     source: "SpatialFlex registry",
@@ -118,22 +148,53 @@ function useSpatialFlexIntegration(): LabIntegration {
       const view = registry.getView(id);
       if (!view || !available.includes(view.registrationId)) return false;
       controller.attach(id);
-      if (!instances.current.has(view.registrationId)) {
-        instances.current.set(
-          view.registrationId,
-          `presentation-${++generation.current}`,
-        );
-        publishInstances();
-      }
+      beginPresentation(view.registrationId);
       return show(view.registrationId);
     },
-    hide(id) {
+    hide: hideItem,
+    surfaceItems: records.map((record) => {
+      const view = views.find((v) => v.id === record.id);
+      const shown = !!view && presentation.shown.includes(view.registrationId);
+      const panel = shown ? panels.find((p) => p.id === record.id) : undefined;
+      const presentationId = view && capturedInstances.get(view.registrationId);
+      return {
+        id: record.id,
+        label: view?.title ?? record.id,
+        extractable: !!view && record.status === "attached",
+        ...(!view
+          ? { reason: "No declared XR view (SpatialItem xr)." }
+          : record.status !== "attached" && {
+              reason: "Moved in its document; attach it first.",
+            }),
+        extraction: panel
+          ? {
+              source: record.layout.visible ? "visible" : "reserved",
+              ...(presentationId && { presentationId }),
+              position: panel.position,
+            }
+          : null,
+      };
+    }),
+    validateSourceVisibility,
+    sourceElement: controller.sourceElement,
+    extract(id, { source, position }) {
+      const visibility = assertSourceVisibility(source);
+      if (position.length !== 3 || !position.every(Number.isFinite))
+        throw new SpatialFlexError(
+          "INVALID_LAYOUT",
+          "An extraction position must be three finite meters.",
+        );
       const view = registry.getView(id);
-      if (!view) return false;
-      instances.current.delete(view.registrationId);
-      publishInstances();
-      return hide(view.registrationId);
+      if (!view || !available.includes(view.registrationId)) return false;
+      if (presentation.shown.includes(view.registrationId)) return false;
+      controller.attach(id);
+      beginPresentation(view.registrationId);
+      if (!show(view.registrationId, [position[0], position[1], position[2]]))
+        return false;
+      controller.setSourceVisibility(id, visibility);
+      return true;
     },
+    restore: hideItem,
     detach(id, options) {
       const strategy = assertDetachmentStrategy(options);
       if (strategy.mode !== "move")
@@ -144,11 +205,7 @@ function useSpatialFlexIntegration(): LabIntegration {
       // Validate/carry out the move before removing a valid existing mirror.
       const result = controller.detach(id, strategy);
       const view = registry.getView(id);
-      if (view) {
-        instances.current.delete(view.registrationId);
-        publishInstances();
-        hide(view.registrationId);
-      }
+      if (view) endPresentation(id, view.registrationId);
       return result;
     },
     attach: controller.attach,
@@ -166,11 +223,7 @@ function useSpatialFlexIntegration(): LabIntegration {
     },
     onPanelClose(id) {
       const view = currentPresentation(id);
-      if (view) {
-        instances.current.delete(view.registrationId);
-        publishInstances();
-        hide(view.registrationId);
-      }
+      if (view) endPresentation(id, view.registrationId);
     },
     renderWidget,
   };

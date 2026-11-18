@@ -75,6 +75,9 @@ export async function openLab(
 
 export type Probe = {
   locate(id: string, part: string): { x: number; y: number } | null;
+  project(
+    point: readonly [number, number, number],
+  ): { x: number; y: number } | null;
   worldPosition(id: string, part: string): [number, number, number] | null;
   hovered(id: string, part: string): boolean;
   frames: number;

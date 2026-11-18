@@ -11,6 +11,10 @@ export interface HostProbe {
   engine: string | null;
   /** Client (CSS pixel) coordinates of a panel part's center, if visible. */
   locate(panelId: string, part: string): { x: number; y: number } | null;
+  /** Client (CSS pixel) coordinates of a world point, if in front of the camera. */
+  project(
+    point: readonly [number, number, number],
+  ): { x: number; y: number } | null;
   /** World position (meters) of a panel part's center, if present. */
   worldPosition(panelId: string, part: string): [number, number, number] | null;
   /** Whether a panel part currently shows hover feedback. */
@@ -43,6 +47,7 @@ export const testHooksEnabled =
 const probe: HostProbe = {
   engine: null,
   locate: () => null,
+  project: () => null,
   worldPosition: () => null,
   hovered: () => false,
   frames: 0,
@@ -93,6 +98,7 @@ export function hostMounted(engine: string) {
       probe.panels = [];
       probe.sessionMode = null;
       probe.locate = () => null;
+      probe.project = () => null;
       probe.worldPosition = () => null;
       probe.hovered = () => false;
     }

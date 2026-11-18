@@ -31,6 +31,7 @@ import {
 import {
   CAMERA,
   panelLayout,
+  type HostCameraFrame,
   type HostEvents,
   type HostPanel,
   type PanelPart,
@@ -84,6 +85,12 @@ export class BabylonLabScene {
   readonly #panels = new Map<string, PanelEntry>();
   readonly #resizeObserver: ResizeObserver;
   readonly #disconnectPointerLifecycle: () => void;
+  #cameraFrameListener: ((frame: HostCameraFrame) => void) | null = null;
+  readonly #cameraFrame = {
+    viewProjection: [] as ArrayLike<number>,
+    viewport: { left: 0, top: 0, width: 0, height: 0 },
+    eye: [0, 0, 0] as [number, number, number],
+  };
   #events: HostEvents;
   #xr: WebXRDefaultExperience | null = null;
   /** The control under each pointer (mouse, each XR controller). */
@@ -262,6 +269,7 @@ export class BabylonLabScene {
     });
 
     scene.onAfterRenderObservable.add(() => {
+      this.#reportCameraFrame();
       const now = performance.now();
       recordFrame(this.#lastFrame === null ? null : now - this.#lastFrame);
       this.#lastFrame = now;
@@ -275,6 +283,31 @@ export class BabylonLabScene {
 
   setEvents(events: HostEvents) {
     this.#events = events;
+  }
+
+  /** Receives the final camera of every rendered frame (see HostCameraFrame). */
+  setCameraFrameListener(listener: ((frame: HostCameraFrame) => void) | null) {
+    this.#cameraFrameListener = listener;
+  }
+
+  #reportCameraFrame() {
+    const listener = this.#cameraFrameListener;
+    const camera = this.#scene.activeCamera;
+    if (!listener || !camera) return;
+    const rect = this.#canvas.getBoundingClientRect();
+    const frame = this.#cameraFrame;
+    // Babylon stores matrices for row vectors, which is the same memory
+    // layout as column-major matrices for column vectors (WebGL convention).
+    frame.viewProjection = this.#scene.getTransformMatrix().m;
+    frame.viewport.left = rect.left;
+    frame.viewport.top = rect.top;
+    frame.viewport.width = rect.width;
+    frame.viewport.height = rect.height;
+    const eye = camera.globalPosition;
+    frame.eye[0] = eye.x;
+    frame.eye[1] = eye.y;
+    frame.eye[2] = eye.z;
+    listener(frame);
   }
 
   /** Reconciles the scene with the given panels. */
@@ -520,6 +553,22 @@ export class BabylonLabScene {
       const height = this.#engine.getRenderHeight();
       const projected = Vector3.Project(
         world,
+        Matrix.Identity(),
+        this.#scene.getTransformMatrix(),
+        this.#camera.viewport.toGlobal(width, height),
+      );
+      if (projected.z < 0 || projected.z > 1) return null;
+      const rect = this.#canvas.getBoundingClientRect();
+      return {
+        x: rect.left + (projected.x * rect.width) / width,
+        y: rect.top + (projected.y * rect.height) / height,
+      };
+    };
+    probe.project = ([x, y, z]) => {
+      const width = this.#engine.getRenderWidth();
+      const height = this.#engine.getRenderHeight();
+      const projected = Vector3.Project(
+        new Vector3(x, y, z),
         Matrix.Identity(),
         this.#scene.getTransformMatrix(),
         this.#camera.viewport.toGlobal(width, height),

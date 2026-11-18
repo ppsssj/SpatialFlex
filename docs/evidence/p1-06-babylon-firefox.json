@@ -1,0 +1,32 @@
+{
+  "engine": "babylon",
+  "browser": "firefox",
+  "context": "same-document",
+  "flow": "select → extract (reserve) → 3D +1 → restore; chart keep-original; image reserve + 3D Next + 3D close",
+  "sourceFootprint": {
+    "before": {
+      "left": 14,
+      "top": 80,
+      "width": 264,
+      "height": 120
+    },
+    "during": {
+      "left": 14,
+      "top": 80,
+      "width": 264,
+      "height": 120
+    }
+  },
+  "neighborLayout": {
+    "left": 290,
+    "top": 80,
+    "width": 178,
+    "height": 120
+  },
+  "incrementCalls": 2,
+  "counterMounts": "1",
+  "counterInstances": "1",
+  "activeSubscriptions": "6",
+  "totalSubscribes": "6",
+  "liveTexturesAfterRestore": 0
+}

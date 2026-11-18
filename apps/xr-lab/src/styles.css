@@ -211,3 +211,144 @@ html.xr-iframe-document,
 .xr-iframe-document #root > button {
   align-self: flex-start;
 }
+
+/* P1-06 spatial website. Inactive wrappers are plain blocks: no styles. */
+.lab[data-surface="website"] .lab-left {
+  width: 320px;
+}
+.web-surface-layer[data-active] {
+  position: fixed;
+  z-index: 5;
+  overflow: hidden;
+  /* Only the page itself takes input; the rest reaches the 3D canvas. */
+  pointer-events: none;
+}
+.web-surface-layer[data-active] .web-surface-page {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  transform-origin: 0 0;
+  pointer-events: auto;
+  overflow: hidden;
+  background: #fff;
+  border: 2px solid #24292f;
+  border-radius: 10px;
+}
+.web-surface-chrome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 6px 10px;
+  background: #24292f;
+  color: #f6f8fa;
+  font-size: 0.8125rem;
+}
+.web-surface-chrome label {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+.web-surface-badge {
+  color: #4ac26b;
+  font-weight: 600;
+}
+.web-surface-message {
+  flex-basis: 100%;
+  color: #d0d7de;
+}
+.web-surface-layer[data-active] .web-surface-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 14px;
+}
+.web-surface-content[inert] {
+  opacity: 0.8;
+}
+.web-surface-corner {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.web-surface-corner[data-surface-corner="tl"] {
+  left: 0;
+  top: 0;
+}
+.web-surface-corner[data-surface-corner="tr"] {
+  right: 0;
+  top: 0;
+}
+.web-surface-corner[data-surface-corner="bl"] {
+  left: 0;
+  bottom: 0;
+}
+.web-surface-corner[data-surface-corner="br"] {
+  right: 0;
+  bottom: 0;
+}
+.surface-shield {
+  position: absolute;
+  left: 0;
+  top: 0;
+  cursor: not-allowed;
+}
+.surface-outline {
+  position: absolute;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 2px dashed #8c959f;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+}
+div.surface-outline {
+  pointer-events: none;
+}
+button.surface-outline {
+  cursor: pointer;
+}
+.surface-outline[data-hovered] {
+  border: 2px solid #0969da;
+  background: #0969da1f;
+}
+.surface-outline[data-extracted] {
+  border: 2px dashed #8250df;
+  background: #8250df14;
+}
+.surface-outline[data-selected] {
+  border: 3px solid #0969da;
+  box-shadow: 0 0 0 3px #0969da55;
+}
+.surface-outline[data-unsupported] {
+  border-color: #cf222e;
+}
+.surface-outline-label {
+  position: absolute;
+  left: -2px;
+  bottom: 100%;
+  padding: 1px 6px;
+  border-radius: 4px 4px 0 0;
+  background: #0969da;
+  color: #fff;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.surface-outline[data-extracted] .surface-outline-label {
+  background: #8250df;
+}
+.surface-pose-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.surface-extractions {
+  padding-left: 18px;
+  font-size: 0.875rem;
+}
