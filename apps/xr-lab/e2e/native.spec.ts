@@ -75,24 +75,45 @@ const design = (page: Page) =>
     )!;
     const pick = (el: Element) => {
       const s = getComputedStyle(el);
-      return [
-        s.fontFamily,
-        s.fontSize,
-        s.fontWeight,
-        s.color,
-        s.backgroundColor,
-        s.borderTopWidth,
-        s.borderTopStyle,
-        s.borderRadius,
-        s.paddingTop,
-        s.paddingLeft,
-        s.width,
-      ].join("|");
+      return (
+        [
+          s.fontFamily,
+          s.fontSize,
+          s.fontWeight,
+          s.color,
+          s.backgroundColor,
+          s.borderTopWidth,
+          s.borderTopStyle,
+          s.borderRadius,
+          s.paddingTop,
+          s.paddingLeft,
+          // Widths are compared numerically: computed-style serialization
+          // rounds to 0.001px while Chromium lays out in 1/64px units.
+          s.width === "auto" ? "auto" : "px",
+        ].join("|") + `|${s.width === "auto" ? "" : parseFloat(s.width)}`
+      );
     };
     return ["article", "h3", "output", "article button", "input"].map((sel) =>
       pick(item.querySelector(sel)!),
     );
   });
+
+/** Same design: identical styles, widths within one 1/64px layout unit. */
+function expectSameDesign(actual: string[], expected: string[]) {
+  expect(actual.length).toBe(expected.length);
+  actual.forEach((value, i) => {
+    const [styles, width] = [
+      value.slice(0, value.lastIndexOf("|")),
+      value.slice(value.lastIndexOf("|") + 1),
+    ];
+    const other = expected[i]!;
+    expect(styles).toBe(other.slice(0, other.lastIndexOf("|")));
+    const w = other.slice(other.lastIndexOf("|") + 1);
+    if (w === "") expect(width).toBe("");
+    else
+      expect(Math.abs(Number(width) - Number(w))).toBeLessThanOrEqual(1 / 64);
+  });
+}
 
 async function diagnostics(page: Page) {
   const subs = page.getByTestId("active-subscriptions");
@@ -275,7 +296,7 @@ for (const engine of ENGINES) {
     // The same nodes, one instance, the same React lifecycle and design.
     expect(await sameNodes(page)).toBe(true);
     expect(await diagnostics(page)).toEqual(before);
-    expect(await design(page)).toEqual(styles);
+    expectSameDesign(await design(page), styles);
     await expect(
       page.getByTestId("surface-extraction-shared-counter"),
     ).toContainText("Native DOM (the original element), native-");
@@ -345,7 +366,7 @@ for (const engine of ENGINES) {
       ),
     ).toBe("");
     expect(await layoutBox(page, "shared-counter")).toEqual(source);
-    expect(await design(page)).toEqual(styles);
+    expectSameDesign(await design(page), styles);
     await expect(surface(page).getByTestId("counter-note")).toHaveValue(
       "typed in space",
     );

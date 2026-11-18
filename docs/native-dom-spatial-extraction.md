@@ -57,7 +57,7 @@ Clipping:
 
 - The node never changes parent: the E2E compares retained element references for the article, button, input and local button before, during and after extraction, and checks that exactly one `web-count` exists.
 - React state, context and subscriptions are untouched. The fixture's diagnostics show React effect mounts 1, active instances 1, and active and cumulative subscriptions unchanged.
-- The design is unchanged: computed font, color, background, border, radius, padding and width are identical before, during and after extraction. The content keeps its fractional original width because the panel uses `content-box` with the measured layout width.
+- The design is unchanged: computed font, color, background, border, radius, padding and width are identical before, during and after extraction (widths within one 1/64px layout unit, the precision of Chromium layout and of computed-style serialization). The content keeps its fractional original width because the panel uses `content-box` with the measured layout width.
 
 ## 3. SDK API
 
@@ -145,7 +145,7 @@ Records: `evidence/p1-06a-{three,babylon}-{chromium,firefox}.json`.
 
 **Browser tests** (`apps/xr-lab/e2e/native.spec.ts`, 7 scenarios × Chromium and Firefox):
 
-1. Native extraction for both engines: same nodes and one instance; unchanged mounts, instances and subscriptions; identical computed design; reserved footprint and unchanged neighbor; placement within 2 px of the renderer's own projection of the world pose; outside the surface's area; real `+1`, local button, keyboard typing and focus; orbit, reset and two viewport sizes; restore with identity, design, layout and state preserved.
+1. Native extraction for both engines: same nodes and one instance; unchanged mounts, instances and subscriptions; identical computed design (widths within 1/64px); reserved footprint and unchanged neighbor; placement within 2 px of the renderer's own projection of the world pose; outside the surface's area; real `+1`, local button, keyboard typing and focus; orbit, reset and two viewport sizes; restore with identity, design, layout and state preserved.
 2. Native ↔ Adaptive on the same Counter for both engines: unsupported options are disabled with reasons; the adaptive 3D `+1` runs exactly once; a side-by-side comparison; identity and diagnostics are preserved.
 3. Native + Collapse: the source becomes `display: contents`, neighbors reflow, and restore returns the exact layout.
 4. Depth: in front of the page, the panel is hit-tested and typed into over the page; behind it, the page covers it.
