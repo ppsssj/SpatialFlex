@@ -12,6 +12,9 @@ import type { ComponentType } from "react";
 /** Position in meters, world space: y up, -z forward (right-handed). */
 export type Vec3 = readonly [x: number, y: number, z: number];
 
+/** Unit quaternion `[x, y, z, w]`. */
+export type Quat = readonly [x: number, y: number, z: number, w: number];
+
 /** What a panel shows. A small, generic vocabulary drawn by every host. */
 export type HostPanelBody =
   | { readonly kind: "value"; readonly label: string; readonly value: string }
@@ -38,6 +41,10 @@ export interface HostPanel {
   readonly title: string;
   /** Center of the panel, in meters. */
   readonly position: Vec3;
+  /** Orientation; identity (facing +z) when absent. */
+  readonly rotation?: Quat;
+  /** Uniform spatial scale of the panel; 1 when absent. */
+  readonly scale?: number;
   readonly body: HostPanelBody;
   readonly buttons: readonly HostButton[];
   readonly selected: boolean;
@@ -75,6 +82,43 @@ export interface HostCameraFrame {
   readonly eye: Vec3;
 }
 
+export type HostManipulationMode = "translate" | "rotate" | "resize";
+
+/** A world-space pointing ray (meters). */
+export interface HostRay {
+  readonly origin: Vec3;
+  readonly direction: Vec3;
+}
+
+/**
+ * Spatial panel manipulation, renderer-neutral. A host draws handles on the
+ * listed panels and reports input as world rays; it never changes a panel's
+ * pose itself (the poses come back through {@link HostPanel}). While a
+ * manipulation is in progress the host suspends its own camera controls.
+ */
+export interface HostManipulation {
+  /** Panels that show manipulation handles. */
+  readonly panels: readonly string[];
+  /** The handle in use, for feedback. */
+  readonly active: {
+    readonly panelId: string;
+    readonly mode: HostManipulationMode;
+  } | null;
+  /**
+   * A handle was pressed. Returns a session token if a manipulation began;
+   * the host then reports that pointer's rays until it is released.
+   */
+  begin(
+    panelId: string,
+    mode: HostManipulationMode,
+    pointerId: number,
+    ray: HostRay,
+  ): number | null;
+  update(token: number, ray: HostRay): void;
+  /** Release (`commit`) or cancel (Escape, pointercancel, blur, unmount). */
+  end(token: number, commit: boolean): void;
+}
+
 export interface XRHostProps extends HostEvents {
   /** Parent-only registration epochs; never part of serialized HostPanel data. */
   readonly actionOwners?: Readonly<Record<string, string>>;
@@ -86,6 +130,8 @@ export interface XRHostProps extends HostEvents {
    * the host's own document and realm.
    */
   readonly onCameraFrame?: (frame: HostCameraFrame) => void;
+  /** Spatial manipulation handles and input; absent: no handles. */
+  readonly manipulation?: HostManipulation;
 }
 
 export type EngineId = "three" | "babylon";
@@ -130,6 +176,8 @@ export interface PanelPart {
   readonly height: number;
   readonly label?: string;
   readonly buttonId?: string;
+  /** Manipulation handle (part `handle:<mode>`). */
+  readonly handle?: HostManipulationMode;
 }
 
 /** Where every part of a panel goes. Shared so all hosts lay out alike. */
@@ -165,3 +213,43 @@ export function panelLayout(panel: HostPanel): readonly PanelPart[] {
     },
   ];
 }
+
+export const HANDLE_SIZE = { width: 0.16, height: 0.05 } as const;
+
+/**
+ * Manipulation handles of a panel, in its local coordinates: a row below
+ * the panel, outside its face, so they never overlap the panel's buttons
+ * or close control. Shared so every host lays them out alike.
+ */
+export function handleLayout(): readonly PanelPart[] {
+  const y = -PANEL_SIZE.height / 2 - HANDLE_SIZE.height / 2 - 0.02;
+  const spacing = HANDLE_SIZE.width + 0.03;
+  return (
+    [
+      ["rotate", "Rotate", -spacing],
+      ["translate", "Move", 0],
+      ["resize", "Resize", spacing],
+    ] as const
+  ).map(([handle, label, x]) => ({
+    part: `handle:${handle}`,
+    center: [x, y, 0] as Vec3,
+    width: HANDLE_SIZE.width,
+    height: HANDLE_SIZE.height,
+    label,
+    handle,
+  }));
+}
+
+/**
+ * Local bounds (meters) of a panel together with its handle row, for hosts
+ * and compositors that need the full footprint of a manipulable panel.
+ */
+export const HANDLED_PANEL_BOUNDS = (() => {
+  const top = PANEL_SIZE.height / 2;
+  const bottom = -PANEL_SIZE.height / 2 - 0.02 - HANDLE_SIZE.height;
+  return {
+    center: [0, (top + bottom) / 2, 0] as Vec3,
+    width: PANEL_SIZE.width,
+    height: top - bottom,
+  };
+})();

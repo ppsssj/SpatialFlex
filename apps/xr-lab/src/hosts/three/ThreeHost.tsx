@@ -1,16 +1,33 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import {
+  Canvas,
+  useFrame,
+  useThree,
+  type ThreeEvent,
+} from "@react-three/fiber";
 import { createXRStore, XR, type XRStore } from "@react-three/xr";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Matrix4, Mesh, Vector3, type PerspectiveCamera } from "three";
+import {
+  Matrix4,
+  Mesh,
+  Raycaster,
+  Vector2,
+  Vector3,
+  type PerspectiveCamera,
+  type Ray,
+} from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { getProbe, hostMounted, recordFrame } from "../../contracts/hostProbe";
 import {
   CAMERA,
   type HostCameraFrame,
+  type HostManipulation,
+  type HostManipulationMode,
   type HostPanel,
+  type HostRay,
   type XRHostProps,
 } from "../../contracts/xrHost";
 import { describeError, HostToolbar } from "../shared/HostToolbar";
+import { trackManipulationPointer } from "../shared/manipulationPointer";
 import { useXRAvailability } from "../shared/useXRAvailability";
 import { Panel3D } from "./Panel3D";
 
@@ -36,7 +53,12 @@ function createHostXRStore() {
  * WebXR session through @react-three/xr. Depends only on the neutral host
  * contract.
  */
-export function ThreeHost({ panels, onCameraFrame, ...events }: XRHostProps) {
+export function ThreeHost({
+  panels,
+  onCameraFrame,
+  manipulation,
+  ...events
+}: XRHostProps) {
   const [store] = useState(createHostXRStore);
   useEffect(() => () => store.destroy(), [store]);
   useEffect(() => hostMounted("three"), []);
@@ -80,6 +102,7 @@ export function ThreeHost({ panels, onCameraFrame, ...events }: XRHostProps) {
           store={store}
           panels={panels}
           events={events}
+          manipulation={sessionMode ? undefined : manipulation}
           sessionMode={sessionMode}
           viewKey={viewKey}
         />
@@ -89,19 +112,76 @@ export function ThreeHost({ panels, onCameraFrame, ...events }: XRHostProps) {
   );
 }
 
+const rayOf = (ray: Ray): HostRay => ({
+  origin: [ray.origin.x, ray.origin.y, ray.origin.z],
+  direction: [ray.direction.x, ray.direction.y, ray.direction.z],
+});
+
+/** Starts a manipulation from a handle press; see {@link HostManipulation}. */
+export type HandleDown = (
+  panelId: string,
+  mode: HostManipulationMode,
+  event: ThreeEvent<PointerEvent>,
+) => void;
+
 function Scene({
   store,
   panels,
   events,
+  manipulation,
   sessionMode,
   viewKey,
 }: {
   store: XRStore;
   panels: readonly HostPanel[];
-  events: Omit<XRHostProps, "panels">;
+  events: Omit<XRHostProps, "panels" | "manipulation">;
+  manipulation: HostManipulation | undefined;
   sessionMode: string | null;
   viewKey: number;
 }) {
+  const { camera, gl } = useThree();
+  const controlsRef = useRef<OrbitControls | null>(null);
+  // The pointer session in progress; cancelled if the scene unmounts.
+  const dragRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => dragRef.current?.(), []);
+  const onHandleDown: HandleDown = (panelId, mode, event) => {
+    event.stopPropagation();
+    if (!manipulation || event.button !== 0 || dragRef.current) return;
+    const token = manipulation.begin(
+      panelId,
+      mode,
+      event.pointerId,
+      rayOf(event.ray),
+    );
+    if (token === null) return;
+    // OrbitControls already saw this press; with `enabled` false it ignores
+    // the moves until the release (even after Escape ends the session), and
+    // its own release handling still cleans up. (R3F's listeners are
+    // passive: no preventDefault here.)
+    const controls = controlsRef.current;
+    if (controls) controls.enabled = false;
+    const raycaster = new Raycaster();
+    const ndc = new Vector2();
+    dragRef.current = trackManipulationPointer({
+      token,
+      pointerId: event.pointerId,
+      manipulation,
+      toRay: (x, y) => {
+        const rect = gl.domElement.getBoundingClientRect();
+        ndc.set(
+          ((x - rect.left) / rect.width) * 2 - 1,
+          -((y - rect.top) / rect.height) * 2 + 1,
+        );
+        raycaster.setFromCamera(ndc, camera);
+        return rayOf(raycaster.ray);
+      },
+      onRelease: () => {
+        dragRef.current = null;
+        if (controls) controls.enabled = true;
+      },
+    });
+  };
+  const handles = manipulation ? new Set(manipulation.panels) : null;
   return (
     <XR store={store}>
       <color attach="background" args={["#dde3ea"]} />
@@ -116,9 +196,28 @@ function Scene({
         position={[0, 0.001, 0]}
       />
       {panels.map((panel) => (
-        <Panel3D key={panel.id} panel={panel} events={events} />
+        <Panel3D
+          key={panel.id}
+          panel={panel}
+          events={events}
+          handles={
+            handles?.has(panel.id)
+              ? {
+                  active:
+                    manipulation?.active?.panelId === panel.id
+                      ? manipulation.active.mode
+                      : null,
+                  onDown: onHandleDown,
+                }
+              : null
+          }
+        />
       ))}
-      <DesktopControls enabled={!sessionMode} resetKey={viewKey} />
+      <DesktopControls
+        enabled={!sessionMode}
+        resetKey={viewKey}
+        controlsRef={controlsRef}
+      />
       <ProbeBinder panels={panels} sessionMode={sessionMode} />
     </XR>
   );
@@ -128,9 +227,11 @@ function Scene({
 function DesktopControls({
   enabled,
   resetKey,
+  controlsRef,
 }: {
   enabled: boolean;
   resetKey: number;
+  controlsRef: { current: OrbitControls | null };
 }) {
   const { camera, gl } = useThree();
   useEffect(() => {
@@ -139,8 +240,12 @@ function DesktopControls({
     const controls = new OrbitControls(camera, gl.domElement);
     controls.target.set(...CAMERA.target);
     controls.update();
-    return () => controls.dispose();
-  }, [camera, gl, enabled, resetKey]);
+    controlsRef.current = controls;
+    return () => {
+      controls.dispose();
+      if (controlsRef.current === controls) controlsRef.current = null;
+    };
+  }, [camera, gl, enabled, resetKey, controlsRef]);
   return null;
 }
 

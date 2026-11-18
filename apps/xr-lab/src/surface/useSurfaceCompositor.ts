@@ -1,18 +1,24 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
+  HANDLED_PANEL_BOUNDS,
   PANEL_SIZE,
   type HostCameraFrame,
   type HostPanel,
+  type HostRay,
+  type Quat,
   type Vec3,
 } from "../contracts/xrHost";
 import { DEFAULT_SURFACE_POSE, SURFACE_RESOLUTION } from "./surfaceConfig";
 import {
+  eulerFromQuaternion,
   nativePanelTransform,
   occlusionClipPath,
   pageClipPath,
   planeVisibility,
   surfaceMatrix,
   surfaceQuad,
+  transformedQuad,
+  viewportRay,
   type Occluder,
   type SpatialWebSurfacePose,
   type SurfaceVisibility,
@@ -30,6 +36,18 @@ export interface NativeAnchor {
 
 /** Resolves a natively extracted id to its original element. */
 export type NativeResolver = (id: string) => HTMLElement | null;
+
+/**
+ * Manipulated pose of an item's presentation (Native DOM element or XR
+ * panel), read every frame: poses change without React renders.
+ */
+export type PoseResolver = (
+  id: string,
+) =>
+  | { readonly position: Vec3; readonly rotation: Quat; readonly scale: number }
+  | undefined;
+
+const noPose: PoseResolver = () => undefined;
 
 interface Written {
   transform: string;
@@ -64,6 +82,7 @@ export function useSurfaceCompositor(
   panels: readonly HostPanel[],
   nativeIds: readonly string[],
   resolveNative: NativeResolver,
+  poseOf: PoseResolver = noPose,
 ) {
   const layerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
@@ -74,9 +93,16 @@ export function useSurfaceCompositor(
   );
   const state = useRef({
     pose,
-    occluders: [] as Occluder[],
+    panels: [] as readonly HostPanel[],
     natives: [] as string[],
     resolve: (() => null) as NativeResolver,
+    poseOf: noPose,
+    /** Copy of the last camera frame (hosts reuse their frame objects). */
+    camera: null as {
+      viewProjection: number[];
+      viewport: { left: number; top: number; width: number; height: number };
+      eye: [number, number, number];
+    } | null,
     anchors: new Map() as ReadonlyMap<string, NativeAnchor>,
     written: new Map<HTMLElement, Written>(),
     border: 0,
@@ -93,12 +119,11 @@ export function useSurfaceCompositor(
     state.current.anchors = anchors;
   }, [anchors]);
   useLayoutEffect(() => {
-    state.current.occluders = panels.map((panel) => ({
-      center: panel.position,
-      width: PANEL_SIZE.width,
-      height: PANEL_SIZE.height,
-    }));
+    state.current.panels = panels;
   }, [panels]);
+  useLayoutEffect(() => {
+    state.current.poseOf = poseOf;
+  }, [poseOf]);
 
   // Release elements that are no longer natively extracted (restore,
   // unmount): before paint, so a restored element is never drawn with a
@@ -156,6 +181,37 @@ export function useSurfaceCompositor(
     if (!layer || !page) return;
     const s = state.current;
     const { left, top, width, height } = frame.viewport;
+    // Copied into one reused buffer: hosts reuse their frame objects.
+    const camera = (s.camera ??= {
+      viewProjection: new Array<number>(16).fill(0),
+      viewport: { left: 0, top: 0, width: 0, height: 0 },
+      eye: [0, 0, 0],
+    });
+    for (let i = 0; i < 16; i++)
+      camera.viewProjection[i] = frame.viewProjection[i]!;
+    Object.assign(camera.viewport, frame.viewport);
+    camera.eye[0] = frame.eye[0];
+    camera.eye[1] = frame.eye[1];
+    camera.eye[2] = frame.eye[2];
+    // XR panels in front of the page (or of a native element) cut it out,
+    // at their current (possibly manipulated) pose.
+    const occluders: Occluder[] = s.panels.map((panel) => {
+      const p = s.poseOf(panel.id);
+      // A manipulable panel also shows its handle row below its face.
+      return p
+        ? transformedQuad(
+            p.position,
+            p.rotation,
+            HANDLED_PANEL_BOUNDS.width * p.scale,
+            HANDLED_PANEL_BOUNDS.height * p.scale,
+            [0, HANDLED_PANEL_BOUNDS.center[1] * p.scale, 0],
+          )
+        : {
+            center: panel.position,
+            width: PANEL_SIZE.width,
+            height: PANEL_SIZE.height,
+          };
+    });
     const layerKey = `${left},${top},${width},${height}`;
     if (layerKey !== s.layer) {
       // The layer covers exactly the canvas, clipping the page to it.
@@ -191,12 +247,18 @@ export function useSurfaceCompositor(
         pose: "",
       };
       s.written.set(element, written);
+      // The manipulated pose, once the manipulator owns it; until then the
+      // extraction anchor. Scale is spatial: the element's CSS layout size
+      // (w × h) is unchanged, only its world size.
+      const manipulated = s.poseOf(id);
       const panelPose: SpatialWebSurfacePose | null = anchor
         ? {
-            position: anchor.position,
-            rotation: anchor.rotation,
-            width: w * anchor.metersPerPixel,
-            height: h * anchor.metersPerPixel,
+            position: manipulated?.position ?? anchor.position,
+            rotation: manipulated
+              ? eulerFromQuaternion(manipulated.rotation)
+              : anchor.rotation,
+            width: w * anchor.metersPerPixel * (manipulated?.scale ?? 1),
+            height: h * anchor.metersPerPixel * (manipulated?.scale ?? 1),
           }
         : null;
       const placed =
@@ -224,8 +286,8 @@ export function useSurfaceCompositor(
           panelPose!,
           { width: w, height: h },
           placed.behindPage
-            ? [...s.occluders, surfaceQuad(s.pose, SURFACE_RESOLUTION)]
-            : s.occluders,
+            ? [...occluders, surfaceQuad(s.pose, SURFACE_RESOLUTION)]
+            : occluders,
         );
         if (clip !== written.clip) {
           element.style.clipPath = clip;
@@ -253,7 +315,7 @@ export function useSurfaceCompositor(
         frame,
         s.pose,
         SURFACE_RESOLUTION,
-        s.occluders,
+        occluders,
         keep,
       );
       if (clip !== s.clip) {
@@ -267,6 +329,14 @@ export function useSurfaceCompositor(
       s.visibility = visibility;
       setStatus(visibility);
     }
+  }, []);
+
+  /** World ray under a client point, from the last rendered camera. */
+  const rayAt = useCallback((clientX: number, clientY: number) => {
+    const camera = state.current.camera;
+    return camera
+      ? (viewportRay(camera, clientX, clientY) as HostRay | null)
+      : null;
   }, []);
 
   const placeNative = useCallback((id: string, anchor: NativeAnchor) => {
@@ -290,6 +360,7 @@ export function useSurfaceCompositor(
     onCameraFrame,
     anchors,
     placeNative,
+    rayAt,
   };
 }
 

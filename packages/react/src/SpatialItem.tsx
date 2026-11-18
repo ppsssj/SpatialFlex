@@ -319,8 +319,13 @@ export function SpatialItem({
           <div
             data-spatialflex-panel-bar=""
             data-movable={movable}
+            // Externally placed: the bar is the spatial grab handle, bound
+            // by the compositor that owns the placement (not dragged here).
+            data-spatialflex-handle={externallyPlaced ? "translate" : undefined}
             style={
-              movable ? { touchAction: "none", cursor: "move" } : undefined
+              movable || externallyPlaced
+                ? { touchAction: "none", cursor: "move" }
+                : undefined
             }
             onPointerDown={startDrag}
             onPointerMove={onPointerMove}
@@ -328,7 +333,21 @@ export function SpatialItem({
             onPointerCancel={end}
             onLostPointerCapture={end}
           >
-            <span>{title}</span>
+            {externallyPlaced ? (
+              <span {...handleProps("translate", `Move ${title} in space`)}>
+                {title}
+              </span>
+            ) : (
+              <span>{title}</span>
+            )}
+            {externallyPlaced ? (
+              <span
+                {...handleProps("rotate", `Rotate ${title} in space`)}
+                style={{ cursor: "ew-resize", touchAction: "none" }}
+              >
+                ⟲
+              </span>
+            ) : null}
             <button type="button" onClick={() => controller.attach(id)}>
               Attach
             </button>
@@ -355,7 +374,37 @@ export function SpatialItem({
             onLostPointerCapture={end}
           />
         ) : null}
+        {externallyPlaced ? (
+          <span
+            {...handleProps("resize", `Resize ${title} in space`)}
+            style={{
+              position: "absolute",
+              right: 0,
+              bottom: 0,
+              width: 18,
+              height: 18,
+              cursor: "nwse-resize",
+              touchAction: "none",
+            }}
+          />
+        ) : null}
       </div>
     </div>
   );
+}
+
+/**
+ * Spatial manipulation affordances of an externally placed panel. The SDK
+ * renders them; the compositor that owns the placement binds pointer and
+ * keyboard input to them (by `data-spatialflex-handle`), so this component
+ * never changes its own spatial pose. Focusable for keyboard manipulation.
+ */
+function handleProps(mode: "translate" | "rotate" | "resize", label: string) {
+  return {
+    "data-spatialflex-handle": mode,
+    role: "button",
+    tabIndex: 0,
+    "aria-label": label,
+    title: label,
+  } as const;
 }

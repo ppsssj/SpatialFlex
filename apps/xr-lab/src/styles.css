@@ -190,6 +190,44 @@ canvas.xr-host-canvas {
   background: #2f6fdf;
 }
 
+/* P1-06B spatial manipulation handles of an externally placed panel. */
+[data-spatialflex-handle] {
+  user-select: none;
+}
+[data-spatialflex-panel-bar] > [data-spatialflex-handle="translate"] {
+  flex: 1;
+}
+[data-spatialflex-handle="rotate"] {
+  padding: 0 8px;
+  border-radius: 4px;
+  background: #2f6fdf26;
+  font-weight: bold;
+}
+[data-spatialflex-handle="resize"] {
+  background: linear-gradient(135deg, transparent 50%, #2f6fdf 50%);
+  border-bottom-right-radius: 4px;
+}
+[data-spatialflex-handle]:focus-visible {
+  outline: 2px solid #d97706;
+  outline-offset: -2px;
+}
+/* Selected for manipulation; drawn inside the border box (never clipped). */
+[data-spatialflex-panel][data-manipulation-selected] {
+  outline: 3px solid #f59e0b;
+  outline-offset: -3px;
+}
+[data-spatialflex-panel][data-manipulating] {
+  border-color: #d97706;
+}
+.manipulation-targets {
+  padding-left: 1.2em;
+  line-height: 1.6;
+}
+.manipulation-targets li[data-selected] > button:first-child {
+  font-weight: bold;
+  outline: 2px solid #f59e0b;
+}
+
 /* The independent Host document has no .lab-right containing block. */
 html.xr-iframe-document,
 .xr-iframe-document body,

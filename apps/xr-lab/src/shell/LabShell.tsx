@@ -1,4 +1,5 @@
-import { useLayoutEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import { testHooksEnabled } from "../contracts/hostProbe";
 import type { HostModule } from "../contracts/xrHost";
 import { Dashboard, LabStoreContext, type LabStore } from "../fixtures";
 import type {
@@ -10,6 +11,9 @@ import { StrategyControls } from "./StrategyControls";
 import { SpatialWebSurface } from "../surface/SpatialWebSurface";
 import { SurfaceInspector } from "../surface/SurfaceInspector";
 import { useSurfaceCompositor } from "../surface/useSurfaceCompositor";
+import { ManipulatedHost } from "../manipulation/ManipulatedHost";
+import { ManipulationInspector } from "../manipulation/ManipulationInspector";
+import { useNativeHandles } from "../manipulation/useNativeHandles";
 
 const noElement = () => null;
 
@@ -84,12 +88,39 @@ function ShellLayout({
     .filter((item) => item.extraction?.presentation === "native")
     .map((item) => item.id);
   const nativeIds = JSON.stringify(nativeList);
+  const manipulation = lab.manipulation;
   const surface = useSurfaceCompositor(
     surfaceActive,
     lab.panels,
     nativeList,
     lab.nativeElement ?? noElement,
+    manipulation?.poseOf,
   );
+  // Native DOM handles feed the same manipulation controller as 3D handles.
+  useNativeHandles(
+    surfaceActive ? manipulation : undefined,
+    nativeList,
+    lab.nativeElement ?? noElement,
+    surface.rayAt,
+  );
+  // Read-only test hook: poses and sessions, never a way to change them.
+  useEffect(() => {
+    if (!testHooksEnabled || !manipulation) return;
+    const target = window as unknown as {
+      __xrLabManipulation?: Pick<
+        typeof manipulation,
+        "targets" | "getSnapshot" | "poseOf"
+      >;
+    };
+    target.__xrLabManipulation = {
+      targets: manipulation.targets,
+      getSnapshot: manipulation.getSnapshot,
+      poseOf: manipulation.poseOf,
+    };
+    return () => {
+      delete target.__xrLabManipulation;
+    };
+  }, [manipulation]);
   // Without an active surface (mode off, workspace unmounted) there is no
   // compositor to place them: the originals return to their place.
   useLayoutEffect(() => {
@@ -121,12 +152,17 @@ function ShellLayout({
       <div className="lab-columns">
         <div className="lab-left">
           {website ? (
-            <SurfaceInspector
-              surface={surface}
-              lab={lab}
-              engine={host.id}
-              workspaceMounted={workspaceMounted}
-            />
+            <>
+              <SurfaceInspector
+                surface={surface}
+                lab={lab}
+                engine={host.id}
+                workspaceMounted={workspaceMounted}
+              />
+              {manipulation && (
+                <ManipulationInspector manipulation={manipulation} lab={lab} />
+              )}
+            </>
           ) : (
             lab.detach && <StrategyControls lab={lab} />
           )}
@@ -164,13 +200,19 @@ function ShellLayout({
             </span>
           </div>
           {workspaceMounted && (
-            <Host
-              {...(lab.actionOwners && { actionOwners: lab.actionOwners })}
-              panels={lab.panels}
-              onPanelButton={lab.onPanelButton}
-              onPanelSelect={lab.onPanelSelect}
-              onPanelClose={lab.onPanelClose}
-              {...(surfaceActive && { onCameraFrame: surface.onCameraFrame })}
+            <ManipulatedHost
+              Host={Host}
+              manipulation={manipulation}
+              // Handles on the Spatial Website only (desktop, same document).
+              handles={surfaceActive}
+              props={{
+                ...(lab.actionOwners && { actionOwners: lab.actionOwners }),
+                panels: lab.panels,
+                onPanelButton: lab.onPanelButton,
+                onPanelSelect: lab.onPanelSelect,
+                onPanelClose: lab.onPanelClose,
+                ...(surfaceActive && { onCameraFrame: surface.onCameraFrame }),
+              }}
             />
           )}
         </div>

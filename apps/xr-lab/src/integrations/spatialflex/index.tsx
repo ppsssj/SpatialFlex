@@ -19,10 +19,16 @@ import {
   validateDetachmentStrategy,
   validateSourceVisibility,
 } from "@spatialflex/core";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { PANEL_SIZE, type Vec3 } from "../../contracts/xrHost";
 import type { RenderWidget } from "../../fixtures";
+import { quaternionFromEuler } from "../../surface/surfaceMath";
 import { usePresentation } from "../common/presentation";
 import type { IntegrationModule, LabIntegration } from "../contract";
+import {
+  ManipulationAdapter,
+  type ManipulablePresentation,
+} from "./manipulation";
 
 // Generic translation only: no widget IDs, application state or action table.
 const renderWidget: RenderWidget = (id, widget, view) => (
@@ -47,8 +53,21 @@ function useSpatialFlexIntegration(): LabIntegration {
   const { presentation, show, hide, move, select } = usePresentation(available);
   const instances = useRef(new Map<string, string>());
   const [natives, setNatives] = useState<
-    ReadonlyMap<string, { source: "reserved" | "collapsed"; instance: string }>
+    ReadonlyMap<
+      string,
+      {
+        source: "reserved" | "collapsed";
+        instance: string;
+        /** Start pose and natural size of this Native DOM presentation. */
+        position: Vec3;
+        rotation: Vec3;
+        extent: { width: number; height: number };
+      }
+    >
   >(() => new Map());
+  // One manipulation target per presentation instance (P1-06B).
+  const [manipulation] = useState(() => new ManipulationAdapter());
+  useEffect(() => () => manipulation.dispose(), [manipulation]);
   const nativeGeneration = useRef(0);
   const generation = useRef(0);
   const [capturedInstances, setInstances] = useState<
@@ -154,8 +173,61 @@ function useSpatialFlexIntegration(): LabIntegration {
     }
     return endPresentation(id, view.registrationId);
   };
+  // Manipulable presentations: every live Native DOM extraction and every
+  // shown XR Adaptive panel, each with the pose it started from.
+  const manipulable: ManipulablePresentation[] = [
+    ...records.flatMap((record) => {
+      const native = nativeOf(record.id);
+      return native
+        ? [
+            {
+              itemId: record.id,
+              presentationId: native.instance,
+              registrationId:
+                registry.getView(record.id)?.registrationId ?? record.id,
+              kind: "native" as const,
+              initial: {
+                position: native.position,
+                rotation: quaternionFromEuler(native.rotation),
+                scale: 1,
+              },
+              extent: native.extent,
+            },
+          ]
+        : [];
+    }),
+    ...panels.flatMap((panel) => {
+      const view = views.find((v) => v.id === panel.id);
+      const instance = view && capturedInstances.get(view.registrationId);
+      return view && instance
+        ? [
+            {
+              itemId: panel.id,
+              presentationId: instance,
+              registrationId: view.registrationId,
+              kind: "adaptive" as const,
+              initial: {
+                position: panel.position,
+                rotation: [0, 0, 0, 1] as const,
+                scale: 1,
+              },
+              extent: PANEL_SIZE,
+            },
+          ]
+        : [];
+    }),
+  ];
+  // Synced whenever the set of instances or their layout placement changes:
+  // new instances are attached at their start pose, ended ones detached,
+  // and a moved placement shifts its instance. Manipulation itself never
+  // re-renders the integration.
+  const manipulableKey = JSON.stringify(manipulable);
+  useLayoutEffect(() => {
+    manipulation.sync(JSON.parse(manipulableKey) as ManipulablePresentation[]);
+  }, [manipulation, manipulableKey]);
   return {
     source: "SpatialFlex registry",
+    manipulation,
     validateStrategy: validateDetachmentStrategy,
     items: views.map((v) => ({
       id: v.id,
@@ -243,7 +315,16 @@ function useSpatialFlexIntegration(): LabIntegration {
     nativeElement: controller.nativeElement,
     validateSourceVisibility,
     sourceElement: controller.sourceElement,
-    extract(id, { presentation: requested = "adaptive", source, position }) {
+    extract(
+      id,
+      {
+        presentation: requested = "adaptive",
+        source,
+        position,
+        rotation,
+        extent,
+      },
+    ) {
       if (!registry.has(id)) return false;
       const request = assertExtraction(
         { presentation: requested, source },
@@ -265,6 +346,9 @@ function useSpatialFlexIntegration(): LabIntegration {
         const native = {
           source: request.source,
           instance: `native-${++nativeGeneration.current}`,
+          position: [position[0], position[1], position[2]] as Vec3,
+          rotation: [...(rotation ?? [0, 0, 0])] as unknown as Vec3,
+          extent: extent ?? PANEL_SIZE,
         };
         setNatives((current) => new Map(current).set(id, native));
         return true;
@@ -310,7 +394,10 @@ function useSpatialFlexIntegration(): LabIntegration {
     },
     onPanelSelect(id) {
       const view = currentPresentation(id);
-      if (view) select(view.registrationId);
+      if (view) {
+        select(view.registrationId);
+        manipulation.select(id);
+      }
     },
     onPanelClose(id) {
       const view = currentPresentation(id);

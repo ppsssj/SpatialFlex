@@ -7,7 +7,7 @@ import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { DynamicTexture } from "@babylonjs/core/Materials/Textures/dynamicTexture";
 import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
-import { Matrix, Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { Matrix, Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { CreateGround } from "@babylonjs/core/Meshes/Builders/groundBuilder";
 import { CreateLineSystem } from "@babylonjs/core/Meshes/Builders/linesBuilder";
 import { CreatePlane } from "@babylonjs/core/Meshes/Builders/planeBuilder";
@@ -30,12 +30,17 @@ import {
 } from "../../contracts/hostProbe";
 import {
   CAMERA,
+  handleLayout,
   panelLayout,
   type HostCameraFrame,
   type HostEvents,
+  type HostManipulation,
+  type HostManipulationMode,
   type HostPanel,
+  type HostRay,
   type PanelPart,
 } from "../../contracts/xrHost";
+import { trackManipulationPointer } from "../shared/manipulationPointer";
 import {
   describeBody,
   drawButtonFace,
@@ -48,6 +53,7 @@ interface PartMeta {
   panelId: string;
   part: string;
   buttonId?: string;
+  handle?: HostManipulationMode;
 }
 
 interface PartEntry {
@@ -56,6 +62,8 @@ interface PartEntry {
   texture: DynamicTexture;
   layout: PanelPart;
   hovered: boolean;
+  /** A manipulation handle in use. */
+  pressed: boolean;
 }
 
 interface PanelEntry {
@@ -92,6 +100,9 @@ export class BabylonLabScene {
     eye: [0, 0, 0] as [number, number, number],
   };
   #events: HostEvents;
+  #manipulation: HostManipulation | null = null;
+  /** The manipulation pointer session in progress (ends it when called). */
+  #drag: (() => void) | null = null;
   #xr: WebXRDefaultExperience | null = null;
   /** The control under each pointer (mouse, each XR controller). */
   readonly #hoveredBy = new Map<number, PartEntry>();
@@ -210,6 +221,12 @@ export class BabylonLabScene {
       if (info.type === PointerEventTypes.POINTERDOWN) {
         const mesh = info.pickInfo?.hit ? info.pickInfo.pickedMesh : null;
         const meta = metaOf(mesh);
+        if (mouse && meta?.handle) {
+          // A handle press starts a manipulation; it never activates.
+          mousePressed.delete(pointerId);
+          this.#beginManipulation(meta.panelId, meta.handle, pointer);
+          return;
+        }
         if (mouse) {
           mousePressed.delete(pointerId);
           if (mesh && meta)
@@ -268,6 +285,18 @@ export class BabylonLabScene {
       }
     });
 
+    // While a panel is manipulated the camera must not orbit or zoom: its
+    // pointer input never sees the moves (or wheel) of that drag. Presses
+    // and releases still reach it, so its own state stays consistent.
+    scene.onPrePointerObservable.add((info) => {
+      if (
+        this.#drag &&
+        (info.type === PointerEventTypes.POINTERMOVE ||
+          info.type === PointerEventTypes.POINTERWHEEL)
+      )
+        info.skipOnPointerObservable = true;
+    });
+
     scene.onAfterRenderObservable.add(() => {
       this.#reportCameraFrame();
       const now = performance.now();
@@ -283,6 +312,46 @@ export class BabylonLabScene {
 
   setEvents(events: HostEvents) {
     this.#events = events;
+  }
+
+  #rayAt(clientX: number, clientY: number): HostRay {
+    const rect = this.#canvas.getBoundingClientRect();
+    const ray = this.#scene.createPickingRay(
+      clientX - rect.left,
+      clientY - rect.top,
+      Matrix.Identity(),
+      this.#camera,
+    );
+    return {
+      origin: [ray.origin.x, ray.origin.y, ray.origin.z],
+      direction: [ray.direction.x, ray.direction.y, ray.direction.z],
+    };
+  }
+
+  #beginManipulation(
+    panelId: string,
+    mode: HostManipulationMode,
+    pointer: PointerEvent,
+  ) {
+    const manipulation = this.#manipulation;
+    if (!manipulation || pointer.button !== 0 || this.#drag) return;
+    const token = manipulation.begin(
+      panelId,
+      mode,
+      pointer.pointerId,
+      this.#rayAt(pointer.clientX, pointer.clientY),
+    );
+    if (token === null) return;
+    pointer.preventDefault();
+    this.#drag = trackManipulationPointer({
+      token,
+      pointerId: pointer.pointerId,
+      manipulation,
+      toRay: (x, y) => this.#rayAt(x, y),
+      onRelease: () => {
+        this.#drag = null;
+      },
+    });
   }
 
   /** Receives the final camera of every rendered frame (see HostCameraFrame). */
@@ -310,25 +379,44 @@ export class BabylonLabScene {
     listener(frame);
   }
 
-  /** Reconciles the scene with the given panels. */
-  setPanels(panels: readonly HostPanel[]) {
+  /** Reconciles the scene with the given panels and manipulation handles. */
+  setPanels(
+    panels: readonly HostPanel[],
+    manipulation: HostManipulation | null = null,
+  ) {
+    this.#manipulation = manipulation;
+    const handles = new Set(manipulation?.panels ?? []);
     const ids = new Set(panels.map((panel) => panel.id));
     for (const [id, entry] of this.#panels) {
       if (!ids.has(id)) this.#disposePanel(id, entry);
     }
     for (const panel of panels) {
-      const signature = panel.buttons
-        .map((b) => `${b.id}:${b.label}`)
-        .join("|");
+      const signature =
+        panel.buttons.map((b) => `${b.id}:${b.label}`).join("|") +
+        (handles.has(panel.id) ? "|handles" : "");
       let entry = this.#panels.get(panel.id);
       if (entry && entry.signature !== signature) {
         this.#disposePanel(panel.id, entry);
         entry = undefined;
       }
-      entry ??= this.#createPanel(panel, signature);
+      entry ??= this.#createPanel(panel, signature, handles.has(panel.id));
       const [x, y, z] = panel.position;
-      if (!entry.root.position.equalsToFloats(x, y, z)) {
+      const [qx, qy, qz, qw] = panel.rotation ?? [0, 0, 0, 1];
+      const scale = panel.scale ?? 1;
+      const rotation = entry.root.rotationQuaternion!;
+      if (
+        !entry.root.position.equalsToFloats(x, y, z) ||
+        !(
+          rotation.x === qx &&
+          rotation.y === qy &&
+          rotation.z === qz &&
+          rotation.w === qw
+        ) ||
+        !entry.root.scaling.equalsToFloats(scale, scale, scale)
+      ) {
         entry.root.position.set(x, y, z);
+        rotation.set(qx, qy, qz, qw);
+        entry.root.scaling.setAll(scale);
         // Babylon caches world matrices until the next render. Refresh them
         // now so picking and probes use the new position immediately.
         entry.root.computeWorldMatrix(true);
@@ -362,6 +450,16 @@ export class BabylonLabScene {
         };
         recordDrawn(panel.id, describeBody(panel.body));
       }
+      for (const part of entry.parts.values()) {
+        if (!part.layout.handle) continue;
+        const pressed =
+          manipulation?.active?.panelId === panel.id &&
+          manipulation.active.mode === part.layout.handle;
+        if (pressed !== part.pressed) {
+          part.pressed = pressed;
+          this.#drawControl(part);
+        }
+      }
     }
     getProbe().panels = panels.map((panel) => panel.id);
   }
@@ -390,6 +488,7 @@ export class BabylonLabScene {
   dispose() {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#drag?.();
     this.#disconnectPointerLifecycle();
     this.#resizeObserver.disconnect();
     for (const [id, entry] of this.#panels) this.#disposePanel(id, entry);
@@ -442,10 +541,18 @@ export class BabylonLabScene {
     return xr;
   }
 
-  #createPanel(panel: HostPanel, signature: string): PanelEntry {
+  #createPanel(
+    panel: HostPanel,
+    signature: string,
+    handles: boolean,
+  ): PanelEntry {
     const root = new TransformNode(`panel:${panel.id}`, this.#scene);
+    root.rotationQuaternion = Quaternion.Identity();
     const parts = new Map<string, PartEntry>();
-    for (const layout of panelLayout(panel)) {
+    for (const layout of [
+      ...panelLayout(panel),
+      ...(handles ? handleLayout() : []),
+    ]) {
       const mesh = CreatePlane(
         `${panel.id}:${layout.part}`,
         { width: layout.width, height: layout.height },
@@ -460,6 +567,7 @@ export class BabylonLabScene {
         panelId: panel.id,
         part: layout.part,
         ...(layout.buttonId && { buttonId: layout.buttonId }),
+        ...(layout.handle && { handle: layout.handle }),
       };
       mesh.metadata = meta;
       // Hover feedback: Babylon picks on pointer move only for meshes that
@@ -489,6 +597,7 @@ export class BabylonLabScene {
         texture,
         layout,
         hovered: false,
+        pressed: false,
       };
       if (layout.part !== "background") this.#drawControl(entry);
       parts.set(layout.part, entry);
@@ -502,7 +611,13 @@ export class BabylonLabScene {
     const ctx =
       entry.texture.getContext() as unknown as CanvasRenderingContext2D;
     const { width, height } = entry.texture.getSize();
-    drawButtonFace(ctx, width, height, entry.layout.label ?? "", entry.hovered);
+    drawButtonFace(
+      ctx,
+      width,
+      height,
+      entry.layout.label ?? "",
+      entry.hovered || entry.pressed,
+    );
     entry.texture.update();
   }
 
