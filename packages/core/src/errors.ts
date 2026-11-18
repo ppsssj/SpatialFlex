@@ -1,4 +1,5 @@
 export type SpatialFlexErrorCode =
+  | "UNSUPPORTED_STRATEGY"
   | "INVALID_ITEM_ID"
   | "DUPLICATE_ITEM_ID"
   | "UNKNOWN_ITEM_ID"

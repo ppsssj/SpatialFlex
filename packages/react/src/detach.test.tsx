@@ -167,6 +167,38 @@ function pointer(target: Element, type: string, x: number, y: number) {
 }
 
 describe("React state across detach/attach", () => {
+  it("switches source policies without replacing DOM, local state, focus or React effects", () => {
+    const registry = new SpatialRegistry();
+    render(<Gallery registry={registry} />);
+    const original = probe();
+    click(original);
+    original.focus();
+    const baseline = { ...lifecycle };
+    for (const source of ["collapse", "placeholder", "collapse"] as const) {
+      act(() =>
+        controller.detach("image-b", { mode: "move", source, target: "web" }),
+      );
+      expect(item("image-b").style.display).toBe(
+        source === "collapse" ? "contents" : "",
+      );
+      expect(probe()).toBe(original);
+      expect(document.activeElement).toBe(original);
+      expect(original.textContent).toBe("ocean:1");
+      expect(lifecycle).toEqual(baseline);
+    }
+    act(() => controller.attach("image-b"));
+    expect(item("image-b").style.cssText).toBe("");
+    expect(probe()).toBe(original);
+    expect(document.activeElement).toBe(original);
+    expect(() =>
+      controller.detach("image-b", {
+        mode: "move",
+        source: "visible",
+        target: "xr",
+      }),
+    ).toThrow(/React DOM/);
+    expect(registry.get("image-b")?.status).toBe("attached");
+  });
   it.each([
     ["without StrictMode", (ui: ReactNode) => ui, 1],
     ["in StrictMode", (ui: ReactNode) => <StrictMode>{ui}</StrictMode>, 2],

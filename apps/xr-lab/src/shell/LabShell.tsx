@@ -6,6 +6,7 @@ import type {
   LabIntegration,
 } from "../integrations/contract";
 import { XRControls } from "./XRControls";
+import { StrategyControls } from "./StrategyControls";
 
 export interface LabShellProps {
   integration: IntegrationModule;
@@ -69,6 +70,7 @@ function ShellLayout({
       <header className="lab-header">{header}</header>
       <div className="lab-columns">
         <div className="lab-left">
+          {lab.detach && <StrategyControls lab={lab} />}
           <Dashboard
             {...(lab.renderWidget && { renderWidget: lab.renderWidget })}
           />

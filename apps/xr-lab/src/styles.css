@@ -148,3 +148,31 @@ canvas.xr-host-canvas {
   border: 1px solid #9ba8b8;
   border-radius: 8px;
 }
+
+.strategy-controls label {
+  display: grid;
+  grid-template-columns: 115px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin-block: 6px;
+}
+.strategy-controls select {
+  max-width: 100%;
+}
+[data-spatialflex-panel][data-status="detached"] {
+  z-index: 10;
+  background: white;
+  border: 2px solid #2f6fdf;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px #0003;
+}
+[data-spatialflex-panel-bar] {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px;
+  background: #ddf4ff;
+}
+[data-spatialflex-resize-handle] {
+  background: #2f6fdf;
+}
