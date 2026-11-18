@@ -54,6 +54,13 @@ body {
   min-height: 0;
 }
 
+.lab-right > .bridge-host {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .widgets {
   display: flex;
   flex-wrap: wrap;
@@ -143,8 +150,11 @@ canvas.xr-host-canvas {
   outline: none;
 }
 .bridge-frame {
+  display: block;
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  height: 660px;
+  box-sizing: border-box;
   border: 1px solid #9ba8b8;
   border-radius: 8px;
 }
@@ -175,4 +185,26 @@ canvas.xr-host-canvas {
 }
 [data-spatialflex-resize-handle] {
   background: #2f6fdf;
+}
+
+/* The independent Host document has no .lab-right containing block. */
+html.xr-iframe-document,
+.xr-iframe-document body,
+.xr-iframe-document #root {
+  height: 100%;
+}
+
+.xr-iframe-document #root {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.xr-iframe-document #root > .xr-host {
+  flex: 1;
+  min-height: 0;
+}
+
+.xr-iframe-document #root > button {
+  align-self: flex-start;
 }
