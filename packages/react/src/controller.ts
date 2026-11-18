@@ -42,6 +42,25 @@ export interface SpatialController {
    */
   setSourceVisibility(id: SpatialItemId, visibility: SourceVisibility): boolean;
   /**
+   * Native DOM extraction: detaches the original mounted element (the same
+   * node and React instance) into an externally composited placement. The
+   * source keeps its footprint (`placeholder`) or reflows (`collapse`), as
+   * for a Move. Positioning belongs to the compositor that owns the
+   * placement (see {@link SpatialController.nativeElement}); `attach`
+   * restores the original layout.
+   */
+  extractNative(id: SpatialItemId, source: "placeholder" | "collapse"): boolean;
+  /**
+   * Where a detached item is placed: `viewport` (P0 floating panel) or
+   * `external` (Native DOM extraction). `null` when attached or unknown.
+   */
+  placement(id: SpatialItemId): ItemPlacement | null;
+  /**
+   * The original panel element of a natively extracted item, for its
+   * compositor to position. `null` for any other item.
+   */
+  nativeElement(id: SpatialItemId): HTMLElement | null;
+  /**
    * The in-flow element of a currently registered and connected item, for
    * read-only geometry (for example a selection outline). `null` for any
    * other id: only registered items are discoverable.
@@ -63,7 +82,11 @@ export interface ItemHost {
   /** Receives the measured original size, shown by the placeholder. */
   readonly setPlaceholder: (size: SpatialSize) => void;
   readonly setSourcePolicy: (source: "placeholder" | "collapse") => void;
+  readonly setPlacement: (placement: ItemPlacement) => void;
 }
+
+/** Who positions a detached panel. */
+export type ItemPlacement = "viewport" | "external";
 
 export interface WorkspaceController extends SpatialController {
   /** Connects an item's DOM host. Returns a disconnect function. */
@@ -74,12 +97,24 @@ export function createController(
   registry: SpatialRegistry,
 ): WorkspaceController {
   const hosts = new Map<SpatialItemId, ItemHost>();
+  const external = new Set<SpatialItemId>();
+  const placementOf = (id: SpatialItemId): ItemPlacement | null => {
+    if (registry.get(id)?.status !== "detached") return null;
+    return external.has(id) ? "external" : "viewport";
+  };
+  const setPlacementOf = (id: SpatialItemId, placement: ItemPlacement) => {
+    if (placement === "external") external.add(id);
+    else external.delete(id);
+    hosts.get(id)?.setPlacement(placement);
+  };
 
   return {
     connect(id, host) {
       hosts.set(id, host);
       return () => {
-        if (hosts.get(id) === host) hosts.delete(id);
+        if (hosts.get(id) !== host) return;
+        hosts.delete(id);
+        external.delete(id);
       };
     },
 
@@ -94,6 +129,9 @@ export function createController(
       const host = hosts.get(id);
       // Validate capabilities before changing the host's source policy.
       if (record && !record.capabilities.detachable) return registry.detach(id);
+      // An already detached item (including a native extraction) keeps its
+      // placement; the registry reports it unchanged.
+      if (record?.status !== "detached") setPlacementOf(id, "viewport");
       host?.setSourcePolicy(strategy.source);
       if (!record || !host || record.status === "detached") {
         // Let the registry report unknown IDs or capability errors, or
@@ -113,7 +151,41 @@ export function createController(
     },
 
     attach(id) {
-      return registry.attach(id);
+      const attached = registry.attach(id);
+      if (attached) setPlacementOf(id, "viewport");
+      return attached;
+    },
+
+    extractNative(id, source) {
+      if (source !== "placeholder" && source !== "collapse")
+        throw new SpatialFlexError(
+          "UNSUPPORTED_STRATEGY",
+          "Native DOM extraction reserves (placeholder) or collapses the source.",
+        );
+      const record = registry.get(id);
+      const host = hosts.get(id);
+      // Let the registry report unknown ids and capability errors.
+      if (!record || !record.capabilities.detachable)
+        return registry.detach(id);
+      if (!host || record.status === "detached") return false;
+      host.setSourcePolicy(source);
+      // Layout size, unaffected by transformed ancestors (unlike
+      // getBoundingClientRect inside a composited surface); fractional, so
+      // the moved content keeps exactly its original width.
+      const style = getComputedStyle(host.slot);
+      host.setPlaceholder({
+        width: parseFloat(style.width) || host.slot.offsetWidth,
+        height: parseFloat(style.height) || host.slot.offsetHeight,
+      });
+      setPlacementOf(id, "external");
+      return registry.detach(id);
+    },
+
+    placement: placementOf,
+
+    nativeElement(id) {
+      if (placementOf(id) !== "external") return null;
+      return hosts.get(id)?.panel ?? null;
     },
 
     setSourceVisibility(id, visibility) {

@@ -245,6 +245,87 @@ function invert3(m: Mat3): Mat3 | null {
   ];
 }
 
+/** Four world corners of a planar quad, in order around it. */
+export type WorldQuad = readonly [Vec3, Vec3, Vec3, Vec3];
+/** Something that can occlude a surface: an XR HostPanel rect or a quad. */
+export type Occluder = WorldRect | WorldQuad;
+type Point2 = [number, number];
+
+const quadOf = (o: Occluder): WorldQuad => {
+  if (Array.isArray(o)) return o as WorldQuad;
+  const { center, width, height } = o as WorldRect;
+  const [x, y, z] = center;
+  const hw = width / 2,
+    hh = height / 2;
+  return [
+    [x - hw, y + hh, z],
+    [x + hw, y + hh, z],
+    [x + hw, y - hh, z],
+    [x - hw, y - hh, z],
+  ];
+};
+const centroid = (q: WorldQuad): Vec3 => [
+  (q[0][0] + q[1][0] + q[2][0] + q[3][0]) / 4,
+  (q[0][1] + q[1][1] + q[2][1] + q[3][1]) / 4,
+  (q[0][2] + q[1][2] + q[2][2] + q[3][2]) / 4,
+];
+
+/** World corners of a surface (top-left, top-right, bottom-right, bottom-left). */
+export function surfaceQuad(
+  pose: SpatialWebSurfacePose,
+  resolution: SurfaceResolution,
+): WorldQuad {
+  const { width: W, height: H } = resolution;
+  return [
+    surfacePoint(pose, resolution, 0, 0),
+    surfacePoint(pose, resolution, W, 0),
+    surfacePoint(pose, resolution, W, H),
+    surfacePoint(pose, resolution, 0, H),
+  ];
+}
+
+/** Occluders in front of the surface, as quads in its local CSS pixels. */
+function localHoles(
+  frame: HostCameraFrame,
+  pose: SpatialWebSurfacePose,
+  resolution: SurfaceResolution,
+  occluders: readonly Occluder[],
+): Point2[][] {
+  const { normal } = surfaceAxes(pose);
+  const inverse = invert3(homography(frame, pose, resolution));
+  if (!inverse) return [];
+  const holes: Point2[][] = [];
+  for (const occluder of occluders) {
+    const quad = quadOf(occluder);
+    if (dot(normal, sub(centroid(quad), pose.position)) <= 0.005) continue;
+    const local: Point2[] = [];
+    for (const corner of quad) {
+      const p = projectPoint(frame, corner);
+      if (!p) break;
+      const u = inverse[0] * p.x + inverse[1] * p.y + inverse[2];
+      const v = inverse[3] * p.x + inverse[4] * p.y + inverse[5];
+      const w = inverse[6] * p.x + inverse[7] * p.y + inverse[8];
+      if (Math.abs(w) < 1e-9) break;
+      local.push([u / w, v / w]);
+    }
+    if (local.length !== 4) continue;
+    const xs = local.map(([u]) => u),
+      ys = local.map(([, v]) => v);
+    // Skip occluders that do not reach the surface at all.
+    if (
+      Math.max(...xs) < 0 ||
+      Math.min(...xs) > resolution.width ||
+      Math.max(...ys) < 0 ||
+      Math.min(...ys) > resolution.height
+    )
+      continue;
+    holes.push(local);
+  }
+  return holes;
+}
+
+const r1 = (n: number) => Math.round(n * 10) / 10;
+
 /**
  * Explicit occlusion: the HTML surface is composited above the WebGL canvas,
  * so rectangles that are between the surface plane and the camera are cut
@@ -258,50 +339,192 @@ export function occlusionClipPath(
   frame: HostCameraFrame,
   pose: SpatialWebSurfacePose,
   resolution: SurfaceResolution,
-  occluders: readonly WorldRect[],
+  occluders: readonly Occluder[],
 ): string {
-  const { normal } = surfaceAxes(pose);
-  const inverse = invert3(homography(frame, pose, resolution));
-  if (!inverse) return "none";
-  const holes: string[] = [];
-  for (const rect of occluders) {
-    if (dot(normal, sub(rect.center, pose.position)) <= 0.005) continue;
-    const [x, y, z] = rect.center;
-    const hw = rect.width / 2,
-      hh = rect.height / 2;
-    const local: [number, number][] = [];
-    for (const corner of [
-      [x - hw, y + hh, z],
-      [x + hw, y + hh, z],
-      [x + hw, y - hh, z],
-      [x - hw, y - hh, z],
-    ] as Vec3[]) {
-      const p = projectPoint(frame, corner);
-      if (!p) break;
-      const u = inverse[0] * p.x + inverse[1] * p.y + inverse[2];
-      const v = inverse[3] * p.x + inverse[4] * p.y + inverse[5];
-      const w = inverse[6] * p.x + inverse[7] * p.y + inverse[8];
-      if (Math.abs(w) < 1e-9) break;
-      local.push([u / w, v / w]);
-    }
-    if (local.length !== 4) continue;
-    const xs = local.map(([u]) => u),
-      ys = local.map(([, v]) => v);
-    // Skip rectangles that do not reach the page at all.
-    if (
-      Math.max(...xs) < 0 ||
-      Math.min(...xs) > resolution.width ||
-      Math.max(...ys) < 0 ||
-      Math.min(...ys) > resolution.height
-    )
-      continue;
-    const px = ([u, v]: [number, number]) =>
-      `${Math.round(u * 10) / 10}px ${Math.round(v * 10) / 10}px`;
-    holes.push([...local, local[0]!].map(px).join(", ") + ", 0px 0px");
-  }
+  const holes = localHoles(frame, pose, resolution, occluders);
   if (holes.length === 0) return "none";
+  const px = ([u, v]: Point2) => `${r1(u)}px ${r1(v)}px`;
   const { width: W, height: H } = resolution;
-  return `polygon(evenodd, 0px 0px, ${W}px 0px, ${W}px ${H}px, 0px ${H}px, 0px 0px, ${holes.join(", ")})`;
+  return `polygon(evenodd, 0px 0px, ${W}px 0px, ${W}px ${H}px, 0px ${H}px, 0px 0px, ${holes
+    .map((hole) => [...hole, hole[0]!].map(px).join(", ") + ", 0px 0px")
+    .join(", ")})`;
+}
+
+const signedArea = (q: readonly Point2[]) =>
+  q.reduce((sum, [x1, y1], i) => {
+    const [x2, y2] = q[(i + 1) % q.length]!;
+    return sum + x1 * y2 - x2 * y1;
+  }, 0);
+const oriented = (q: Point2[], sign: number) =>
+  Math.sign(signedArea(q)) === sign ? q : [...q].reverse();
+
+/**
+ * The page clip when natively extracted elements are composited as its
+ * descendants: `clip-path` clips descendants too, so their footprint in the
+ * page plane (`keep`) is united with the page (nonzero winding) while
+ * occluders in front are still cut out.
+ */
+export function pageClipPath(
+  frame: HostCameraFrame,
+  pose: SpatialWebSurfacePose,
+  resolution: SurfaceResolution,
+  occluders: readonly Occluder[],
+  keep: readonly Point2[][],
+): string {
+  if (keep.length === 0)
+    return occlusionClipPath(frame, pose, resolution, occluders);
+  const { width: W, height: H } = resolution;
+  const outer: Point2[] = [
+    [0, 0],
+    [W, 0],
+    [W, H],
+    [0, H],
+  ];
+  const sign = Math.sign(signedArea(outer));
+  const loops = [
+    outer,
+    ...localHoles(frame, pose, resolution, occluders).map((hole) =>
+      oriented(hole, -sign),
+    ),
+    ...keep.map((quad) => oriented([...quad], sign)),
+  ];
+  const d = loops
+    .map(
+      (loop) => `M ${loop.map(([x, y]) => `${r1(x)} ${r1(y)}`).join(" L ")} Z`,
+    )
+    .join(" ");
+  return `path(nonzero, "${d}")`;
+}
+
+const matrix3d = (h: Mat3) =>
+  `matrix3d(${[
+    h[0],
+    h[3],
+    0,
+    h[6],
+    h[1],
+    h[4],
+    0,
+    h[7],
+    0,
+    0,
+    1,
+    0,
+    h[2],
+    h[5],
+    0,
+    h[8],
+  ]
+    .map((n) => Number(n.toPrecision(12)))
+    .join(",")})`;
+
+const mul3 = (a: Mat3, b: Mat3): Mat3 => {
+  const m = [0, 0, 0, 0, 0, 0, 0, 0, 0] as Mat3;
+  for (let r = 0; r < 3; r++)
+    for (let c = 0; c < 3; c++)
+      m[r * 3 + c] =
+        a[r * 3]! * b[c]! +
+        a[r * 3 + 1]! * b[3 + c]! +
+        a[r * 3 + 2]! * b[6 + c]!;
+  return m;
+};
+
+/** The page transform for any camera that does not cross its plane. */
+export function surfaceMatrix(
+  frame: HostCameraFrame,
+  pose: SpatialWebSurfacePose,
+  resolution: SurfaceResolution,
+): string {
+  return matrix3d(homography(frame, pose, resolution));
+}
+
+/** Facing and camera-plane checks shared by every composited plane. */
+export function planeVisibility(
+  frame: HostCameraFrame,
+  pose: SpatialWebSurfacePose,
+  resolution: SurfaceResolution,
+): SurfaceVisibility {
+  const { normal } = surfaceAxes(pose);
+  if (dot(normal, sub(frame.eye, pose.position)) <= 0) return "back";
+  for (const corner of surfaceQuad(pose, resolution))
+    if (clip(frame.viewProjection, corner)[2] <= NEAR_W) return "behind";
+  return "visible";
+}
+
+export type NativePanelPlacement =
+  | {
+      readonly visibility: "visible";
+      /** CSS transform for the element, relative to its containing block. */
+      readonly matrix3d: string;
+      /** The element's footprint in the page's border-box pixels. */
+      readonly pageQuad: Point2[];
+      /** The panel lies behind the page plane (seen from the camera). */
+      readonly behindPage: boolean;
+    }
+  | { readonly visibility: "back" | "behind" | "unmappable" };
+
+/**
+ * Places a descendant of the composited page at its own world pose.
+ *
+ * The element stays where React rendered it, inside the page, so every CSS
+ * transform of the page also applies to it. With `position: fixed; left: 0;
+ * top: 0` its containing block is the page's padding box (the page is
+ * transformed), i.e. border-box offset `border`. Its own transform is
+ *
+ *   T = translate(-border) · H_page⁻¹ · H_panel
+ *
+ * so the composed mapping H_page · translate(border) · T equals H_panel: the
+ * parent's world transform is cancelled by its inverse and the same node is
+ * projected at an independent pose. Unmappable when the panel would cross
+ * the page plane's horizon (mixed homogeneous signs).
+ */
+export function nativePanelTransform(
+  frame: HostCameraFrame,
+  page: {
+    readonly pose: SpatialWebSurfacePose;
+    readonly resolution: SurfaceResolution;
+    readonly border: number;
+  },
+  panel: {
+    readonly pose: SpatialWebSurfacePose;
+    readonly resolution: SurfaceResolution;
+  },
+): NativePanelPlacement {
+  const visibility = planeVisibility(frame, panel.pose, panel.resolution);
+  if (visibility !== "visible") return { visibility };
+  if (planeVisibility(frame, page.pose, page.resolution) === "behind")
+    return { visibility: "unmappable" };
+  const inverse = invert3(homography(frame, page.pose, page.resolution));
+  if (!inverse) return { visibility: "unmappable" };
+  const b = page.border;
+  let t = mul3(
+    [1, 0, -b, 0, 1, -b, 0, 0, 1],
+    mul3(inverse, homography(frame, panel.pose, panel.resolution)),
+  );
+  const { width: w, height: h } = panel.resolution;
+  const corners: Point2[] = [
+    [0, 0],
+    [w, 0],
+    [w, h],
+    [0, h],
+  ];
+  const ws = corners.map(([u, v]) => t[6] * u + t[7] * v + t[8]);
+  // A homography is defined up to scale: keep w positive for CSS.
+  if (ws.every((x) => x < 0)) t = t.map((x) => -x) as Mat3;
+  else if (!ws.every((x) => x > 0)) return { visibility: "unmappable" };
+  const pageQuad = corners.map(([u, v]): Point2 => {
+    const x = t[0] * u + t[1] * v + t[2];
+    const y = t[3] * u + t[4] * v + t[5];
+    const z = t[6] * u + t[7] * v + t[8];
+    return [x / z + b, y / z + b];
+  });
+  const { normal } = surfaceAxes(page.pose);
+  return {
+    visibility: "visible",
+    matrix3d: matrix3d(t),
+    pageQuad,
+    behindPage: dot(normal, sub(panel.pose.position, page.pose.position)) < 0,
+  };
 }
 
 /**

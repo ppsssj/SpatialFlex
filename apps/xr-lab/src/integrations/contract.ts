@@ -47,13 +47,27 @@ export interface LabIntegration extends HostEvents {
    */
   readonly surfaceItems?: readonly SurfaceItem[];
   /**
-   * Extracts a registered component into an independent live XR panel at a
-   * world position. `source` is the original's visibility policy. The
-   * original stays mounted in place; it is never moved, cloned or remounted.
+   * Extracts a registered component into space with an explicit
+   * presentation strategy:
+   * - `adaptive`: an independent renderer-native XR panel at `position`,
+   *   built from the declared XR view. The original stays mounted in place
+   *   (visible or reserved).
+   * - `native`: the original mounted DOM element itself, presented in space
+   *   by the same-document DOM compositor (which owns its pose). The
+   *   source is reserved or collapsed. Nothing is cloned or remounted.
    */
   extract?(id: string, options: ExtractOptions): boolean;
-  /** Removes the extracted presentation and shows the original again. */
+  /** Ends the extraction and returns the original to its place. */
   restore?(id: string): boolean;
+  /** Validates an untrusted presentation + source request for an item. */
+  validateExtraction?(
+    id: string,
+    request: unknown,
+  ):
+    | { readonly supported: true }
+    | { readonly supported: false; readonly reason: string };
+  /** The original element of a natively extracted item, for its compositor. */
+  nativeElement?(id: string): HTMLElement | null;
   /** Element of a registered component, for read-only selection geometry. */
   sourceElement?(id: string): HTMLElement | null;
   validateSourceVisibility?(
@@ -64,22 +78,39 @@ export interface LabIntegration extends HostEvents {
 }
 
 export interface ExtractOptions {
-  /** Untrusted policy, validated by the integration. */
+  /** Untrusted presentation strategy; defaults to `adaptive`. */
+  readonly presentation?: unknown;
+  /** Untrusted source layout policy, validated by the integration. */
   readonly source: unknown;
+  /** World position of an adaptive panel. */
   readonly position: Vec3;
+}
+
+export type PresentationId = "native" | "adaptive";
+
+export interface PresentationOption {
+  readonly supported: boolean;
+  readonly reason?: string;
 }
 
 export interface SurfaceItem {
   readonly id: string;
   readonly label: string;
-  /** Whether the registration declares an XR view that can be extracted. */
+  /** Whether any presentation strategy is available. */
   readonly extractable: boolean;
   /** Why the component cannot be extracted, if it cannot. */
   readonly reason?: string;
+  /** Declared (or derived) default presentation strategy. */
+  readonly defaultPresentation: PresentationId;
+  /** Availability of each presentation strategy for this registration. */
+  readonly presentations: Readonly<Record<PresentationId, PresentationOption>>;
   readonly extraction: {
-    readonly source: "visible" | "reserved";
+    readonly presentation: PresentationId;
+    readonly source: "visible" | "reserved" | "collapsed";
+    /** Presentation instance identity (not the strategy). */
     readonly presentationId?: string;
-    readonly position: Vec3;
+    /** World position of an adaptive panel (native poses belong to the compositor). */
+    readonly position?: Vec3;
   } | null;
 }
 

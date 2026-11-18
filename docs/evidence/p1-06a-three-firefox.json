@@ -1,0 +1,32 @@
+{
+  "engine": "three",
+  "browser": "firefox",
+  "presentation": "native",
+  "source": "reserved",
+  "sameNodesDuringAndAfter": true,
+  "singleContentInstance": true,
+  "computedDesignUnchanged": true,
+  "sourceFootprint": {
+    "left": 14,
+    "top": 80,
+    "width": 264,
+    "height": 120
+  },
+  "neighborLayout": {
+    "left": 290,
+    "top": 80,
+    "width": 178,
+    "height": 120
+  },
+  "panelBoundingBox": {
+    "x": 1006.6643676757812,
+    "y": 281.066650390625,
+    "width": 194.49786376953125,
+    "height": 131.20526123046875
+  },
+  "counterMounts": "1",
+  "counterInstances": "1",
+  "activeSubscriptions": "6",
+  "totalSubscribes": "6",
+  "incrementCalls": 2
+}

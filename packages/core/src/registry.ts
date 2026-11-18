@@ -1,5 +1,9 @@
 import { SpatialFlexError } from "./errors";
 import {
+  assertPresentationStrategy,
+  type PresentationStrategy,
+} from "./presentation";
+import {
   assertSourceVisibility,
   type SourceVisibility,
 } from "./sourceVisibility";
@@ -36,6 +40,13 @@ export interface SpatialItemRegistration {
   update(capabilities: Partial<SpatialItemCapabilities>): void;
   /** @experimental Publish/revoke a spatial view for this exact registration. */
   setView(view: SpatialViewBinding | undefined): void;
+  /**
+   * Declares this registration's default presentation strategy, or clears
+   * it (`undefined`: derived from whether an XR view is declared).
+   *
+   * @throws {SpatialFlexError} `UNSUPPORTED_STRATEGY` for an invalid value.
+   */
+  setPresentation(presentation: PresentationStrategy | undefined): void;
   /** Removes this registration. Safe to call more than once. */
   unregister(): void;
 }
@@ -62,6 +73,7 @@ export class SpatialRegistry {
   #viewSnapshot: readonly SpatialViewRecord[] = Object.freeze([]);
   readonly #items = new Map<SpatialItemId, SpatialItemRecord>();
   readonly #owners = new Map<SpatialItemId, object>();
+  readonly #presentations = new Map<SpatialItemId, PresentationStrategy>();
   readonly #listeners = new Set<SpatialRegistryListener>();
   #snapshot: readonly SpatialItemRecord[] = Object.freeze([]);
 
@@ -101,6 +113,16 @@ export class SpatialRegistry {
 
     return {
       id,
+      setPresentation: (presentation) => {
+        const next =
+          presentation === undefined
+            ? undefined
+            : assertPresentationStrategy(presentation);
+        if (!isCurrent() || this.#presentations.get(id) === next) return;
+        if (next) this.#presentations.set(id, next);
+        else this.#presentations.delete(id);
+        this.#commit();
+      },
       setView: (view) => {
         if (!isCurrent()) return;
         if (!view) {
@@ -146,6 +168,7 @@ export class SpatialRegistry {
   unregister(id: SpatialItemId): boolean {
     if (!this.#items.delete(id)) return false;
     this.#owners.delete(id);
+    this.#presentations.delete(id);
     this.#viewHandlers.delete(id);
     if (this.#views.delete(id)) this.#commitViews();
     this.#commit();
@@ -327,6 +350,11 @@ export class SpatialRegistry {
   #commitViews(): void {
     this.#viewSnapshot = Object.freeze([...this.#views.values()]);
     for (const listener of [...this.#viewListeners]) listener();
+  }
+
+  /** The presentation strategy declared by the current registration, if any. */
+  presentationOf(id: SpatialItemId): PresentationStrategy | undefined {
+    return this.#presentations.get(id);
   }
 
   has(id: SpatialItemId): boolean {

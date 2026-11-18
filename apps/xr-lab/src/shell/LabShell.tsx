@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useState, type ReactNode } from "react";
 import type { HostModule } from "../contracts/xrHost";
 import { Dashboard, LabStoreContext, type LabStore } from "../fixtures";
 import type {
@@ -10,6 +10,8 @@ import { StrategyControls } from "./StrategyControls";
 import { SpatialWebSurface } from "../surface/SpatialWebSurface";
 import { SurfaceInspector } from "../surface/SurfaceInspector";
 import { useSurfaceCompositor } from "../surface/useSurfaceCompositor";
+
+const noElement = () => null;
 
 export interface LabShellProps {
   integration: IntegrationModule;
@@ -77,7 +79,25 @@ function ShellLayout({
   const [surfaceMode, setSurfaceMode] = useState(surfaceRequested);
   const website = surfaceMode && !surfaceSupport;
   const surfaceActive = website && workspaceMounted;
-  const surface = useSurfaceCompositor(surfaceActive, lab.panels);
+  // Natively extracted originals, positioned by the surface compositor.
+  const nativeList = (lab.surfaceItems ?? [])
+    .filter((item) => item.extraction?.presentation === "native")
+    .map((item) => item.id);
+  const nativeIds = JSON.stringify(nativeList);
+  const surface = useSurfaceCompositor(
+    surfaceActive,
+    lab.panels,
+    nativeList,
+    lab.nativeElement ?? noElement,
+  );
+  // Without an active surface (mode off, workspace unmounted) there is no
+  // compositor to place them: the originals return to their place.
+  useLayoutEffect(() => {
+    if (surfaceActive) return;
+    for (const id of JSON.parse(nativeIds) as string[]) lab.restore?.(id);
+    // `lab` is rebuilt every render; the effect depends on its native ids.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [surfaceActive, nativeIds]);
   const toggleSurface = () => {
     const next = !website;
     // Same-document Move uses fixed positioning, which a transformed surface

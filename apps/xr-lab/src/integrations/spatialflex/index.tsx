@@ -8,6 +8,11 @@ import {
 } from "@spatialflex/react";
 import {
   assertDetachmentStrategy,
+  assertExtraction,
+  defaultPresentation,
+  presentationSupport,
+  validateExtraction,
+  type ExtractionContext,
   assertSourceVisibility,
   SpatialFlexError,
   XR_MIRROR_STRATEGY,
@@ -21,7 +26,14 @@ import type { IntegrationModule, LabIntegration } from "../contract";
 
 // Generic translation only: no widget IDs, application state or action table.
 const renderWidget: RenderWidget = (id, widget, view) => (
-  <SpatialItem id={id} xr={view} detachable movable resizable>
+  <SpatialItem
+    id={id}
+    {...(view && { label: view.title })}
+    xr={view}
+    detachable
+    movable
+    resizable
+  >
     {widget}
   </SpatialItem>
 );
@@ -34,6 +46,10 @@ function useSpatialFlexIntegration(): LabIntegration {
   const available = useMemo(() => views.map((v) => v.registrationId), [views]);
   const { presentation, show, hide, move, select } = usePresentation(available);
   const instances = useRef(new Map<string, string>());
+  const [natives, setNatives] = useState<
+    ReadonlyMap<string, { source: "reserved" | "collapsed"; instance: string }>
+  >(() => new Map());
+  const nativeGeneration = useRef(0);
   const generation = useRef(0);
   const [capturedInstances, setInstances] = useState<
     ReadonlyMap<string, string>
@@ -108,7 +124,29 @@ function useSpatialFlexIntegration(): LabIntegration {
     publishInstances();
     return hide(registrationId);
   };
+  // Native DOM extractions: presentation instance and source policy per id.
+  // Valid only while the controller reports the external placement.
+  const nativeOf = (id: string) =>
+    controller.placement(id) === "external" ? natives.get(id) : undefined;
+  const contextOf = (id: string): ExtractionContext => {
+    const record = registry.get(id);
+    return {
+      detachable: !!record?.capabilities.detachable,
+      hasView: !!registry.getView(id),
+      // Surface items are offered only by hosts with a same-document DOM
+      // compositor (the shell disables the surface otherwise).
+      nativeHost: true,
+    };
+  };
   const hideItem = (id: string) => {
+    if (controller.placement(id) === "external") {
+      setNatives((current) => {
+        const next = new Map(current);
+        next.delete(id);
+        return next;
+      });
+      return controller.attach(id);
+    }
     const view = registry.getView(id);
     if (!view) {
       showSource(id);
@@ -157,28 +195,81 @@ function useSpatialFlexIntegration(): LabIntegration {
       const shown = !!view && presentation.shown.includes(view.registrationId);
       const panel = shown ? panels.find((p) => p.id === record.id) : undefined;
       const presentationId = view && capturedInstances.get(view.registrationId);
+      const native = nativeOf(record.id);
+      const context = contextOf(record.id);
+      const support = {
+        native: presentationSupport("native", context),
+        adaptive: presentationSupport("adaptive", context),
+      };
+      const moved = record.status === "detached" && !native;
+      const extractable =
+        !moved && (support.native.supported || support.adaptive.supported);
       return {
         id: record.id,
         label: view?.title ?? record.id,
-        extractable: !!view && record.status === "attached",
-        ...(!view
-          ? { reason: "No declared XR view (SpatialItem xr)." }
-          : record.status !== "attached" && {
-              reason: "Moved in its document; attach it first.",
+        defaultPresentation: defaultPresentation(
+          registry.presentationOf(record.id),
+          !!view,
+        ),
+        presentations: support,
+        extractable,
+        ...(moved
+          ? { reason: "Moved in its document; attach it first." }
+          : !extractable && {
+              reason: [support.native, support.adaptive]
+                .map((s) => (s.supported ? "" : s.reason))
+                .join(" "),
             }),
-        extraction: panel
+        extraction: native
           ? {
-              source: record.layout.visible ? "visible" : "reserved",
-              ...(presentationId && { presentationId }),
-              position: panel.position,
+              presentation: "native",
+              source: native.source,
+              presentationId: native.instance,
             }
-          : null,
+          : panel
+            ? {
+                presentation: "adaptive",
+                source: record.layout.visible ? "visible" : "reserved",
+                ...(presentationId && { presentationId }),
+                position: panel.position,
+              }
+            : null,
       };
     }),
+    validateExtraction: (id, request) => {
+      const result = validateExtraction(request, contextOf(id));
+      return result.supported ? { supported: true } : result;
+    },
+    nativeElement: controller.nativeElement,
     validateSourceVisibility,
     sourceElement: controller.sourceElement,
-    extract(id, { source, position }) {
-      const visibility = assertSourceVisibility(source);
+    extract(id, { presentation: requested = "adaptive", source, position }) {
+      if (!registry.has(id)) return false;
+      const request = assertExtraction(
+        { presentation: requested, source },
+        contextOf(id),
+      );
+      if (request.presentation === "native") {
+        if (controller.placement(id) === "external") return false;
+        // One presentation per item: end an adaptive mirror first.
+        const view = registry.getView(id);
+        if (view && presentation.shown.includes(view.registrationId))
+          endPresentation(id, view.registrationId);
+        if (
+          !controller.extractNative(
+            id,
+            request.source === "collapsed" ? "collapse" : "placeholder",
+          )
+        )
+          return false;
+        const native = {
+          source: request.source,
+          instance: `native-${++nativeGeneration.current}`,
+        };
+        setNatives((current) => new Map(current).set(id, native));
+        return true;
+      }
+      const visibility = assertSourceVisibility(request.source);
       if (position.length !== 3 || !position.every(Number.isFinite))
         throw new SpatialFlexError(
           "INVALID_LAYOUT",

@@ -1,4 +1,6 @@
+import { assertPresentationStrategy } from "@spatialflex/core";
 import type {
+  PresentationStrategy,
   SpatialItemId,
   SpatialItemRegistration,
   SpatialSize,
@@ -15,6 +17,7 @@ import {
   type ReactNode,
 } from "react";
 import { useWorkspace } from "./context";
+import type { ItemPlacement } from "./controller";
 import { useSpatialItem } from "./hooks";
 
 export interface SpatialItemProps {
@@ -28,6 +31,12 @@ export interface SpatialItemProps {
   children?: ReactNode;
   /** @experimental Explicit XR mirror data and parent-owned semantic actions. */
   xr?: SpatialViewBinding | undefined;
+  /**
+   * @experimental Default presentation when extracted to space: `native`
+   * (this original DOM) or `adaptive` (the declared `xr` view). Defaults to
+   * `adaptive` when `xr` is declared, otherwise `native`.
+   */
+  presentation?: PresentationStrategy | undefined;
 }
 
 /** The pointer interaction in progress, if any. Only one at a time. */
@@ -63,6 +72,7 @@ export function SpatialItem({
   label,
   children,
   xr,
+  presentation,
 }: SpatialItemProps) {
   const { registry, controller } = useWorkspace();
   const record = useSpatialItem(id);
@@ -73,6 +83,15 @@ export function SpatialItem({
   const capabilitiesRef = useRef(capabilities);
   const registrationRef = useRef<SpatialItemRegistration | null>(null);
   const viewRef = useRef<SpatialViewBinding | undefined>(undefined);
+  const presentationRef = useRef<PresentationStrategy | undefined>(undefined);
+  useLayoutEffect(() => {
+    presentationRef.current =
+      presentation === undefined
+        ? undefined
+        : assertPresentationStrategy(presentation);
+    if (registrationRef.current?.id === id)
+      registrationRef.current.setPresentation(presentationRef.current);
+  }, [presentation, id]);
   useLayoutEffect(() => {
     viewRef.current = xr
       ? { ...xr, title: xr.title ?? label ?? id }
@@ -89,6 +108,9 @@ export function SpatialItem({
   const [sourcePolicy, setSourcePolicy] = useState<"placeholder" | "collapse">(
     "placeholder",
   );
+  // Who positions the detached panel: this component (viewport) or an
+  // external compositor (Native DOM extraction). Presentation only.
+  const [placement, setPlacement] = useState<ItemPlacement>("viewport");
 
   // Declared before the registration effect so that, when the ID and the
   // capabilities change together, the new registration reads fresh values.
@@ -105,6 +127,7 @@ export function SpatialItem({
     registrationRef.current = registration;
     try {
       registration.setView(viewRef.current);
+      registration.setPresentation(presentationRef.current);
     } catch (error) {
       registration.unregister();
       registrationRef.current = null;
@@ -115,6 +138,7 @@ export function SpatialItem({
       panel: panelRef.current!,
       setPlaceholder,
       setSourcePolicy,
+      setPlacement,
     });
     return () => {
       disconnect();
@@ -124,6 +148,7 @@ export function SpatialItem({
   }, [registry, controller, id]);
 
   const detached = record?.status === "detached";
+  const externallyPlaced = detached && placement === "external";
   // Source visibility policy "reserved": hidden, footprint kept, still mounted.
   const reserved = !detached && record?.layout.visible === false;
   const position = record?.layout.position;
@@ -136,14 +161,29 @@ export function SpatialItem({
 
   // Keep the panel inside the viewport when the window shrinks.
   useEffect(() => {
-    if (!detached || !position || !(movable || (resizable && size))) return;
+    if (
+      !detached ||
+      externallyPlaced ||
+      !position ||
+      !(movable || (resizable && size))
+    )
+      return;
     const onResize = () => {
       if (movable) controller.move(id, position);
       if (resizable && size) controller.resize(id, size);
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [controller, id, detached, movable, resizable, position, size]);
+  }, [
+    controller,
+    id,
+    detached,
+    externallyPlaced,
+    movable,
+    resizable,
+    position,
+    size,
+  ]);
 
   const begin = (
     event: PointerEvent<HTMLElement>,
@@ -185,7 +225,7 @@ export function SpatialItem({
   };
 
   const startDrag = (event: PointerEvent<HTMLElement>) => {
-    if (!movable || !position) return;
+    if (!movable || !position || externallyPlaced) return;
     if ((event.target as Element).closest("button")) return;
     begin(event, {
       kind: "drag",
@@ -217,18 +257,31 @@ export function SpatialItem({
         : undefined;
   const panelStyle: CSSProperties | undefined = reserved
     ? { visibility: "hidden" }
-    : detached
+    : externallyPlaced
       ? {
+          // The containing block's origin; the external compositor owns the
+          // transform that places this same element in space.
           position: "fixed",
-          left: position?.x ?? 0,
-          top: position?.y ?? 0,
-          // Natural size: the original width and automatic height.
-          width: size?.width ?? placeholder?.width,
-          height: size?.height,
-          boxSizing: "border-box",
-          overflow: size ? "hidden" : undefined,
+          left: 0,
+          top: 0,
+          // The original content width; panel chrome adds to it, so the
+          // component keeps its own layout and design.
+          width: placeholder?.width,
+          boxSizing: "content-box",
+          transformOrigin: "0 0",
         }
-      : undefined;
+      : detached
+        ? {
+            position: "fixed",
+            left: position?.x ?? 0,
+            top: position?.y ?? 0,
+            // Natural size: the original width and automatic height.
+            width: size?.width ?? placeholder?.width,
+            height: size?.height,
+            boxSizing: "border-box",
+            overflow: size ? "hidden" : undefined,
+          }
+        : undefined;
   const title = label ?? id;
 
   // The element structure is identical in both states, and the panel bar and
@@ -247,6 +300,7 @@ export function SpatialItem({
         ref={panelRef}
         data-spatialflex-panel=""
         data-status={status}
+        data-spatialflex-placement={detached ? placement : undefined}
         role={detached ? "dialog" : undefined}
         aria-label={detached ? title : undefined}
         style={panelStyle}
@@ -281,7 +335,7 @@ export function SpatialItem({
           </div>
         ) : null}
         {children}
-        {detached && resizable ? (
+        {detached && resizable && !externallyPlaced ? (
           <div
             data-spatialflex-resize-handle=""
             aria-hidden="true"

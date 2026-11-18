@@ -13,6 +13,14 @@ import { extractionPosition } from "./surfaceMath";
 import type { SurfaceCompositor } from "./useSurfaceCompositor";
 
 type SourcePolicy = "visible" | "reserved" | "collapsed";
+type Presentation = "native" | "adaptive";
+const SOURCES: readonly { value: SourcePolicy; label: string }[] = [
+  { value: "reserved", label: "Reserve space" },
+  { value: "visible", label: "Keep original" },
+  { value: "collapsed", label: "Collapse" },
+];
+/** Height of the SDK panel bar shown above a natively extracted element. */
+const NATIVE_BAR = 34;
 interface Box {
   readonly left: number;
   readonly top: number;
@@ -28,7 +36,7 @@ interface Box {
  */
 export function SpatialWebSurface({
   active,
-  surface: { attachLayer, attachPage, pose },
+  surface: { attachLayer, attachPage, pose, anchors, placeNative },
   lab,
   children,
 }: {
@@ -46,6 +54,7 @@ export function SpatialWebSurface({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [policy, setPolicy] = useState<SourcePolicy>("reserved");
+  const [presentation, setPresentation] = useState<Presentation>("adaptive");
   const [notice, setNotice] = useState<string | null>(null);
   const items = lab.surfaceItems ?? [];
   const selected = items.find((item) => item.id === selectedId) ?? null;
@@ -54,8 +63,30 @@ export function SpatialWebSurface({
   if (selectedId && !selected) setSelectedId(null);
   const selectionMode = active && selecting;
 
+  // Which source policies the chosen presentation supports, with reasons.
+  const supportOf = (value: SourcePolicy, as: Presentation = presentation) =>
+    selected && lab.validateExtraction
+      ? lab.validateExtraction(selected.id, { presentation: as, source: value })
+      : ({ supported: false, reason: "Nothing selected." } as const);
+  const choosePresentation = (next: Presentation) => {
+    setPresentation(next);
+    setNotice(null);
+    if (!supportOf(policy, next).supported) {
+      const fallback = SOURCES.find((s) => supportOf(s.value, next).supported);
+      if (fallback) setPolicy(fallback.value);
+    }
+  };
+
   const pick = (item: SurfaceItem) => {
     setSelectedId(item.id);
+    // Start from the component's declared (or derived) default strategy.
+    const preferred = item.presentations[item.defaultPresentation].supported
+      ? item.defaultPresentation
+      : item.defaultPresentation === "native"
+        ? "adaptive"
+        : "native";
+    setPresentation(preferred);
+    if (preferred === "native" && policy === "visible") setPolicy("reserved");
     setSelecting(false);
     setHoveredId(null);
     setNotice(null);
@@ -67,21 +98,44 @@ export function SpatialWebSurface({
 
   const extract = () => {
     if (!selected || !lab.extract) return;
-    const validation = lab.validateSourceVisibility?.(policy);
-    if (validation && !validation.supported) {
+    const validation = supportOf(policy);
+    if (!validation.supported) {
       setNotice(validation.reason);
       return;
     }
-    const taken = items
-      .map((item) => item.extraction?.position)
-      .filter((p): p is Vec3 => !!p);
+    // Native panels keep the page's scale: same design, same size.
+    const metersPerPixel = pose.width / SURFACE_RESOLUTION.width;
+    const source = lab.sourceElement?.(selected.id);
+    const size =
+      presentation === "native" && source
+        ? {
+            width: source.offsetWidth * metersPerPixel,
+            height: (source.offsetHeight + NATIVE_BAR) * metersPerPixel,
+          }
+        : PANEL_SIZE;
+    const taken = items.flatMap((item) => {
+      if (item.extraction?.presentation === "native") {
+        const anchor = anchors.get(item.id);
+        return anchor ? [anchor.position] : [];
+      }
+      return item.extraction?.position ? [item.extraction.position] : [];
+    });
     let index = 0;
-    let position = extractionPosition(pose, index, PANEL_SIZE);
+    let position = extractionPosition(pose, index, size);
     while (taken.some((p) => near(p, position)))
-      position = extractionPosition(pose, ++index, PANEL_SIZE);
-    if (!lab.extract(selected.id, { source: policy, position }))
-      setNotice(`${selected.label} could not be extracted.`);
-    else setNotice(null);
+      position = extractionPosition(pose, ++index, size);
+    if (presentation === "native")
+      placeNative(selected.id, {
+        position,
+        rotation: pose.rotation,
+        metersPerPixel,
+      });
+    const done = lab.extract(selected.id, {
+      presentation,
+      source: policy,
+      position,
+    });
+    setNotice(done ? null : `${selected.label} could not be extracted.`);
   };
 
   // Escape leaves selection mode wherever focus is (inert content cannot
@@ -121,6 +175,8 @@ export function SpatialWebSurface({
             selecting={selecting}
             selected={selected}
             policy={policy}
+            presentation={presentation}
+            supportOf={supportOf}
             notice={notice}
             toggleRef={selectToggleRef}
             extractRef={extractRef}
@@ -130,7 +186,11 @@ export function SpatialWebSurface({
               setHoveredId(null);
               setNotice(null);
             }}
-            onPolicy={setPolicy}
+            onPolicy={(next) => {
+              setPolicy(next);
+              setNotice(null);
+            }}
+            onPresentation={choosePresentation}
             onExtract={extract}
             onRestore={() => selected && lab.restore?.(selected.id)}
           />
@@ -187,23 +247,33 @@ function SurfaceChrome({
   selecting,
   selected,
   policy,
+  presentation,
+  supportOf,
   notice,
   toggleRef,
   extractRef,
   onToggle,
   onPolicy,
+  onPresentation,
   onExtract,
   onRestore,
 }: {
   selecting: boolean;
   selected: SurfaceItem | null;
   policy: SourcePolicy;
+  presentation: Presentation;
+  supportOf(
+    value: SourcePolicy,
+  ):
+    | { readonly supported: true }
+    | { readonly supported: false; readonly reason: string };
   notice: string | null;
   toggleRef: RefObject<HTMLButtonElement | null>;
   extractRef: RefObject<HTMLButtonElement | null>;
   /** `keyboard`: activated with the keyboard rather than a pointer. */
   onToggle(keyboard: boolean): void;
   onPolicy(policy: SourcePolicy): void;
+  onPresentation(presentation: Presentation): void;
   onExtract(): void;
   onRestore(): void;
 }) {
@@ -216,9 +286,15 @@ function SurfaceChrome({
         ? "Interact with the website normally, or choose Select elements."
         : !selected.extractable
           ? `Unsupported: ${selected.reason ?? "cannot be extracted."}`
-          : extraction
-            ? `${selected.label} is a live 3D panel (${extraction.presentationId ?? "presentation"}); original ${extraction.source === "reserved" ? "hidden, space reserved" : "kept visible"}.`
-            : `Extract ${selected.label} as a separate live 3D panel.`);
+          : extraction?.presentation === "native"
+            ? `Native DOM: the original ${selected.label} element itself (same node, ${extraction.presentationId}) is in space; its place is ${extraction.source === "collapsed" ? "collapsed" : "reserved"}.`
+            : extraction
+              ? `XR Adaptive: ${selected.label} is a separate live 3D panel (${extraction.presentationId ?? "presentation"}); original ${extraction.source === "reserved" ? "hidden, space reserved" : "kept visible"}.`
+              : presentation === "native"
+                ? `Native DOM moves the original ${selected.label} (its HTML, CSS and state) into space.`
+                : `XR Adaptive shows ${selected.label} as a separate 3D panel with its own design.`);
+  const blocked = SOURCES.map((s) => ({ ...s, support: supportOf(s.value) }));
+  const current = blocked.find((s) => s.value === policy)!;
   return (
     <div
       className="web-surface-chrome"
@@ -243,25 +319,63 @@ function SurfaceChrome({
       </span>
       {selected && !extraction ? (
         <>
+          <fieldset
+            className="web-surface-presentation"
+            data-testid="surface-presentation"
+          >
+            <legend>Presentation</legend>
+            {(
+              [
+                ["native", "Native DOM", "original design"],
+                ["adaptive", "XR Adaptive", "spatial redesign"],
+              ] as const
+            ).map(([value, name, hint]) => {
+              const option = selected.presentations[value];
+              return (
+                <label
+                  key={value}
+                  title={option.supported ? hint : option.reason}
+                >
+                  <input
+                    type="radio"
+                    name="surface-presentation"
+                    value={value}
+                    data-testid={`surface-presentation-${value}`}
+                    checked={presentation === value}
+                    disabled={!option.supported}
+                    onChange={() => onPresentation(value)}
+                  />{" "}
+                  {name} — {hint}
+                  {!option.supported && " (unsupported)"}
+                </label>
+              );
+            })}
+          </fieldset>
           <label>
-            Original{" "}
+            Source layout{" "}
             <select
               data-testid="surface-source"
               value={policy}
               onChange={(e) => onPolicy(e.target.value as SourcePolicy)}
             >
-              <option value="reserved">Reserve space</option>
-              <option value="visible">Keep original</option>
-              <option value="collapsed" disabled>
-                Collapse (unsupported)
-              </option>
+              {blocked.map(({ value, label, support }) => (
+                <option
+                  key={value}
+                  value={value}
+                  disabled={!support.supported}
+                  title={support.supported ? undefined : support.reason}
+                >
+                  {label}
+                  {!support.supported && " (unsupported)"}
+                </option>
+              ))}
             </select>
           </label>
           <button
             ref={extractRef}
             type="button"
             data-testid="surface-extract"
-            disabled={!selected.extractable}
+            disabled={!selected.extractable || !current.support.supported}
             onClick={onExtract}
           >
             Extract to Space
@@ -280,6 +394,15 @@ function SurfaceChrome({
       >
         {message}
       </span>
+      {selected && !extraction ? (
+        <span className="web-surface-message" data-testid="surface-unsupported">
+          {blocked
+            .flatMap(({ label, support }) =>
+              support.supported ? [] : [`${label}: ${support.reason}`],
+            )
+            .join(" ")}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -369,19 +492,23 @@ function SelectionLayer({
       ) : null}
       {items.map((item) => {
         const box = boxes[item.id];
-        if (!box) return null;
+        // A collapsed source has no layout box of its own.
+        if (!box || box.width === 0) return null;
         const flags = {
           "data-surface-item": item.id,
           "data-selected": item.id === selectedId || undefined,
           "data-hovered": (selecting && item.id === hoveredId) || undefined,
           "data-extracted": item.extraction?.source,
+          "data-presentation": item.extraction?.presentation,
           "data-unsupported": !item.extractable || undefined,
         };
         const state = [
           item.extraction &&
-            (item.extraction.source === "reserved"
-              ? "extracted · space reserved"
-              : "extracted · original kept"),
+            `${item.extraction.presentation === "native" ? "native DOM in space" : "extracted"} · ${
+              item.extraction.source === "visible"
+                ? "original kept"
+                : "space reserved"
+            }`,
           item.id === selectedId && "selected",
           !item.extractable && "unsupported",
         ]

@@ -3,7 +3,7 @@ import type { SpatialWebSurfacePose, SurfaceResolution } from "./surfaceMath";
 /** CSS pixel layout viewport of the spatial website page. */
 export const SURFACE_RESOLUTION: SurfaceResolution = {
   width: 720,
-  height: 520,
+  height: 600,
 };
 
 /**
