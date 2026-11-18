@@ -51,6 +51,12 @@ export interface SpatialItemLayout {
    * cannot change the page layout the item returns to.
    */
   readonly size: SpatialSize | null;
+  /**
+   * Whether the original placement is visually presented. `false` means the
+   * source visibility policy `reserved`: the item stays mounted and keeps its
+   * footprint, but is hidden while another presentation represents it.
+   * Always `true` for a newly registered or detached item.
+   */
   readonly visible: boolean;
 }
 

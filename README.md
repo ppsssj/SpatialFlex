@@ -4,7 +4,7 @@
 
 > 개발자는 공간형 UI와 제약 조건을 정의하고, 사용자는 필요한 웹 요소를 독립시켜 자신만의 작업 공간을 구성합니다.
 
-**Status:** P0 Detach + P1 Cross-Context XR Mirror — P1-05 Interactive Detachment Strategies (Experimental)
+**Status:** P0 Detach + P1 Cross-Context XR Mirror — P1-06 Spatial Web Surface & In-Surface Extraction (Experimental, desktop)
 
 **Type:** Open-source Spatial Layout & Element Detachment SDK  
 **Focus:** Adaptive Layout · Element Detachment · Live Components · User Composition · Layout Persistence
@@ -530,6 +530,8 @@ SpatialFlex는 WebSpatial이나 React Three Fiber와 같은 렌더링 기술을 
 - [x] **P1-00 / P1-02 — Same-Context XR Mirror:** Three.js/Babylon.js의 별도 3D 표현과 desktop/IWER 검증
 - [x] **P1-03 — Cross-Context XR Mirror:** same-origin iframe의 versioned 상태·액션 브리지, 중복 방지와 재연결
 - [x] **P1-04 — Declarative Spatial View (Experimental):** 컴포넌트 근처의 명시적 `SpatialItem xr` 선언과 실제 등록 수명주기
+- [x] **P1-05 — Interactive Detachment Strategies (Experimental):** Move + Placeholder/Collapse, Mirror + Visible 비교와 명시적 거부
+- [x] **P1-06 — Spatial Web Surface (Experimental, desktop):** 3D 월드에 고정된 실제 React 웹사이트 위에서 등록 컴포넌트를 선택·추출·복원
 - [ ] **Future — Generalized Detach to XR:** 런타임 capability에 따른 더 폭넓은 presentation 재사용; 자동 DOM 변환을 뜻하지 않음
 - [ ] **Future — Adaptive Layout / Persistence:** 자동 배치, 충돌 방지, 레이아웃 저장·복원
 - [ ] **Future — Open-Source Release:** API 안정화, 기기 호환성 검증, 문서 및 npm 배포
@@ -573,7 +575,7 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 ## 12. Project Status
 
-**Current stage: P1-05 Interactive Detachment Strategies (Experimental)**
+**Current stage: P1-06 Spatial Web Surface & In-Surface Element Extraction (Experimental, desktop)**
 
 P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.com/ppsssj/SpatialFlex/issues/5))에서 **같은 브라우저 페이지 안의 2D 개념 증명(PoC)** 을 구현하고 자동화 테스트로 검증했습니다. 이는 위에서 설명한 SpatialFlex 비전의 첫 단계이며, XR 환경에서의 동작이나 SDK 전체의 완성을 뜻하지 않습니다. 실행 방법과 세부 동작은 [13. Local Development](#13-local-development)에 있습니다.
 
@@ -591,6 +593,7 @@ P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.co
 - **P1-03 Cross-Context Mirror:** 별도 JavaScript realm의 same-origin iframe에 검증된 데이터와 semantic action ID만 전달하며, 앱이 상태와 액션을 소유합니다. [Live Bridge](docs/live-bridge.md).
 - **P1-04 선언형 View (실험적):** `SpatialItem xr`로 컴포넌트 근처에서 representation과 허용 액션을 선언합니다. 실제 등록·해제와 최신 handler를 추적하며 앱별 XR adapter entry 없이 발견합니다. [API / DX 비교](docs/declarative-spatial-view.md).
 - **P1-05 Interactive Detachment (실험적):** XR Lab에서 실제 Counter·Live Chart·Image를 선택하고 Move + Placeholder, Move + Collapse, Mirror + Visible을 비교합니다. Move는 원래 React/DOM 인스턴스를 유지하고, XR Mirror는 별도로 선언된 3D 표현입니다. 지원하지 않는 조합은 이유와 함께 거부합니다. [전략 API / 시연 / 검증](docs/detachment-strategies.md).
+- **P1-06 Spatial Web Surface (실험적, 데스크톱):** 원래 React 대시보드(같은 mounted 인스턴스)를 3D 카메라에 맞춘 원근 CSS 변환으로 월드에 고정해 보여 줍니다. 네이티브 HTML 입력이 그대로 동작하며, 표면 위에서 등록된 컴포넌트만 선택해 별도의 live XR 패널로 추출하고(원본 유지 또는 공간 예약) 복원합니다. HTML 표면은 WebGL 지오메트리가 아니고 몰입형 WebXR 세션에는 표시되지 않습니다. Three.js·Babylon.js same-context만 지원하며 iframe Host는 이유와 함께 비활성화됩니다. [아키텍처 / 시연 / 검증](docs/spatial-web-surface.md).
 
 ### 아직 구현되지 않은 것
 

@@ -52,11 +52,40 @@ export interface HostEvents {
   onPanelClose(panelId: string): void;
 }
 
+/**
+ * The desktop camera of one rendered frame, published for same-document DOM
+ * compositing (the spatial web surface). Plain numbers only: no engine
+ * objects. The object and its arrays may be reused by the next frame, so a
+ * listener reads them synchronously and keeps no reference.
+ */
+export interface HostCameraFrame {
+  /**
+   * World → clip transform (projection × view), column-major, WebGL clip
+   * space (y up, visible where -w <= x, y <= w).
+   */
+  readonly viewProjection: ArrayLike<number>;
+  /** The canvas' client rectangle, in CSS pixels. */
+  readonly viewport: {
+    readonly left: number;
+    readonly top: number;
+    readonly width: number;
+    readonly height: number;
+  };
+  /** Camera position, in meters. */
+  readonly eye: Vec3;
+}
+
 export interface XRHostProps extends HostEvents {
   /** Parent-only registration epochs; never part of serialized HostPanel data. */
   readonly actionOwners?: Readonly<Record<string, string>>;
   /** Panels to render. A host keeps no copy of their content. */
   readonly panels: readonly HostPanel[];
+  /**
+   * Called after the camera is final for each rendered frame. Only hosts
+   * whose module declares `webSurface: true` call it: the listener runs in
+   * the host's own document and realm.
+   */
+  readonly onCameraFrame?: (frame: HostCameraFrame) => void;
 }
 
 export type EngineId = "three" | "babylon";
@@ -66,6 +95,11 @@ export interface HostModule {
   readonly id: EngineId;
   readonly label: string;
   readonly Host: ComponentType<XRHostProps>;
+  /**
+   * The host renders in this document and reports {@link HostCameraFrame}s,
+   * so the same document's live DOM can be composited into its world.
+   */
+  readonly webSurface?: boolean;
 }
 
 /** Panel geometry, identical for every panel, engine and integration. */

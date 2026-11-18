@@ -5,4 +5,5 @@ export const babylonHost: HostModule = {
   id: "babylon",
   label: "Babylon.js",
   Host: BabylonHost,
+  webSurface: true,
 };

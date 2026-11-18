@@ -9,6 +9,8 @@ import type { Vec3 } from "../../contracts/xrHost";
 export interface Presentation {
   readonly shown: readonly string[];
   readonly offsets: Readonly<Partial<Record<string, Vec3>>>;
+  /** Explicit world base positions; items without one use their slot. */
+  readonly anchors?: Readonly<Partial<Record<string, Vec3>>>;
   readonly selected: string | null;
 }
 
@@ -31,12 +33,18 @@ export function usePresentation(available: readonly string[]) {
   }
 
   const show = useCallback(
-    (id: string) => {
+    (id: string, anchor?: Vec3) => {
       if (!available.includes(id)) return false;
       setPresentation((current) =>
         current.shown.includes(id)
           ? current
-          : { ...current, shown: [...current.shown, id] },
+          : {
+              ...current,
+              shown: [...current.shown, id],
+              ...(anchor && {
+                anchors: { ...current.anchors, [id]: anchor },
+              }),
+            },
       );
       return true;
     },
@@ -49,9 +57,12 @@ export function usePresentation(available: readonly string[]) {
       setPresentation((current) => {
         const offsets = { ...current.offsets };
         delete offsets[id as string];
+        const anchors = { ...current.anchors };
+        delete anchors[id as string];
         return {
           shown: current.shown.filter((shownId) => shownId !== id),
           offsets,
+          anchors,
           selected: current.selected === id ? null : current.selected,
         };
       });
@@ -96,13 +107,17 @@ function prune(
   const shown = presentation.shown.filter((id) => available.includes(id));
   if (shown.length === presentation.shown.length) return presentation;
   const offsets = { ...presentation.offsets };
+  const anchors = { ...presentation.anchors };
   for (const id of presentation.shown)
-    if (!shown.includes(id)) delete offsets[id];
+    if (!shown.includes(id)) {
+      delete offsets[id];
+      delete anchors[id];
+    }
   const selected =
     presentation.selected && shown.includes(presentation.selected)
       ? presentation.selected
       : null;
-  return { shown, offsets, selected };
+  return { shown, offsets, anchors, selected };
 }
 
 const round = (value: number) => Math.round(value * 1000) / 1000;

@@ -1,5 +1,6 @@
 import type {
   DetachmentStrategy,
+  SourceVisibility,
   SpatialItemId,
   SpatialPosition,
   SpatialRegistry,
@@ -34,6 +35,18 @@ export interface SpatialController {
    * most the space between its position and the viewport's bottom-right.
    */
   resize(id: SpatialItemId, size: SpatialSize): boolean;
+  /**
+   * Sets the visual policy of an attached item's original placement while
+   * another presentation (such as a live XR mirror) represents it. The item
+   * stays mounted; `reserved` hides it and keeps its footprint.
+   */
+  setSourceVisibility(id: SpatialItemId, visibility: SourceVisibility): boolean;
+  /**
+   * The in-flow element of a currently registered and connected item, for
+   * read-only geometry (for example a selection outline). `null` for any
+   * other id: only registered items are discoverable.
+   */
+  sourceElement(id: SpatialItemId): HTMLElement | null;
 }
 
 /** Smallest panel size the controller allows when resizing. */
@@ -101,6 +114,14 @@ export function createController(
 
     attach(id) {
       return registry.attach(id);
+    },
+
+    setSourceVisibility(id, visibility) {
+      return registry.setSourceVisibility(id, visibility);
+    },
+
+    sourceElement(id) {
+      return registry.has(id) ? (hosts.get(id)?.slot ?? null) : null;
     },
 
     move(id, position) {

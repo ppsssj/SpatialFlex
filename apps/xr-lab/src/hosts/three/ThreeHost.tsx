@@ -1,11 +1,12 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { createXRStore, XR, type XRStore } from "@react-three/xr";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Mesh, Vector3, type PerspectiveCamera } from "three";
+import { Matrix4, Mesh, Vector3, type PerspectiveCamera } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { getProbe, hostMounted, recordFrame } from "../../contracts/hostProbe";
 import {
   CAMERA,
+  type HostCameraFrame,
   type HostPanel,
   type XRHostProps,
 } from "../../contracts/xrHost";
@@ -35,7 +36,7 @@ function createHostXRStore() {
  * WebXR session through @react-three/xr. Depends only on the neutral host
  * contract.
  */
-export function ThreeHost({ panels, ...events }: XRHostProps) {
+export function ThreeHost({ panels, onCameraFrame, ...events }: XRHostProps) {
   const [store] = useState(createHostXRStore);
   useEffect(() => () => store.destroy(), [store]);
   useEffect(() => hostMounted("three"), []);
@@ -82,6 +83,7 @@ export function ThreeHost({ panels, ...events }: XRHostProps) {
           sessionMode={sessionMode}
           viewKey={viewKey}
         />
+        <CameraFrameReporter onCameraFrame={onCameraFrame} />
       </Canvas>
     </div>
   );
@@ -148,6 +150,62 @@ function resetCamera(camera: PerspectiveCamera) {
   camera.updateProjectionMatrix();
 }
 
+/**
+ * Publishes the final desktop camera of each frame for same-document DOM
+ * compositing. Plain numbers only; objects are reused between frames.
+ */
+function CameraFrameReporter({
+  onCameraFrame,
+}: {
+  onCameraFrame: XRHostProps["onCameraFrame"];
+}) {
+  const listener = useRef(onCameraFrame);
+  useEffect(() => {
+    listener.current = onCameraFrame;
+  }, [onCameraFrame]);
+  // Reused between frames; created on the first frame.
+  const scratch = useRef<{
+    vp: Matrix4;
+    eye: Vector3;
+    frame: {
+      viewProjection: ArrayLike<number>;
+      viewport: { left: number; top: number; width: number; height: number };
+      eye: [number, number, number];
+    };
+  } | null>(null);
+  useFrame(({ camera, gl }) => {
+    const report = listener.current;
+    if (!report) return;
+    const state = (scratch.current ??= {
+      vp: new Matrix4(),
+      eye: new Vector3(),
+      frame: {
+        viewProjection: [],
+        viewport: { left: 0, top: 0, width: 0, height: 0 },
+        eye: [0, 0, 0],
+      },
+    });
+    camera.updateMatrixWorld();
+    state.vp.multiplyMatrices(
+      camera.projectionMatrix,
+      camera.matrixWorldInverse,
+    );
+    camera.getWorldPosition(state.eye);
+    const rect = gl.domElement.getBoundingClientRect();
+    const { frame } = state;
+    frame.viewProjection = state.vp.elements;
+    frame.viewport.left = rect.left;
+    frame.viewport.top = rect.top;
+    frame.viewport.width = rect.width;
+    frame.viewport.height = rect.height;
+    frame.eye[0] = state.eye.x;
+    frame.eye[1] = state.eye.y;
+    frame.eye[2] = state.eye.z;
+    report(frame satisfies HostCameraFrame);
+  });
+  return null;
+}
+
 /** Keeps the read-only host probe up to date. */
 function ProbeBinder({
   panels,
@@ -178,6 +236,15 @@ function ProbeBinder({
       const mesh = find(panelId, part);
       if (!mesh) return null;
       const ndc = mesh.getWorldPosition(new Vector3()).project(camera);
+      if (ndc.z > 1) return null;
+      const rect = gl.domElement.getBoundingClientRect();
+      return {
+        x: rect.left + ((ndc.x + 1) / 2) * rect.width,
+        y: rect.top + ((1 - ndc.y) / 2) * rect.height,
+      };
+    };
+    probe.project = ([x, y, z]) => {
+      const ndc = new Vector3(x, y, z).project(camera);
       if (ndc.z > 1) return null;
       const rect = gl.domElement.getBoundingClientRect();
       return {

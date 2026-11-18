@@ -15,6 +15,7 @@ export function BabylonHost({
   onPanelButton,
   onPanelSelect,
   onPanelClose,
+  onCameraFrame,
 }: XRHostProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<BabylonLabScene | null>(null);
@@ -48,6 +49,12 @@ export function BabylonHost({
   useEffect(() => {
     sceneRef.current?.setPanels(panels);
   }, [panels]);
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+    scene?.setCameraFrameListener(onCameraFrame ?? null);
+    return () => scene?.setCameraFrameListener(null);
+  }, [onCameraFrame]);
 
   const enterVR = async () => {
     setError(null);
