@@ -1,0 +1,277 @@
+{
+  "stage": "before",
+  "records": [
+    {
+      "browser": "chromium",
+      "engine": "three",
+      "parent": {
+        "workspace": {
+          "x": 453,
+          "y": 70,
+          "width": 827,
+          "height": 830,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "bridge": {
+          "x": 453,
+          "y": 109,
+          "width": 827,
+          "height": 700,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "iframe": {
+          "x": 453,
+          "y": 143,
+          "width": 829,
+          "height": 662,
+          "display": "inline",
+          "flex": "0 1 auto"
+        },
+        "viewport": 900,
+        "scrollHeight": 900
+      },
+      "child": {
+        "root": {
+          "x": 0,
+          "y": 4,
+          "width": 827,
+          "height": 233,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "host": {
+          "x": 0,
+          "y": 49,
+          "width": 827,
+          "height": 188,
+          "display": "flex",
+          "flex": "0 1 auto"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 87,
+          "width": 827,
+          "height": 150,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "restore": {
+          "x": 0,
+          "y": 28,
+          "width": 188.640625,
+          "height": 21,
+          "display": "inline-block",
+          "flex": "0 1 auto"
+        },
+        "viewport": 660,
+        "scrollHeight": 660
+      }
+    },
+    {
+      "browser": "chromium",
+      "engine": "babylon",
+      "parent": {
+        "workspace": {
+          "x": 453,
+          "y": 70,
+          "width": 827,
+          "height": 830,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "bridge": {
+          "x": 453,
+          "y": 109,
+          "width": 827,
+          "height": 700,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "iframe": {
+          "x": 453,
+          "y": 143,
+          "width": 829,
+          "height": 662,
+          "display": "inline",
+          "flex": "0 1 auto"
+        },
+        "viewport": 900,
+        "scrollHeight": 900
+      },
+      "child": {
+        "root": {
+          "x": 0,
+          "y": 4,
+          "width": 827,
+          "height": 497,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "host": {
+          "x": 0,
+          "y": 49,
+          "width": 827,
+          "height": 452,
+          "display": "flex",
+          "flex": "0 1 auto"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 87,
+          "width": 827,
+          "height": 414,
+          "display": "block",
+          "flex": "1 1 0%"
+        },
+        "restore": {
+          "x": 0,
+          "y": 28,
+          "width": 188.640625,
+          "height": 21,
+          "display": "inline-block",
+          "flex": "0 1 auto"
+        },
+        "viewport": 660,
+        "scrollHeight": 660
+      }
+    },
+    {
+      "browser": "firefox",
+      "engine": "three",
+      "parent": {
+        "workspace": {
+          "x": 453,
+          "y": 70,
+          "width": 827,
+          "height": 830,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "bridge": {
+          "x": 453,
+          "y": 109,
+          "width": 827,
+          "height": 701,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "iframe": {
+          "x": 453,
+          "y": 144,
+          "width": 829,
+          "height": 662,
+          "display": "inline",
+          "flex": "0 1 auto"
+        },
+        "viewport": 900,
+        "scrollHeight": 900
+      },
+      "child": {
+        "root": {
+          "x": 0,
+          "y": 4,
+          "width": 827,
+          "height": 234,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "host": {
+          "x": 0,
+          "y": 49,
+          "width": 827,
+          "height": 189,
+          "display": "flex",
+          "flex": "0 1 auto"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 88,
+          "width": 827,
+          "height": 150,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "restore": {
+          "x": 0,
+          "y": 27,
+          "width": 179.73333740234375,
+          "height": 22,
+          "display": "inline-block",
+          "flex": "0 1 auto"
+        },
+        "viewport": 660,
+        "scrollHeight": 660
+      }
+    },
+    {
+      "browser": "firefox",
+      "engine": "babylon",
+      "parent": {
+        "workspace": {
+          "x": 453,
+          "y": 70,
+          "width": 827,
+          "height": 830,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "bridge": {
+          "x": 453,
+          "y": 109,
+          "width": 827,
+          "height": 701,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "iframe": {
+          "x": 453,
+          "y": 144,
+          "width": 829,
+          "height": 662,
+          "display": "inline",
+          "flex": "0 1 auto"
+        },
+        "viewport": 900,
+        "scrollHeight": 900
+      },
+      "child": {
+        "root": {
+          "x": 0,
+          "y": 4,
+          "width": 827,
+          "height": 498,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "host": {
+          "x": 0,
+          "y": 49,
+          "width": 827,
+          "height": 453,
+          "display": "flex",
+          "flex": "0 1 auto"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 88,
+          "width": 827,
+          "height": 414,
+          "display": "block",
+          "flex": "1 1 0%"
+        },
+        "restore": {
+          "x": 0,
+          "y": 27,
+          "width": 179.73333740234375,
+          "height": 22,
+          "display": "inline-block",
+          "flex": "0 1 auto"
+        },
+        "viewport": 660,
+        "scrollHeight": 660
+      }
+    }
+  ]
+}
