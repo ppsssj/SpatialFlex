@@ -117,7 +117,38 @@ This writes `docs/evidence/p1-05-{engine}-{bridge}-{browser}.json`. The represen
 
 Core tests enumerate all 18 dimension combinations and malformed runtime values. React tests exercise changing source policy while detached without changing state, focus, Context or effects. Adapter integration tests verify switching keeps one presentation and stale callbacks cannot invoke the replacement instance. All existing assertions remain intact. The layout fix is included through a normal Git merge and its regression suite runs with this branch.
 
-Validation status and observed geometry will be recorded after the browser run; pending checks are not claimed as passing.
+Observed focused result: **PASS — 10 browser cases, Chromium and Firefox, 1.2 minutes**. The eight full-flow cases cover both XR engines and both execution contexts; the remaining two cover detached chart/image restoration and Image unmount/remount. No original browser assertions were changed.
+
+| Observed property                           | Chromium                  | Firefox                   |
+| ------------------------------------------- | ------------------------- | ------------------------- |
+| Original → reserved footprint               | 276.125 × 120 → identical | 263.800 × 120 → identical |
+| Chart moves upward when source collapses    | 132px                     | 132px                     |
+| Original DOM identity / local clicks / note | Same node / 1 / retained  | Same node / 1 / retained  |
+| Counter effect mounts / active instances    | 1 → 1 / 1                 | 1 → 1 / 1                 |
+| Application subscriptions                   | 6 → 6                     | 6 → 6                     |
+| Total subscribe / unsubscribe calls         | 6 → 6 / 0 → 0             | 6 → 6 / 0 → 0             |
+| Domain increments / processed actions       | Exactly 3 / 3             | Exactly 3 / 3             |
+
+These values were observed for both engines and contexts. Measurements use actual DOM bounding boxes. The window shrinks from 1280×900 to 1100×820 during the scenario; source Collapse measurements are taken after selecting that policy, so control text does not contaminate the source reflow comparison. The Placeholder comparison asserts unchanged sibling position as well as unchanged source footprint.
+
+| Raw full-flow evidence | Chromium                                            | Firefox                                            |
+| ---------------------- | --------------------------------------------------- | -------------------------------------------------- |
+| Three / same context   | [JSON](evidence/p1-05-three-off-chromium.json)      | [JSON](evidence/p1-05-three-off-firefox.json)      |
+| Three / iframe         | [JSON](evidence/p1-05-three-iframe-chromium.json)   | [JSON](evidence/p1-05-three-iframe-firefox.json)   |
+| Babylon / same context | [JSON](evidence/p1-05-babylon-off-chromium.json)    | [JSON](evidence/p1-05-babylon-off-firefox.json)    |
+| Babylon / iframe       | [JSON](evidence/p1-05-babylon-iframe-chromium.json) | [JSON](evidence/p1-05-babylon-iframe-firefox.json) |
+
+| Attached original                                           | Move with Placeholder                                                                 |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| ![Attached original dashboard](evidence/p1-05-attached.png) | ![Original component floats while source gap remains](evidence/p1-05-placeholder.png) |
+
+| Move with Collapse                                                                     | Live XR Mirror                                                                             |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| ![Chart and image reflow after original source collapses](evidence/p1-05-collapse.png) | ![Original component remains beside independent live XR mirror](evidence/p1-05-mirror.png) |
+
+The UX adds one strategy control component and extends the existing generic SpatialFlex adapter. It reuses three existing application widgets, their store and declarative XR actions: **zero new authoritative application stores, React roots, per-widget adapter action tables, renderer implementations or protocol versions**. The Core addition is one strategy validation module; the DOM changes extend the existing controller and same-tree Host. The existing XR-controls path remains available and uses the same adapter operations.
+
+Requested install/lint/format/typecheck/build checks and **232 unit/integration cases** passed after integrating the Layout Fix. The complete browser regression and remote CI outcome are recorded in the PR after their final runs; focused evidence alone is not a full-suite claim.
 
 ## Limitations and roadmap
 

@@ -169,6 +169,9 @@ canvas.xr-host-canvas {
 .strategy-controls select {
   max-width: 100%;
 }
+.strategy-controls [data-testid="strategy-presentation"] {
+  min-block-size: 3em;
+}
 [data-spatialflex-panel][data-status="detached"] {
   z-index: 10;
   background: white;

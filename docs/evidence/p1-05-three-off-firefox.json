@@ -1,0 +1,61 @@
+{
+  "engine": "three",
+  "bridge": "off",
+  "browser": "firefox",
+  "sourceAttached": {
+    "x": 16,
+    "y": 543.6666870117188,
+    "width": 263.79998779296875,
+    "height": 120
+  },
+  "sourcePlaceholder": {
+    "x": 16,
+    "y": 543.6666870117188,
+    "width": 263.79998779296875,
+    "height": 120
+  },
+  "chartAttached": {
+    "x": 16,
+    "y": 693.6666870117188,
+    "width": 178,
+    "height": 106
+  },
+  "chartCollapsed": {
+    "x": 16,
+    "y": 561.6666870117188,
+    "width": 178,
+    "height": 106
+  },
+  "floatingAfterDrag": {
+    "x": 746,
+    "y": 211,
+    "width": 263.79998779296875,
+    "height": 179
+  },
+  "floatingAfterViewportResize": {
+    "x": 746,
+    "y": 211,
+    "width": 324,
+    "height": 219
+  },
+  "originalDOMIdentityPreserved": true,
+  "localState": "Local clicks: 1",
+  "localNote": "same mounted input",
+  "effectMountsBefore": 1,
+  "effectMountsAfter": 1,
+  "activeInstances": 1,
+  "subscriptionsBefore": 6,
+  "totalSubscribesBefore": 6,
+  "totalSubscribesAfter": 6,
+  "totalUnsubscribesBefore": 0,
+  "totalUnsubscribesAfter": 0,
+  "subscriptionsAfter": 6,
+  "domainActions": 3,
+  "incrementCalls": 3,
+  "strategies": [
+    "move/placeholder/web",
+    "move/collapse/web",
+    "mirror/visible/xr"
+  ],
+  "finalPresentation": "Original mounted DOM: attached"
+}

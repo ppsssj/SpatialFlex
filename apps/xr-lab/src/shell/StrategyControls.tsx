@@ -9,18 +9,17 @@ export function StrategyControls({ lab }: { lab: LabIntegration }) {
     source: "placeholder",
     target: "web",
   });
-  const [result, setResult] = useState("");
   const validation = lab.validateStrategy!(strategy);
+  const description = !validation.supported
+    ? `Unsupported strategy. ${validation.reason}`
+    : strategy.mode === "move"
+      ? `Move floats the original React component; source space ${strategy.source === "collapse" ? "collapses and siblings reflow" : "is reserved"}. Drag its title bar or resize its lower-right corner.`
+      : "Mirror keeps the original React component in the dashboard and shows a separate live XR representation. Click its 3D action button.";
   const item = lab.items.find((item) => item.id === selected);
   const run = () => {
     if (!validation.supported || !item) return;
     if (strategy.mode === "move") lab.detach?.(selected, strategy);
     else lab.show(selected, strategy);
-    setResult(
-      strategy.mode === "move"
-        ? `Original React component floats; source space ${strategy.source === "collapse" ? "collapses and siblings reflow" : "is reserved"}. Drag its title bar or resize its lower-right corner.`
-        : "Live XR mirror shown. Original React component remains in the dashboard; click its 3D action button.",
-    );
   };
   return (
     <section className="strategy-controls" aria-labelledby="strategy-heading">
@@ -110,7 +109,6 @@ export function StrategyControls({ lab }: { lab: LabIntegration }) {
         onClick={() => {
           if (item?.detached) lab.attach?.(selected);
           lab.hide(selected);
-          setResult("Presentation restored; original component is attached.");
         }}
       >
         Attach / Hide
@@ -125,7 +123,7 @@ export function StrategyControls({ lab }: { lab: LabIntegration }) {
               : "Original mounted DOM: attached"}
       </p>
       <p className="hint" data-testid="strategy-result">
-        {result}
+        {description}
       </p>
     </section>
   );

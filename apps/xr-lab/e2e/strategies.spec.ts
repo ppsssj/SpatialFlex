@@ -304,6 +304,9 @@ for (const engine of ENGINES)
       await expect(page.getByTestId("strategy-support")).toContainText(
         "Snapshots are not implemented",
       );
+      await expect(page.getByTestId("strategy-result")).toContainText(
+        "Unsupported strategy. Snapshots are not implemented",
+      );
       await expect(page.getByTestId("strategy-apply")).toBeDisabled();
       expect(errors).toEqual([]);
     });
