@@ -73,6 +73,19 @@ function useSpatialFlexIntegration(): LabIntegration {
       },
     ];
   });
+  // Host callbacks are bound to the presentation that actually drew them.
+  // A stale close/select must not affect a later instance either.
+  const currentPresentation = (id: string) => {
+    const view = views.find((v) => v.id === id);
+    if (!view || !presentation.shown.includes(view.registrationId)) return;
+    const instance = capturedInstances.get(view.registrationId);
+    if (
+      instance &&
+      instance === instances.current.get(view.registrationId) &&
+      registry.getView(id)?.registrationId === view.registrationId
+    )
+      return view;
+  };
   return {
     source: "SpatialFlex registry",
     validateStrategy: validateDetachmentStrategy,
@@ -103,7 +116,7 @@ function useSpatialFlexIntegration(): LabIntegration {
           "XR show accepts Mirror + Visible + XR only.",
         );
       const view = registry.getView(id);
-      if (!view) return false;
+      if (!view || !available.includes(view.registrationId)) return false;
       controller.attach(id);
       if (!instances.current.has(view.registrationId)) {
         instances.current.set(
@@ -144,22 +157,15 @@ function useSpatialFlexIntegration(): LabIntegration {
       return view ? move(view.registrationId, delta) : false;
     },
     onPanelButton(id, action) {
-      const view = views.find((v) => v.id === id);
-      if (
-        view &&
-        presentation.shown.includes(view.registrationId) &&
-        capturedInstances.get(view.registrationId) &&
-        capturedInstances.get(view.registrationId) ===
-          instances.current.get(view.registrationId)
-      )
-        registry.invokeView(id, view.registrationId, action);
+      const view = currentPresentation(id);
+      if (view) registry.invokeView(id, view.registrationId, action);
     },
     onPanelSelect(id) {
-      const view = registry.getView(id);
+      const view = currentPresentation(id);
       if (view) select(view.registrationId);
     },
     onPanelClose(id) {
-      const view = registry.getView(id);
+      const view = currentPresentation(id);
       if (view) {
         instances.current.delete(view.registrationId);
         publishInstances();

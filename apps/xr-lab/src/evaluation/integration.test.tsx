@@ -113,6 +113,12 @@ describe("SpatialFlex strategy integration", () => {
     act(() => lab.hide("shared-counter"));
     act(() => lab.show("shared-counter"));
     expect(lab.actionOwners!["shared-counter"]).not.toBe(owner);
+    act(() => old.onPanelSelect("shared-counter"));
+    act(() => old.onPanelClose("shared-counter"));
+    expect(lab.items.find((v) => v.id === "shared-counter")).toMatchObject({
+      shown: true,
+      selected: false,
+    });
     act(() => old.onPanelButton("shared-counter", "increment"));
     expect(webCount()).toBe("0");
     act(() => lab.onPanelButton("shared-counter", "increment"));
@@ -131,6 +137,12 @@ describe("SpatialFlex strategy integration", () => {
     );
     expect(store.getDiagnostics().activeSubscriptions).toBe(
       initial.activeSubscriptions,
+    );
+    expect(store.getDiagnostics().totalSubscribes).toBe(
+      initial.totalSubscribes,
+    );
+    expect(store.getDiagnostics().totalUnsubscribes).toBe(
+      initial.totalUnsubscribes,
     );
     expect(() =>
       lab.show("shared-counter", {

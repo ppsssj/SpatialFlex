@@ -212,6 +212,8 @@ function DomainDiagnostics() {
     activeSubscriptions,
     componentMounts,
     activeComponents,
+    totalSubscribes,
+    totalUnsubscribes,
   } = useLabDiagnostics();
   return (
     <dl className="diagnostics" aria-label="Domain diagnostics">
@@ -220,7 +222,13 @@ function DomainDiagnostics() {
       <dt>increment() calls</dt>
       <dd data-testid="increment-calls">{actionCalls.increment}</dd>
       <dt>Active state subscriptions</dt>
-      <dd data-testid="active-subscriptions">{activeSubscriptions}</dd>
+      <dd
+        data-testid="active-subscriptions"
+        data-total-subscribes={totalSubscribes}
+        data-total-unsubscribes={totalUnsubscribes}
+      >
+        {activeSubscriptions}
+      </dd>
       <dt>Counter React effect mounts</dt>
       <dd data-testid="counter-mounts">
         {componentMounts[WIDGETS.counter] ?? 0}

@@ -85,10 +85,20 @@ for (const engine of ENGINES)
       }
       const counter = page.getByTestId("web-count");
       const original = await counter.elementHandle();
+      await expect(page.getByTestId("counter-instances")).toHaveText("1");
+      await expect(page.getByTestId("active-subscriptions")).not.toHaveText(
+        "0",
+      );
       const mounts = await page.getByTestId("counter-mounts").textContent();
       const subscriptions = await page
         .getByTestId("active-subscriptions")
         .textContent();
+      const totalSubscribes = await page
+        .getByTestId("active-subscriptions")
+        .getAttribute("data-total-subscribes");
+      const totalUnsubscribes = await page
+        .getByTestId("active-subscriptions")
+        .getAttribute("data-total-unsubscribes");
       await page.getByTestId("strategy-item").selectOption("shared-counter");
       await page.getByTestId("counter-local").click();
       await page.getByTestId("counter-note").fill("same mounted input");
@@ -212,6 +222,14 @@ for (const engine of ENGINES)
       await expect(page.getByTestId("active-subscriptions")).toHaveText(
         subscriptions!,
       );
+      await expect(page.getByTestId("active-subscriptions")).toHaveAttribute(
+        "data-total-subscribes",
+        totalSubscribes!,
+      );
+      await expect(page.getByTestId("active-subscriptions")).toHaveAttribute(
+        "data-total-unsubscribes",
+        totalUnsubscribes!,
+      );
       const evidence = {
         engine,
         bridge,
@@ -236,6 +254,18 @@ for (const engine of ENGINES)
           await page.getByTestId("counter-instances").textContent(),
         ),
         subscriptionsBefore: Number(subscriptions),
+        totalSubscribesBefore: Number(totalSubscribes),
+        totalSubscribesAfter: Number(
+          await page
+            .getByTestId("active-subscriptions")
+            .getAttribute("data-total-subscribes"),
+        ),
+        totalUnsubscribesBefore: Number(totalUnsubscribes),
+        totalUnsubscribesAfter: Number(
+          await page
+            .getByTestId("active-subscriptions")
+            .getAttribute("data-total-unsubscribes"),
+        ),
         subscriptionsAfter: Number(
           await page.getByTestId("active-subscriptions").textContent(),
         ),
