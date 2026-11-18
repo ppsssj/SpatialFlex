@@ -1,6 +1,13 @@
 import type { ComponentType, ReactNode } from "react";
 import type { HostEvents, HostPanel, Vec3 } from "../contracts/xrHost";
 import type { RenderWidget } from "../fixtures";
+/** UI capability request. Structurally compatible with SDK strategies without
+ * adding an SDK dependency to the baseline, shared shell or renderer contract. */
+export interface LabStrategy {
+  readonly mode: "move" | "mirror" | "snapshot";
+  readonly source: "placeholder" | "collapse" | "visible";
+  readonly target: "web" | "xr";
+}
 
 /**
  * Contract between the shared lab shell and an integration adapter.
@@ -18,7 +25,15 @@ export interface LabIntegration extends HostEvents {
   /** Panels for the host. */
   readonly panels: readonly HostPanel[];
   /** Shows an item in XR. Returns false for unknown or unavailable ids. */
-  show(id: string): boolean;
+  show(id: string, strategy?: LabStrategy): boolean;
+  validateStrategy?(
+    strategy: unknown,
+  ):
+    | { readonly supported: true }
+    | { readonly supported: false; readonly reason: string };
+  /** Same-document Move, implemented only by SpatialFlex. */
+  detach?(id: string, strategy: LabStrategy): boolean;
+  attach?(id: string): boolean;
   /** Removes an item from XR. Returns false if it was not shown. */
   hide(id: string): boolean;
   /** Moves a shown item's panel by `delta` meters. */
@@ -32,6 +47,8 @@ export interface XRItemOption {
   readonly label: string;
   readonly shown: boolean;
   readonly selected: boolean;
+  readonly detached?: boolean;
+  readonly presentationId?: string;
 }
 
 export type IntegrationId = "baseline" | "spatialflex";

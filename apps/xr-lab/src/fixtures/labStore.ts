@@ -34,6 +34,8 @@ export interface LabActions {
 }
 
 export interface LabDiagnostics {
+  readonly componentMounts: Readonly<Record<string, number>>;
+  readonly activeComponents: Readonly<Record<string, number>>;
   readonly actionCalls: Readonly<Record<keyof LabActions, number>>;
   readonly activeSubscriptions: number;
   readonly totalSubscribes: number;
@@ -43,6 +45,8 @@ export interface LabDiagnostics {
 }
 
 export interface LabStore {
+  /** Demo diagnostics only; does not register another application subscription. */
+  componentMounted(id: string): () => void;
   getState(): LabState;
   subscribe(listener: () => void): () => void;
   readonly actions: LabActions;
@@ -73,6 +77,8 @@ export function createLabStore(
   const listeners = new Set<() => void>();
   const diagnosticListeners = new Set<() => void>();
   const counts = {
+    componentMounts: {} as Record<string, number>,
+    activeComponents: {} as Record<string, number>,
     actionCalls: {
       increment: 0,
       setImageVariant: 0,
@@ -89,6 +95,8 @@ export function createLabStore(
 
   function snapshot(): LabDiagnostics {
     return Object.freeze({
+      componentMounts: Object.freeze({ ...counts.componentMounts }),
+      activeComponents: Object.freeze({ ...counts.activeComponents }),
       actionCalls: Object.freeze({ ...counts.actionCalls }),
       activeSubscriptions: listeners.size,
       totalSubscribes: counts.totalSubscribes,
@@ -110,6 +118,15 @@ export function createLabStore(
   }
 
   return {
+    componentMounted(id) {
+      counts.componentMounts[id] = (counts.componentMounts[id] ?? 0) + 1;
+      counts.activeComponents[id] = (counts.activeComponents[id] ?? 0) + 1;
+      diagnosticsChanged();
+      return () => {
+        counts.activeComponents[id]!--;
+        diagnosticsChanged();
+      };
+    },
     getState: () => state,
     subscribe(listener) {
       listeners.add(listener);

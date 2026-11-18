@@ -48,8 +48,8 @@ type Interaction =
  *
  * Detaching never remounts the children. The same elements stay in the same
  * place in the DOM and the React tree; the panel element only switches to
- * `position: fixed`, and its in-flow parent keeps the original size as a
- * placeholder. Local state, context, event handlers and focus are therefore
+ * `position: fixed`. Its parent reserves the original size by default, or
+ * generates no layout box under the Collapse policy. Local state, context, event handlers and focus are therefore
  * preserved. See the README for the limits of this approach.
  *
  * A duplicate ID throws a `DUPLICATE_ITEM_ID` error from the commit phase,
@@ -86,6 +86,9 @@ export function SpatialItem({
   // Size of the original, attached placement. Host-owned and separate from
   // the registry's panel size, so resizing the panel cannot change it.
   const [placeholder, setPlaceholder] = useState<SpatialSize | null>(null);
+  const [sourcePolicy, setSourcePolicy] = useState<"placeholder" | "collapse">(
+    "placeholder",
+  );
 
   // Declared before the registration effect so that, when the ID and the
   // capabilities change together, the new registration reads fresh values.
@@ -111,6 +114,7 @@ export function SpatialItem({
       slot: slotRef.current!,
       panel: panelRef.current!,
       setPlaceholder,
+      setSourcePolicy,
     });
     return () => {
       disconnect();
@@ -204,9 +208,11 @@ export function SpatialItem({
 
   const status = detached ? "detached" : "attached";
   const slotStyle: CSSProperties | undefined =
-    detached && placeholder
-      ? { width: placeholder.width, height: placeholder.height }
-      : undefined;
+    detached && sourcePolicy === "collapse"
+      ? { display: "contents" }
+      : detached && placeholder
+        ? { width: placeholder.width, height: placeholder.height }
+        : undefined;
   const panelStyle: CSSProperties | undefined = detached
     ? {
         position: "fixed",
@@ -229,6 +235,7 @@ export function SpatialItem({
       ref={slotRef}
       data-spatialflex-item={id}
       data-status={status}
+      data-source-policy={detached ? sourcePolicy : undefined}
       style={slotStyle}
     >
       <div

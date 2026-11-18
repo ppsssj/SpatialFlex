@@ -7,6 +7,12 @@ export type { RenderWidget } from "./spatialView";
 import { useLabDiagnostics, useLabState, useLabStore } from "./context";
 import type { ImageVariant } from "./labStore";
 import { ThermostatWidget } from "./ThermostatWidget";
+import { useEffect, useState } from "react";
+
+function useWidgetMount(id: string) {
+  const store = useLabStore();
+  useEffect(() => store.componentMounted(id), [store, id]);
+}
 
 /** Ids of the dashboard's widgets: the app's own component identities. */
 export const WIDGETS = {
@@ -74,6 +80,8 @@ export function Dashboard({
 }
 
 function CounterWidget() {
+  useWidgetMount(WIDGETS.counter);
+  const [localCount, setLocalCount] = useState(0);
   const renderWidget = useWidgetRenderer();
   const count = useLabState((state) => state.sharedCount);
   const { actions } = useLabStore();
@@ -89,6 +97,22 @@ function CounterWidget() {
       >
         +1
       </button>
+      <div>
+        <button
+          type="button"
+          data-testid="counter-local"
+          onClick={() => setLocalCount((n) => n + 1)}
+        >
+          Local clicks: {localCount}
+        </button>
+      </div>
+      <label>
+        Local note{" "}
+        <input
+          data-testid="counter-note"
+          defaultValue="keeps focus and state"
+        />
+      </label>
     </article>,
     {
       title: "Shared counter",
@@ -99,6 +123,7 @@ function CounterWidget() {
 }
 
 function ChartWidget() {
+  useWidgetMount(WIDGETS.chart);
   const renderWidget = useWidgetRenderer();
   const history = useLabState((state) => state.history);
   const max = Math.max(1, ...history);
@@ -138,6 +163,7 @@ function ChartWidget() {
 }
 
 function ImageWidget() {
+  useWidgetMount(WIDGETS.image);
   const renderWidget = useWidgetRenderer();
   const variant = useLabState((state) => state.imageVariant);
   const { actions } = useLabStore();
@@ -181,7 +207,14 @@ function ImageWidget() {
 
 function DomainDiagnostics() {
   const actionCount = useLabState((state) => state.actionCount);
-  const { actionCalls, activeSubscriptions } = useLabDiagnostics();
+  const {
+    actionCalls,
+    activeSubscriptions,
+    componentMounts,
+    activeComponents,
+    totalSubscribes,
+    totalUnsubscribes,
+  } = useLabDiagnostics();
   return (
     <dl className="diagnostics" aria-label="Domain diagnostics">
       <dt>Domain actions processed</dt>
@@ -189,7 +222,21 @@ function DomainDiagnostics() {
       <dt>increment() calls</dt>
       <dd data-testid="increment-calls">{actionCalls.increment}</dd>
       <dt>Active state subscriptions</dt>
-      <dd data-testid="active-subscriptions">{activeSubscriptions}</dd>
+      <dd
+        data-testid="active-subscriptions"
+        data-total-subscribes={totalSubscribes}
+        data-total-unsubscribes={totalUnsubscribes}
+      >
+        {activeSubscriptions}
+      </dd>
+      <dt>Counter React effect mounts</dt>
+      <dd data-testid="counter-mounts">
+        {componentMounts[WIDGETS.counter] ?? 0}
+      </dd>
+      <dt>Active counter instances</dt>
+      <dd data-testid="counter-instances">
+        {activeComponents[WIDGETS.counter] ?? 0}
+      </dd>
     </dl>
   );
 }

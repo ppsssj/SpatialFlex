@@ -1,8 +1,14 @@
 import type {
+  DetachmentStrategy,
   SpatialItemId,
   SpatialPosition,
   SpatialRegistry,
   SpatialSize,
+} from "@spatialflex/core";
+import {
+  assertDetachmentStrategy,
+  DEFAULT_DETACHMENT_STRATEGY,
+  SpatialFlexError,
 } from "@spatialflex/core";
 
 /**
@@ -17,10 +23,10 @@ import type {
 export interface SpatialController {
   /**
    * Detaches the item. The original placement is measured for the
-   * placeholder, and the panel opens at its last position and size, or over
+   * default placeholder (or released by Collapse), and the panel opens at its last position and size, or over
    * the original placement at its natural size the first time.
    */
-  detach(id: SpatialItemId): boolean;
+  detach(id: SpatialItemId, strategy?: DetachmentStrategy): boolean;
   attach(id: SpatialItemId): boolean;
   move(id: SpatialItemId, position: SpatialPosition): boolean;
   /**
@@ -43,6 +49,7 @@ export interface ItemHost {
   readonly panel: HTMLElement;
   /** Receives the measured original size, shown by the placeholder. */
   readonly setPlaceholder: (size: SpatialSize) => void;
+  readonly setSourcePolicy: (source: "placeholder" | "collapse") => void;
 }
 
 export interface WorkspaceController extends SpatialController {
@@ -63,9 +70,18 @@ export function createController(
       };
     },
 
-    detach(id) {
+    detach(id, options = DEFAULT_DETACHMENT_STRATEGY) {
+      const strategy = assertDetachmentStrategy(options);
+      if (strategy.mode !== "move")
+        throw new SpatialFlexError(
+          "UNSUPPORTED_STRATEGY",
+          "The DOM controller accepts Move strategies only; show a mirror through an XR adapter.",
+        );
       const record = registry.get(id);
       const host = hosts.get(id);
+      // Validate capabilities before changing the host's source policy.
+      if (record && !record.capabilities.detachable) return registry.detach(id);
+      host?.setSourcePolicy(strategy.source);
       if (!record || !host || record.status === "detached") {
         // Let the registry report unknown IDs or capability errors, or
         // detach without measurements when no element is connected.

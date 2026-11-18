@@ -88,6 +88,71 @@ const counterValue = () => {
   const body = panel("shared-counter")?.body;
   return body?.kind === "value" ? body.value : undefined;
 };
+
+describe("SpatialFlex strategy integration", () => {
+  it("keeps one presentation, rejects old presentation actions and preserves mount/subscription counts", () => {
+    render(spatialflexIntegration);
+    const original = container.querySelector('[data-testid="web-count"]');
+    const initial = store.getDiagnostics();
+    act(() =>
+      lab.detach!("shared-counter", {
+        mode: "move",
+        source: "collapse",
+        target: "web",
+      }),
+    );
+    expect(lab.items.find((v) => v.id === "shared-counter")?.detached).toBe(
+      true,
+    );
+    act(() => lab.show("shared-counter"));
+    expect(lab.items.find((v) => v.id === "shared-counter")?.detached).toBe(
+      false,
+    );
+    const old = lab;
+    const owner = old.actionOwners!["shared-counter"];
+    act(() => lab.hide("shared-counter"));
+    act(() => lab.show("shared-counter"));
+    expect(lab.actionOwners!["shared-counter"]).not.toBe(owner);
+    act(() => old.onPanelSelect("shared-counter"));
+    act(() => old.onPanelClose("shared-counter"));
+    expect(lab.items.find((v) => v.id === "shared-counter")).toMatchObject({
+      shown: true,
+      selected: false,
+    });
+    act(() => old.onPanelButton("shared-counter", "increment"));
+    expect(webCount()).toBe("0");
+    act(() => lab.onPanelButton("shared-counter", "increment"));
+    expect(webCount()).toBe("1");
+    act(() =>
+      lab.detach!("shared-counter", {
+        mode: "move",
+        source: "placeholder",
+        target: "web",
+      }),
+    );
+    expect(lab.panels).toHaveLength(0);
+    expect(container.querySelector('[data-testid="web-count"]')).toBe(original);
+    expect(store.getDiagnostics().componentMounts).toEqual(
+      initial.componentMounts,
+    );
+    expect(store.getDiagnostics().activeSubscriptions).toBe(
+      initial.activeSubscriptions,
+    );
+    expect(store.getDiagnostics().totalSubscribes).toBe(
+      initial.totalSubscribes,
+    );
+    expect(store.getDiagnostics().totalUnsubscribes).toBe(
+      initial.totalUnsubscribes,
+    );
+    expect(() =>
+      lab.show("shared-counter", {
+        mode: "move",
+        source: "collapse",
+        target: "web",
+      }),
+    ).toThrow(/Mirror/);
+  });
+});
 const increments = () => store.getDiagnostics().actionCalls.increment;
 const run = (fn: () => unknown) => {
   let result: unknown;

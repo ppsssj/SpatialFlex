@@ -29,11 +29,7 @@ export function BabylonHost({
 
   // Engine and scene: created once, disposed on unmount.
   useEffect(() => {
-    const scene = new BabylonLabScene(canvasRef.current!, {
-      onPanelButton: (...args) => eventsRef.current.onPanelButton(...args),
-      onPanelSelect: (...args) => eventsRef.current.onPanelSelect(...args),
-      onPanelClose: (...args) => eventsRef.current.onPanelClose(...args),
-    });
+    const scene = new BabylonLabScene(canvasRef.current!, eventsRef.current);
     scene.onSessionModeChange = setSessionMode;
     sceneRef.current = scene;
     const unregister = hostMounted("babylon");
@@ -46,6 +42,7 @@ export function BabylonHost({
 
   useEffect(() => {
     eventsRef.current = { onPanelButton, onPanelSelect, onPanelClose };
+    sceneRef.current?.setEvents(eventsRef.current);
   }, [onPanelButton, onPanelSelect, onPanelClose]);
 
   useEffect(() => {
