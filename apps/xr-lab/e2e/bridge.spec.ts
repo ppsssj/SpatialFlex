@@ -150,13 +150,20 @@ async function inject(frame: Frame, patch: Record<string, unknown>) {
       .reverse()
       .find((m) => m.type === "welcome")!;
     const { protocolVersion, appSessionId, viewId, connectionId } = welcome;
+    // Valid forged barriers follow the same committed view revision as real
+    // pointer callbacks. Intercepted network messages may be held or dropped.
+    const revision = Number(
+      document.querySelector('[data-testid="view-revision"]')?.textContent,
+    );
+    if (!Number.isSafeInteger(revision) || revision < 0)
+      throw new Error("Missing committed iframe view revision");
     window.parent.postMessage(
       {
         protocolVersion,
         appSessionId,
         viewId,
         connectionId,
-        revision: 0,
+        revision,
         type: "action-request",
         itemId: "shared-counter",
         action: "increment",
@@ -462,6 +469,7 @@ for (const mode of MODES) {
       { connectionId: "expired" },
       { protocolVersion: 2 },
       { extra: "not permitted" },
+      ...(mode === "spatialflex" ? [{ revision: 0 }] : []),
     ];
     for (const patch of rejected) await inject(frame, patch);
     // Correct identity from the wrong Window (the parent itself).
