@@ -369,7 +369,9 @@ for (const engine of ENGINES) {
     // --- Translate: the title bar follows the pointer, the camera stays.
     const corners = await surfaceCorners(page);
     const grab = await centerOf(handle(page, COUNTER, "translate"));
-    const to = { x: grab.x - 170, y: grab.y + 90 };
+    // Across the website page: the panel must stay in front of it (it
+    // slides on its own plane, parallel to the page) and stay hittable.
+    const to = { x: grab.x - 300, y: grab.y + 120 };
     await drag(page, grab, to, true);
     await expect(modeStatus(page)).toHaveAttribute("data-mode", "translate");
     await expect(panel(page, COUNTER)).toHaveAttribute(

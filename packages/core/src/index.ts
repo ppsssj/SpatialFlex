@@ -43,6 +43,7 @@ export {
   assertTransform,
   IDENTITY_ROTATION,
   KEYBOARD_STEPS,
+  MIN_PLANE_FACING,
   multiplyQuaternions,
   rotateVector,
   SCALE_LIMITS,

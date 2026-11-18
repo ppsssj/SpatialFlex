@@ -158,6 +158,39 @@ describe("pointer manipulation", () => {
     close(m.transform("p1")!.position, [0, 0, -2]);
   });
 
+  it("drags on the presentation's own plane: no depth drift for oblique rays", () => {
+    // A panel to the right of the eye, facing +z, grabbed obliquely.
+    const m = setup([1, 0, -2]);
+    const token = m.begin("p1", "translate", {
+      pointerId: 1,
+      ray: toward([1, 0, -2]),
+    })!;
+    // Pointing far to the left: the panel slides in its plane (z = -2).
+    m.update(token, toward([-1, 0.5, -2]));
+    close(m.transform("p1")!.position, [-1, 0.5, -2]);
+  });
+
+  it("falls back to a ray-facing plane when the panel is seen edge-on", () => {
+    const m = new SpatialManipulator();
+    m.attach("p1", {
+      registrationId: "card",
+      // Turned 85°: almost edge-on to a ray along -z.
+      initial: {
+        position: [0, 0, -2],
+        rotation: yawQuaternion((85 * Math.PI) / 180),
+        scale: 1,
+      },
+      extent: EXTENT,
+    });
+    const token = m.begin("p1", "translate", {
+      pointerId: 1,
+      ray: down(0, 0),
+    })!;
+    m.update(token, down(0.2, 0.1));
+    // Moved in the plane facing the ray (z stays -2), following the ray.
+    close(m.transform("p1")!.position, [0.2, 0.1, -2]);
+  });
+
   it("rotates by yaw from horizontal pointer movement", () => {
     const m = setup();
     const token = m.begin("p1", "rotate", {

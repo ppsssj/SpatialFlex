@@ -56,6 +56,12 @@ export const KEYBOARD_STEPS = {
   resize: [1.1, 1.25],
 } as const;
 
+/**
+ * Smallest |cos| between the pointer ray and a presentation's facing for
+ * dragging on the presentation's own plane (about 70° off its normal).
+ */
+export const MIN_PLANE_FACING = 0.35;
+
 export const IDENTITY_ROTATION: SpatialQuaternion = [0, 0, 0, 1];
 
 type Validation<T> =
@@ -242,7 +248,7 @@ export interface ManipulationSnapshot {
 export type ManipulationEnd = "commit" | "cancel";
 
 interface Session extends ActiveManipulation {
-  /** Drag plane: through the grab point, facing the pointer at grab time. */
+  /** Drag plane: through the grab point (see {@link MIN_PLANE_FACING}). */
   readonly grab: V | null;
   readonly normal: V | null;
   /** Horizontal axis to the right of the initial pointing direction. */
@@ -391,7 +397,15 @@ export class SpatialManipulator {
     const distance = onPanel ?? (depth > 0 ? depth : null);
     if (distance === null) return null;
     const grab = pointOn(ray, distance);
-    const normal = normalize(ray.direction)!.map((c) => -c) as unknown as V;
+    // Drag plane: the presentation's own plane while it faces the pointer,
+    // so a panel slides without drifting in depth (an unrotated native
+    // panel stays parallel to the page it was extracted from). Seen too
+    // obliquely, a plane facing the ray instead.
+    const direction = normalize(ray.direction)!;
+    const normal =
+      onPanel !== null && Math.abs(dot(direction, facing)) >= MIN_PLANE_FACING
+        ? facing
+        : (direction.map((c) => -c) as unknown as V);
     if (mode === "resize" && pivotDistance(grab, normal, t.position) < 1e-4)
       return null;
     const right = normalize(cross(normalize(ray.direction)!, [0, 1, 0])) ?? [

@@ -81,7 +81,9 @@ This reuses existing structures rather than duplicating them:
 Screen-pixel deltas are never converted to meters directly. On press:
 
 1. **Grab point P₀:** where the handle's ray hits the panel's own plane. When the ray is edge-on, P₀ is at the center's depth along the ray instead.
-2. **Drag plane:** passes through P₀ and faces the initial ray (normal `−d₀`).
+2. **Drag plane:** passes through P₀. It is the **panel's own plane** while the ray meets it within about 70° of its normal (`|cos| ≥ MIN_PLANE_FACING = 0.35`); otherwise it is the plane facing the ray (normal `−d₀`).
+
+With the panel's own plane, a panel slides without drifting in depth: an unrotated Native DOM panel stays parallel to the page it came from, 0.3 m in front of it, so it never slips behind the page. An earlier plane that faced the ray did let obliquely grabbed panels drift behind the page; the CI run on Linux Firefox caught it, and the E2E now drags across the page to cover it.
 
 On each move, the ray is intersected with that plane at P:
 
@@ -162,11 +164,11 @@ Two-handed scale or rotate would need a second concurrent session; the controlle
 
 ## 5. Verification
 
-Unit/integration (Vitest): **336 passed** (P1-06A baseline 287, **+49 new**).
+Unit/integration (Vitest): **338 passed** (P1-06A baseline 287, **+51 new**).
 
-- core `manipulation.test.ts` (32):
+- core `manipulation.test.ts` (34):
   - validation, including NaN, Infinity, 0 and negative values, and Euler/yaw math
-  - perspective translate at two depths, grab offset, rotate, resize with limits
+  - perspective translate at two depths, grab offset, own-plane drag without depth drift and the edge-on fallback, rotate, resize with limits
   - begin/commit/cancel, duplicate presses, stale tokens, Native → Adaptive instances
   - reset, independence, keyboard sessions, `shift`
 - react `manipulationHandles.test.tsx` (3): handles only in external placement, focusable and labelled, Attach stays the bar's button, no remount.
