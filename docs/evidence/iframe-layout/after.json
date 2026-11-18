@@ -1,0 +1,277 @@
+{
+  "stage": "after",
+  "records": [
+    {
+      "browser": "chromium",
+      "engine": "three",
+      "parent": {
+        "workspace": {
+          "x": 453,
+          "y": 70,
+          "width": 827,
+          "height": 830,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "bridge": {
+          "x": 453,
+          "y": 109,
+          "width": 827,
+          "height": 791,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "iframe": {
+          "x": 453,
+          "y": 143,
+          "width": 827,
+          "height": 757,
+          "display": "block",
+          "flex": "1 1 0%"
+        },
+        "viewport": 900,
+        "scrollHeight": 900
+      },
+      "child": {
+        "root": {
+          "x": 0,
+          "y": 0,
+          "width": 825,
+          "height": 755,
+          "display": "flex",
+          "flex": "0 1 auto"
+        },
+        "host": {
+          "x": 0,
+          "y": 47,
+          "width": 825,
+          "height": 708,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 85,
+          "width": 825,
+          "height": 670,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "restore": {
+          "x": 0,
+          "y": 26,
+          "width": 188.640625,
+          "height": 21,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "viewport": 755,
+        "scrollHeight": 755
+      }
+    },
+    {
+      "browser": "chromium",
+      "engine": "babylon",
+      "parent": {
+        "workspace": {
+          "x": 453,
+          "y": 70,
+          "width": 827,
+          "height": 830,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "bridge": {
+          "x": 453,
+          "y": 109,
+          "width": 827,
+          "height": 791,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "iframe": {
+          "x": 453,
+          "y": 143,
+          "width": 827,
+          "height": 757,
+          "display": "block",
+          "flex": "1 1 0%"
+        },
+        "viewport": 900,
+        "scrollHeight": 900
+      },
+      "child": {
+        "root": {
+          "x": 0,
+          "y": 0,
+          "width": 825,
+          "height": 755,
+          "display": "flex",
+          "flex": "0 1 auto"
+        },
+        "host": {
+          "x": 0,
+          "y": 47,
+          "width": 825,
+          "height": 708,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 85,
+          "width": 825,
+          "height": 670,
+          "display": "block",
+          "flex": "1 1 0%"
+        },
+        "restore": {
+          "x": 0,
+          "y": 26,
+          "width": 188.640625,
+          "height": 21,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "viewport": 755,
+        "scrollHeight": 755
+      }
+    },
+    {
+      "browser": "firefox",
+      "engine": "three",
+      "parent": {
+        "workspace": {
+          "x": 453,
+          "y": 70,
+          "width": 827,
+          "height": 830,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "bridge": {
+          "x": 453,
+          "y": 109,
+          "width": 827,
+          "height": 791,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "iframe": {
+          "x": 453,
+          "y": 144,
+          "width": 827,
+          "height": 756,
+          "display": "block",
+          "flex": "1 1 0%"
+        },
+        "viewport": 900,
+        "scrollHeight": 900
+      },
+      "child": {
+        "root": {
+          "x": 0,
+          "y": 0,
+          "width": 825,
+          "height": 754,
+          "display": "flex",
+          "flex": "0 1 auto"
+        },
+        "host": {
+          "x": 0,
+          "y": 48,
+          "width": 825,
+          "height": 706,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 87,
+          "width": 825,
+          "height": 667,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "restore": {
+          "x": 0,
+          "y": 26,
+          "width": 179.73333740234375,
+          "height": 22,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "viewport": 754,
+        "scrollHeight": 754
+      }
+    },
+    {
+      "browser": "firefox",
+      "engine": "babylon",
+      "parent": {
+        "workspace": {
+          "x": 453,
+          "y": 70,
+          "width": 827,
+          "height": 830,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "bridge": {
+          "x": 453,
+          "y": 109,
+          "width": 827,
+          "height": 791,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "iframe": {
+          "x": 453,
+          "y": 144,
+          "width": 827,
+          "height": 756,
+          "display": "block",
+          "flex": "1 1 0%"
+        },
+        "viewport": 900,
+        "scrollHeight": 900
+      },
+      "child": {
+        "root": {
+          "x": 0,
+          "y": 0,
+          "width": 825,
+          "height": 754,
+          "display": "flex",
+          "flex": "0 1 auto"
+        },
+        "host": {
+          "x": 0,
+          "y": 48,
+          "width": 825,
+          "height": 706,
+          "display": "flex",
+          "flex": "1 1 0%"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 87,
+          "width": 825,
+          "height": 667,
+          "display": "block",
+          "flex": "1 1 0%"
+        },
+        "restore": {
+          "x": 0,
+          "y": 26,
+          "width": 179.73333740234375,
+          "height": 22,
+          "display": "block",
+          "flex": "0 1 auto"
+        },
+        "viewport": 754,
+        "scrollHeight": 754
+      }
+    }
+  ]
+}
