@@ -8,6 +8,11 @@ import {
   type Quat,
   type Vec3,
 } from "../contracts/xrHost";
+import {
+  describeElement,
+  nativeContainmentIssues,
+  type ContainmentIssue,
+} from "./nativeContainment";
 import { DEFAULT_SURFACE_POSE, SURFACE_RESOLUTION } from "./surfaceConfig";
 import {
   eulerFromQuaternion,
@@ -61,7 +66,18 @@ interface Written {
    * meantime is kept.
    */
   owned: Map<NativeProperty, string>;
+  /**
+   * Containment issues of its ancestors (see nativeContainment.ts), from a
+   * style walk when compositing starts and again whenever the browser
+   * reports a containing block other than the page (`offsetParent`, checked
+   * every frame).
+   */
+  issues: readonly ContainmentIssue[] | null;
+  capturedBy: Element | null;
 }
+
+/** Natively extracted ids that cannot be composited, with the reasons. */
+export type NativeIssues = ReadonlyMap<string, readonly ContainmentIssue[]>;
 
 /**
  * Inline properties the compositor owns on a native element. Visibility is
@@ -80,6 +96,8 @@ const newWritten = (): Written => ({
   visibility: "",
   pose: "",
   owned: new Map(),
+  issues: null,
+  capturedBy: null,
 });
 
 function write(
@@ -104,6 +122,7 @@ function release(element: HTMLElement, written: Written | undefined) {
   delete element.dataset.spatialPlaced;
   delete element.dataset.spatialPose;
   delete element.dataset.spatialVisibility;
+  delete element.dataset.spatialIssue;
 }
 
 /**
@@ -131,6 +150,9 @@ export function useSurfaceCompositor(
   const [anchors, setAnchors] = useState<ReadonlyMap<string, NativeAnchor>>(
     () => new Map(),
   );
+  const [nativeIssues, setNativeIssues] = useState<NativeIssues>(
+    () => new Map(),
+  );
   const state = useRef({
     pose,
     panels: [] as readonly HostPanel[],
@@ -146,6 +168,7 @@ export function useSurfaceCompositor(
     anchors: new Map() as ReadonlyMap<string, NativeAnchor>,
     written: new Map<HTMLElement, Written>(),
     border: 0,
+    issueKey: "[]",
     layer: "",
     transform: "",
     clip: "",
@@ -216,6 +239,8 @@ export function useSurfaceCompositor(
         release(element, written);
       current.written.clear();
       current.layer = current.transform = current.clip = "";
+      current.issueKey = "[]";
+      setNativeIssues(new Map());
       current.visibility = "waiting";
       setStatus("waiting");
     };
@@ -280,6 +305,7 @@ export function useSurfaceCompositor(
     }
     const keep: [number, number][][] = [];
     const composited = new Set<HTMLElement>();
+    const frameIssues: [string, readonly ContainmentIssue[]][] = [];
     for (const id of s.natives) {
       // Resolved per frame: only the controller's current native element.
       const element = s.resolve(id);
@@ -290,6 +316,33 @@ export function useSurfaceCompositor(
       const anchor = s.anchors.get(id);
       const written = s.written.get(element) ?? newWritten();
       s.written.set(element, written);
+      // Containment: the page must be the element's containing block, and
+      // no ancestor may clip it. The browser's own answer for the containing
+      // block is offsetParent (layout is already flushed by offsetWidth).
+      written.issues ??= nativeContainmentIssues(element.parentElement, page);
+      const containingBlock = element.offsetParent;
+      if (containingBlock && containingBlock !== page) {
+        if (written.capturedBy !== containingBlock) {
+          written.capturedBy = containingBlock;
+          const found = nativeContainmentIssues(element.parentElement, page);
+          written.issues = found.some((i) => i.effect === "containing-block")
+            ? found
+            : [
+                ...found,
+                {
+                  element: describeElement(containingBlock),
+                  property: "containing block",
+                  value: "established by an ancestor style",
+                  effect: "containing-block",
+                },
+              ];
+        }
+      } else if (written.capturedBy) {
+        written.capturedBy = null;
+        written.issues = nativeContainmentIssues(element.parentElement, page);
+      }
+      const issues = written.issues;
+      if (issues.length > 0) frameIssues.push([id, issues]);
       // The manipulated pose, once the manipulator owns it; until then the
       // extraction anchor. Scale is spatial: the element's CSS layout size
       // (w × h) is unchanged, only its world size.
@@ -304,8 +357,21 @@ export function useSurfaceCompositor(
             height: h * anchor.metersPerPixel * (manipulated?.scale ?? 1),
           }
         : null;
+      // An element that cannot be composited faithfully is not shown (it
+      // would be misplaced or clipped, and take input there) and is
+      // reported instead.
+      if (issues.length > 0) {
+        element.dataset.spatialIssue = issues[0]!.effect;
+        delete element.dataset.spatialPlaced;
+        delete element.dataset.spatialPose;
+        written.pose = "";
+      } else delete element.dataset.spatialIssue;
       const placed =
-        panelPose && w > 0 && h > 0 && visibility !== "behind"
+        issues.length === 0 &&
+        panelPose &&
+        w > 0 &&
+        h > 0 &&
+        visibility !== "behind"
           ? nativePanelTransform(
               frame,
               {
@@ -352,6 +418,11 @@ export function useSurfaceCompositor(
         element.dataset.spatialVisibility = shown;
         written.visibility = shown;
       }
+    }
+    const issueKey = JSON.stringify(frameIssues);
+    if (issueKey !== s.issueKey) {
+      s.issueKey = issueKey;
+      setNativeIssues(new Map(frameIssues));
     }
     // An element that is no longer the current element of any natively
     // extracted id (replaced while the id list stayed the same) is released.
@@ -411,6 +482,9 @@ export function useSurfaceCompositor(
     anchors,
     placeNative,
     rayAt,
+    nativeIssues,
+    /** The page element (the native elements' required containing block). */
+    pageElement: () => pageRef.current,
   };
 }
 

@@ -313,6 +313,9 @@ html.xr-iframe-document,
   flex-basis: 100%;
   color: #d0d7de;
 }
+.web-surface-message.web-surface-issue {
+  color: #ffb86b;
+}
 .web-surface-layer[data-active] .web-surface-viewport {
   position: relative;
   flex: 1;
