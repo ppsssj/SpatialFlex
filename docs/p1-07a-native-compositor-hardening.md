@@ -110,6 +110,8 @@ The second option is fragile, and a clip cannot be undone by any transform. So t
 
 ## 5. Regression tests added
 
+Totals on this branch: **372 unit/integration** tests (338 existing + 34 new) and **330 browser E2E** tests: 38 Playground and 292 XR Lab (304 existing + 26 new). All pass locally; the existing tests and their tolerances are unchanged.
+
 Unit/integration (Vitest):
 
 - `src/evaluation/hardening.test.tsx` (3): D2 and D3, in a real React tree (`LabShell` with a stub same-document host reporting Three.js camera frames).
