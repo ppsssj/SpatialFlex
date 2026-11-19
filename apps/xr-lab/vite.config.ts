@@ -9,6 +9,18 @@ export default defineConfig({
     // lazily loaded chunks.
     chunkSizeWarningLimit: 2500,
   },
+  // P1-07C benchmark only (XR_LAB_ISOLATED=1): a cross-origin isolated
+  // preview, so performance.now() has fine resolution in every browser.
+  // Ordinary builds, tests and previews are unchanged.
+  preview:
+    process.env.XR_LAB_ISOLATED === "1"
+      ? {
+          headers: {
+            "Cross-Origin-Opener-Policy": "same-origin",
+            "Cross-Origin-Embedder-Policy": "require-corp",
+          },
+        }
+      : {},
   resolve: {
     // Resolve workspace packages to their TypeScript sources so the
     // XR Lab runs without building packages/* first.

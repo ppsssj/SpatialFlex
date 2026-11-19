@@ -39,6 +39,14 @@ export interface HostProbe {
   liveTextures: number;
   /** Hosts currently mounted with a live engine and render loop. */
   activeHosts: number;
+  /**
+   * Places the desktop camera (P1-07C benchmark: identical camera poses in
+   * every engine). Absent while no desktop camera is mounted.
+   */
+  setCamera?: (
+    position: readonly [number, number, number],
+    target: readonly [number, number, number],
+  ) => void;
 }
 
 export const testHooksEnabled =
@@ -101,6 +109,7 @@ export function hostMounted(engine: string) {
       probe.project = () => null;
       probe.worldPosition = () => null;
       probe.hovered = () => false;
+      delete probe.setCamera;
     }
   };
 }

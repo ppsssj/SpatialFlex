@@ -16,7 +16,12 @@ import {
   type Ray,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { getProbe, hostMounted, recordFrame } from "../../contracts/hostProbe";
+import {
+  getProbe,
+  hostMounted,
+  recordFrame,
+  testHooksEnabled,
+} from "../../contracts/hostProbe";
 import {
   CAMERA,
   type HostCameraFrame,
@@ -241,7 +246,15 @@ function DesktopControls({
     controls.target.set(...CAMERA.target);
     controls.update();
     controlsRef.current = controls;
+    const probe = getProbe();
+    if (testHooksEnabled)
+      probe.setCamera = (position, target) => {
+        camera.position.set(...position);
+        controls.target.set(...target);
+        controls.update();
+      };
     return () => {
+      if (testHooksEnabled) delete probe.setCamera;
       controls.dispose();
       if (controlsRef.current === controls) controlsRef.current = null;
     };
