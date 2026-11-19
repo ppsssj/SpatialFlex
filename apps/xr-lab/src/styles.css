@@ -326,6 +326,15 @@ html.xr-iframe-document,
   [data-spatialflex-placement="external"]:not([data-spatial-placed]) {
   visibility: hidden;
 }
+/* The compositor's visibility of a native element (explicit, since the page
+   may be hidden while the element is not). An attribute, not an inline
+   style, so it never touches the inline visibility that React owns. */
+.web-surface-layer[data-active] [data-spatial-visibility="hidden"] {
+  visibility: hidden;
+}
+.web-surface-layer[data-active] [data-spatial-visibility="visible"] {
+  visibility: visible;
+}
 .web-surface-content[inert] {
   opacity: 0.8;
 }

@@ -54,16 +54,56 @@ interface Written {
   clip: string;
   visibility: string;
   pose: string;
+  /**
+   * Inline values as the compositor last left them (serialized by the
+   * browser), per owned property: release removes a property only while it
+   * still holds that value, so a value that another owner set in the
+   * meantime is kept.
+   */
+  owned: Map<NativeProperty, string>;
 }
 
-/** Inline presentation properties the compositor owns on a native element. */
-const NATIVE_PROPERTIES = ["transform", "clip-path", "visibility"] as const;
+/**
+ * Inline properties the compositor owns on a native element. Visibility is
+ * not one of them: it is the `data-spatial-visibility` attribute (styled by
+ * the surface's stylesheet), so the compositor never writes or removes the
+ * inline `visibility` that React owns, such as the SDK's reserved-source
+ * `visibility: hidden`, committed in the same React commit that ends a
+ * native extraction.
+ */
+const NATIVE_PROPERTIES = ["transform", "clip-path"] as const;
+type NativeProperty = (typeof NATIVE_PROPERTIES)[number];
 
-function release(element: HTMLElement) {
-  for (const property of NATIVE_PROPERTIES)
-    element.style.removeProperty(property);
+const newWritten = (): Written => ({
+  transform: "",
+  clip: "",
+  visibility: "",
+  pose: "",
+  owned: new Map(),
+});
+
+function write(
+  element: HTMLElement,
+  written: Written,
+  property: NativeProperty,
+  value: string,
+) {
+  element.style.setProperty(property, value);
+  written.owned.set(property, element.style.getPropertyValue(property));
+}
+
+function release(element: HTMLElement, written: Written | undefined) {
+  for (const property of NATIVE_PROPERTIES) {
+    const value = written?.owned.get(property);
+    if (
+      value !== undefined &&
+      element.style.getPropertyValue(property) === value
+    )
+      element.style.removeProperty(property);
+  }
   delete element.dataset.spatialPlaced;
   delete element.dataset.spatialPose;
+  delete element.dataset.spatialVisibility;
 }
 
 /**
@@ -139,15 +179,20 @@ export function useSurfaceCompositor(
       return element ? [{ id, element }] : [];
     });
     const current = new Set(natives.map((n) => n.element));
-    for (const element of [...s.written.keys()])
+    for (const [element, written] of [...s.written])
       if (!current.has(element)) {
-        release(element);
+        release(element, written);
         s.written.delete(element);
       }
     s.natives = natives.map((n) => n.id);
     // Not placed until the next camera frame.
     for (const { element } of natives)
-      if (!s.written.has(element)) element.style.visibility = "hidden";
+      if (!s.written.has(element)) {
+        const written = newWritten();
+        written.visibility = "hidden";
+        element.dataset.spatialVisibility = "hidden";
+        s.written.set(element, written);
+      }
     // The resolver may change identity every render; the id list decides.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nativeKey]);
@@ -167,7 +212,8 @@ export function useSurfaceCompositor(
       for (const property of ["transform", "clip-path", "visibility"])
         page.style.removeProperty(property);
       delete page.dataset.surfaceVisibility;
-      for (const element of current.written.keys()) release(element);
+      for (const [element, written] of current.written)
+        release(element, written);
       current.written.clear();
       current.layer = current.transform = current.clip = "";
       current.visibility = "waiting";
@@ -233,19 +279,16 @@ export function useSurfaceCompositor(
       }
     }
     const keep: [number, number][][] = [];
+    const composited = new Set<HTMLElement>();
     for (const id of s.natives) {
       // Resolved per frame: only the controller's current native element.
       const element = s.resolve(id);
       if (!element) continue;
+      composited.add(element);
       const w = element.offsetWidth;
       const h = element.offsetHeight;
       const anchor = s.anchors.get(id);
-      const written = s.written.get(element) ?? {
-        transform: "",
-        clip: "",
-        visibility: "",
-        pose: "",
-      };
+      const written = s.written.get(element) ?? newWritten();
       s.written.set(element, written);
       // The manipulated pose, once the manipulator owns it; until then the
       // extraction anchor. Scale is spatial: the element's CSS layout size
@@ -276,7 +319,7 @@ export function useSurfaceCompositor(
       const shown = placed?.visibility === "visible" ? "visible" : "hidden";
       if (placed?.visibility === "visible") {
         if (placed.matrix3d !== written.transform) {
-          element.style.transform = placed.matrix3d;
+          write(element, written, "transform", placed.matrix3d);
           written.transform = placed.matrix3d;
         }
         // 3D panels in front of it are cut out; so is the page when the
@@ -290,7 +333,7 @@ export function useSurfaceCompositor(
             : occluders,
         );
         if (clip !== written.clip) {
-          element.style.clipPath = clip;
+          write(element, written, "clip-path", clip);
           written.clip = clip;
         }
         if (!placed.behindPage) keep.push(placed.pageQuad);
@@ -306,10 +349,17 @@ export function useSurfaceCompositor(
       }
       if (shown !== written.visibility) {
         // Explicit: the page may be hidden while this element is not.
-        element.style.visibility = shown;
+        element.dataset.spatialVisibility = shown;
         written.visibility = shown;
       }
     }
+    // An element that is no longer the current element of any natively
+    // extracted id (replaced while the id list stayed the same) is released.
+    for (const [element, written] of s.written)
+      if (!composited.has(element)) {
+        release(element, written);
+        s.written.delete(element);
+      }
     if (visibility === "visible") {
       const clip = pageClipPath(
         frame,
