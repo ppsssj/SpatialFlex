@@ -18,12 +18,15 @@ import {
   WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import type { AdaptivePanel, SpatialRuntime } from "./useSpatialRuntime";
+import type { PresentationRuntime } from "@spatialflex/react/spatial";
+
+type AdaptivePanel = ReturnType<PresentationRuntime["adaptivePanels"]>[number];
 
 /**
  * This application's renderer adapter (Three.js). It draws its own scene
  * and the XR Adaptive panels, and reports to SpatialFlex only:
- * - a camera frame after each render (`runtime.onCameraFrame`), from which
+ * - a camera frame after each render (`host.frame`, from
+ *   `runtime.connectHost()`), from which
  *   the SDK places the native elements and derives world rays;
  * - world rays from its own picking, fed to the shared `ItemManipulator`.
  * It keeps no copy of application state and has no manipulation logic.
@@ -94,27 +97,26 @@ function drawPanel(context: CanvasRenderingContext2D, panel: AdaptivePanel) {
   }
 }
 
-export function SpatialView({ runtime }: { runtime: SpatialRuntime }) {
+export function SpatialView({ runtime }: { runtime: PresentationRuntime }) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const runtimeRef = useRef(runtime);
-  useEffect(() => {
-    runtimeRef.current = runtime;
-  });
 
   useEffect(() => {
-    const host = hostRef.current!;
+    const element = hostRef.current!;
+    // This renderer is a SpatialFlex host: it reports frames, gets rays.
+    // Disconnecting the last host ends every presentation.
+    const host = runtime.connectHost();
     const renderer = new WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(host.clientWidth, host.clientHeight);
+    renderer.setSize(element.clientWidth, element.clientHeight);
     renderer.domElement.dataset.testid = "spatial-canvas";
-    host.append(renderer.domElement);
+    element.append(renderer.domElement);
     const scene = new Scene();
     scene.background = new Color("#dde3ea");
     scene.add(new GridHelper(10, 20, "#8c959f", "#c3cbd3"));
     scene.add(new HemisphereLight("#ffffff", "#888888", 1));
     const camera = new PerspectiveCamera(
       50,
-      host.clientWidth / host.clientHeight,
+      element.clientWidth / element.clientHeight,
       0.01,
       100,
     );
@@ -131,9 +133,9 @@ export function SpatialView({ runtime }: { runtime: SpatialRuntime }) {
     let liveTextures = 0;
     const geometry = new PlaneGeometry(PANEL.width, PANEL.height);
     const syncPanels = () => {
-      const wanted = runtimeRef.current.adaptivePanels;
+      const wanted = runtime.adaptivePanels();
       for (const [instance, entry] of panels)
-        if (!wanted.some((p) => p.instance === instance)) {
+        if (!wanted.some((p) => p.presentation.instanceId === instance)) {
           scene.remove(entry.mesh);
           entry.texture.dispose();
           (entry.mesh.material as MeshBasicMaterial).dispose();
@@ -141,7 +143,8 @@ export function SpatialView({ runtime }: { runtime: SpatialRuntime }) {
           panels.delete(instance);
         }
       for (const panel of wanted) {
-        let entry = panels.get(panel.instance);
+        const instance = panel.presentation.instanceId;
+        let entry = panels.get(instance);
         if (!entry) {
           const canvas = document.createElement("canvas");
           canvas.width = TEXTURE.width;
@@ -153,10 +156,10 @@ export function SpatialView({ runtime }: { runtime: SpatialRuntime }) {
             geometry,
             new MeshBasicMaterial({ map: texture }),
           );
-          mesh.userData.instance = panel.instance;
+          mesh.userData.instance = instance;
           scene.add(mesh);
           entry = { mesh, texture, key: "", panel };
-          panels.set(panel.instance, entry);
+          panels.set(instance, entry);
         }
         entry.panel = panel;
         const key = JSON.stringify(panel.view);
@@ -165,7 +168,7 @@ export function SpatialView({ runtime }: { runtime: SpatialRuntime }) {
           entry.texture.needsUpdate = true;
           entry.key = key;
         }
-        const pose = runtimeRef.current.items.poseOf(panel.id);
+        const pose = runtime.manipulation.poseOf(panel.presentation.itemId);
         if (pose) {
           entry.mesh.position.set(...pose.position);
           entry.mesh.quaternion.set(...pose.rotation);
@@ -208,14 +211,19 @@ export function SpatialView({ runtime }: { runtime: SpatialRuntime }) {
         uv.y >= ACTION.y0 &&
         uv.y <= ACTION.y1
       ) {
-        runtimeRef.current.invoke(entry.panel, action.id);
+        runtime.invoke(entry.panel.presentation.instanceId, action.id);
         return;
       }
-      const items = runtimeRef.current.items;
-      const token = items.begin(entry.panel.id, "translate", event.pointerId, {
-        origin: [ray.origin.x, ray.origin.y, ray.origin.z],
-        direction: [ray.direction.x, ray.direction.y, ray.direction.z],
-      });
+      const items = runtime.manipulation;
+      const token = items.begin(
+        entry.panel.presentation.itemId,
+        "translate",
+        event.pointerId,
+        {
+          origin: [ray.origin.x, ray.origin.y, ray.origin.z],
+          direction: [ray.direction.x, ray.direction.y, ray.direction.z],
+        },
+      );
       if (token === null) return;
       controls.enabled = false;
       drag = trackManipulationPointer({
@@ -239,11 +247,11 @@ export function SpatialView({ runtime }: { runtime: SpatialRuntime }) {
     renderer.domElement.addEventListener("pointerdown", down, true);
 
     const resize = new ResizeObserver(() => {
-      renderer.setSize(host.clientWidth, host.clientHeight);
-      camera.aspect = host.clientWidth / host.clientHeight;
+      renderer.setSize(element.clientWidth, element.clientHeight);
+      camera.aspect = element.clientWidth / element.clientHeight;
       camera.updateProjectionMatrix();
     });
-    resize.observe(host);
+    resize.observe(element);
 
     const viewProjection = new Matrix4();
     const probe = {
@@ -265,7 +273,9 @@ export function SpatialView({ runtime }: { runtime: SpatialRuntime }) {
       },
       /** Client point of a panel's local uv (0..1, y up). */
       locate(id: string, u: number, v: number) {
-        const entry = [...panels.values()].find((p) => p.panel.id === id);
+        const entry = [...panels.values()].find(
+          (p) => p.panel.presentation.itemId === id,
+        );
         if (!entry) return null;
         const local = new Vector3(
           (u - 0.5) * PANEL.width,
@@ -292,7 +302,7 @@ export function SpatialView({ runtime }: { runtime: SpatialRuntime }) {
         camera.matrixWorldInverse,
       );
       const rect = renderer.domElement.getBoundingClientRect();
-      runtimeRef.current.onCameraFrame({
+      host.frame({
         viewProjection: viewProjection.elements,
         viewport: {
           left: rect.left,
@@ -322,8 +332,9 @@ export function SpatialView({ runtime }: { runtime: SpatialRuntime }) {
       renderer.dispose();
       renderer.domElement.remove();
       liveRenderers--;
+      host.disconnect();
     };
-  }, []);
+  }, [runtime]);
 
   return (
     <div

@@ -206,3 +206,40 @@ describe("SpatialRegistry", () => {
     expect(second.list()).toHaveLength(1);
   });
 });
+
+describe("registration identity (registrationOf)", () => {
+  it("is unique per registration, across registries, and never reused", () => {
+    const a = new SpatialRegistry();
+    const b = new SpatialRegistry();
+    const first = a.register({
+      id: "card",
+      capabilities: { detachable: true },
+    });
+    const key = a.registrationOf("card")!;
+    expect(key).toMatch(/^\d+\/\d+$/);
+    b.register({ id: "card" });
+    expect(b.registrationOf("card")).not.toBe(key);
+    // Stable while the registration lives, through any change.
+    a.detach("card");
+    a.attach("card");
+    first.setView({ body: { kind: "value", label: "x", value: "1" } });
+    first.setView(undefined);
+    expect(a.registrationOf("card")).toBe(key);
+    // A new registration under the same id is a new identity.
+    first.unregister();
+    expect(a.registrationOf("card")).toBeUndefined();
+    a.register({ id: "card" });
+    expect(a.registrationOf("card")).not.toBe(key);
+    expect(a.registrationOf("other")).toBeUndefined();
+  });
+
+  it("an old handle cannot unregister the new registration", () => {
+    const registry = new SpatialRegistry();
+    const old = registry.register({ id: "card" });
+    old.unregister();
+    registry.register({ id: "card" });
+    const key = registry.registrationOf("card");
+    old.unregister();
+    expect(registry.registrationOf("card")).toBe(key);
+  });
+});

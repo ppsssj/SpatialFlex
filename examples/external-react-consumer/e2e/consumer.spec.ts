@@ -36,7 +36,7 @@ type W = Window & {
   __liveListeners?: (target: EventTarget, type: string) => number;
 };
 
-const EVIDENCE = process.env.CONSUMER_EVIDENCE ?? "../../docs/evidence/p1-07b";
+const EVIDENCE = process.env.CONSUMER_EVIDENCE ?? "../../docs/evidence/p1-07b2";
 const COUNTER = "incident-counter";
 const NOTES = "shift-notes";
 const CHART = "throughput-chart";
@@ -661,6 +661,63 @@ test("E5 an unsupported ancestor is diagnosed and Native DOM is refused", async 
   evidence[`e5-${testInfo.project.name}`] = {
     diagnostic: await compatibility.textContent(),
   };
+  expect(errors).toEqual([]);
+});
+
+test("E6 switching strategy is a transaction; actions are scoped to the live instance", async ({
+  page,
+}, testInfo) => {
+  const errors = watchConsole(page);
+  await open(page);
+  const card = slot(page, COUNTER).locator("article");
+  await mark(page, COUNTER);
+  // Native → Adaptive: the original returns to its layout, then the 3D
+  // panel of the new instance appears.
+  await extract(page, COUNTER, "native");
+  const native = (await target(page, COUNTER))!;
+  await page.getByTestId("extract-adaptive").click();
+  await expect
+    .poll(async () => (await target(page, COUNTER))?.kind)
+    .toBe("adaptive");
+  const adaptive = (await target(page, COUNTER))!;
+  expect(adaptive.presentationId).not.toBe(native.presentationId);
+  expect(await targets(page)).toHaveLength(1);
+  await expect(panel(page, COUNTER)).not.toHaveAttribute(
+    "data-spatialflex-placement",
+  );
+  expect(await residue(page, COUNTER)).toEqual([]);
+  expect(await sameNodes(page, COUNTER)).toBe(true);
+  expect(
+    await card.evaluate((el) => el.closest("[data-spatialflex-item]") !== null),
+  ).toBe(true);
+  // The adaptive instance's action runs the app's action exactly once.
+  const incidents = Number(await page.getByTestId("incidents").textContent());
+  const calls = Number(await page.getByTestId("action-calls").textContent());
+  const button = (await page.evaluate(
+    (id) => (window as W).__spatialView!.locate(id, 0.5, 0.15),
+    COUNTER,
+  ))!;
+  await page.mouse.click(button.x, button.y);
+  await expect(page.getByTestId("incidents")).toHaveText(String(incidents + 1));
+  await expect(page.getByTestId("action-calls")).toHaveText(String(calls + 1));
+  // Adaptive → Native: back in space as a new native instance.
+  await page.getByTestId("extract-native").click();
+  await expect(panel(page, COUNTER)).toHaveAttribute("data-spatial-placed", "");
+  const again = (await target(page, COUNTER))!;
+  expect(again.kind).toBe("native");
+  expect(again.transform).toEqual(again.initial);
+  await expect
+    .poll(() => page.evaluate(() => (window as W).__spatialView!.liveTextures))
+    .toBe(0);
+  // A refused switch keeps the current presentation: Region status is
+  // presented as XR Adaptive; Native DOM stays refused, nothing changes.
+  await extract(page, REGION, "adaptive");
+  const regionAdaptive = (await target(page, REGION))!;
+  await expect(page.getByTestId("extract-native")).toBeDisabled();
+  expect(await target(page, REGION)).toEqual(regionAdaptive);
+  await page.screenshot({
+    path: `${EVIDENCE}/e6-switch-${testInfo.project.name}.png`,
+  });
   expect(errors).toEqual([]);
 });
 

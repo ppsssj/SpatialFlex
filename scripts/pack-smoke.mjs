@@ -33,7 +33,11 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const example = join(root, "examples/external-react-consumer");
-const evidence = join(root, "docs/evidence/p1-07b");
+// Evidence of the current milestone (earlier milestones keep their own).
+const evidence = join(
+  root,
+  process.env.SMOKE_EVIDENCE ?? "docs/evidence/p1-07b2",
+);
 const skipBrowser = process.argv.includes("--skip-browser");
 const PACKAGES = ["core", "dom", "react"];
 const isWindows = process.platform === "win32";
@@ -111,16 +115,19 @@ for (const [name, file] of Object.entries(packed)) {
       `${name}: unresolved workspace dependencies ${JSON.stringify(workspaceRefs)}`,
     );
   const entry = manifest.exports["."];
-  for (const target of [entry.types, entry.default])
-    if (!listing.includes(`package/${target.replace(/^\.\//, "")}`))
-      fail(`${name}: export target ${target} is not in the tarball`);
+  for (const [subpath, exported] of Object.entries(manifest.exports))
+    for (const target of [exported.types, exported.default])
+      if (!listing.includes(`package/${target.replace(/^\.\//, "")}`))
+        fail(
+          `${name}${subpath.slice(1)}: export target ${target} is not in the tarball`,
+        );
   if (listing.some((f) => f.startsWith("package/src/")))
     fail(`${name}: sources are packed`);
   step(`tarball @spatialflex/${name}`, {
     files: listing.length,
     dependencies: manifest.dependencies ?? {},
     peerDependencies: manifest.peerDependencies ?? {},
-    exports: entry,
+    exports: manifest.exports,
     note: entry.source
       ? "The `source` export condition points to ./src (not packed); only workspace tooling that opts into the condition uses it."
       : undefined,
@@ -201,11 +208,24 @@ step("installed from tarballs", {
   ),
 });
 
+// One React runtime: the SDK packages must use the application's React
+// (a peer dependency), never a nested copy.
+const nestedReact = PACKAGES.flatMap((name) =>
+  ["react", "react-dom"].filter((dep) =>
+    existsSync(
+      join(app, "node_modules/@spatialflex", name, "node_modules", dep),
+    ),
+  ),
+);
+if (nestedReact.length)
+  fail(`nested React copies under the SDK: ${nestedReact.join(", ")}`);
+step("single React runtime (no nested copy under @spatialflex/*)");
+
 // 5. Resolution: Node ESM, inside this directory.
 writeFileSync(
   join(app, "check-resolution.mjs"),
   `const out = {};
-for (const name of ["@spatialflex/core", "@spatialflex/dom", "@spatialflex/react"]) {
+for (const name of ["@spatialflex/core", "@spatialflex/dom", "@spatialflex/react", "@spatialflex/react/spatial"]) {
   const url = import.meta.resolve(name);
   const module = await import(name);
   out[name] = { url, exports: Object.keys(module).length };
@@ -219,7 +239,7 @@ const resolution = run("node", ["check-resolution.mjs"], app, {
 const resolved = JSON.parse(resolution.trim().split(/\r?\n/).at(-1));
 for (const [name, { url }] of Object.entries(resolved)) {
   const path = fileURLToPath(url);
-  if (!path.startsWith(join(app, "node_modules")))
+  if (!path.startsWith(join(app, "node_modules")) || /xr-lab/.test(path))
     fail(`${name} resolves outside the app: ${path}`);
   if (path.startsWith(root)) fail(`${name} resolves into the repository`);
 }

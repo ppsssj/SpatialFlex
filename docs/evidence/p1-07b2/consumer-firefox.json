@@ -1,0 +1,52 @@
+{
+  "e2-firefox": {
+    "start": {
+      "position": [-0.4, 1.6, -1],
+      "rotation": [0, 0, 0, 1],
+      "scale": 1
+    },
+    "moved": {
+      "position": [0.059004762015890166, 1.3714804417001838, -1],
+      "rotation": [0, 0, 0, 1],
+      "scale": 1
+    },
+    "rotated": {
+      "position": [0.059004762015890166, 1.3714804417001838, -1],
+      "rotation": [0, 0.28557186305313387, 0, 0.9583572982099954],
+      "scale": 1
+    },
+    "scaled": {
+      "position": [0.059004762015890166, 1.3714804417001838, -1],
+      "rotation": [0, 0.28557186305313387, 0, 0.9583572982099954],
+      "scale": 1.772320331664776
+    },
+    "committed": {
+      "position": [0.059004762015890166, 1.3914804417001838, -1],
+      "rotation": [0, 0.28557186305313387, 0, 0.9583572982099954],
+      "scale": 1.772320331664776
+    }
+  },
+  "e4-firefox": {
+    "presentationInstances": [
+      "native-1",
+      "adaptive-2",
+      "native-3",
+      "adaptive-4",
+      "native-5",
+      "adaptive-6"
+    ],
+    "listeners": {
+      "move": 0,
+      "up": 0,
+      "key": 0,
+      "diagnostics": {
+        "subscriptions": "2",
+        "subscribes": "2",
+        "mounts": "{\"incident-counter\":1,\"shift-notes\":1,\"throughput-chart\":1,\"region-status\":1}"
+      }
+    }
+  },
+  "e5-firefox": {
+    "diagnostic": "Native DOM is not supported here: ancestor div.carousel has will-change: transform, which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+  }
+}
