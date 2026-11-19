@@ -1,0 +1,5 @@
+{
+  "mode": "after",
+  "nativeDisabled": true,
+  "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-transform has transform: matrix(0.999657, 0.0261769, -0.0261769, 0.999…, which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+}

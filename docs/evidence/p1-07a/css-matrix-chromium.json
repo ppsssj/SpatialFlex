@@ -1,0 +1,228 @@
+{
+  "three-chromium": {
+    "case-form": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-plain": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-scroll": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-hidden": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-clip": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-positioned": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-stacking": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-opacity": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-container": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-transform": {
+      "classification": "UNSUPPORTED (diagnosed)",
+      "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-transform has transform: matrix(0.999657, 0.0261769, -0.0261769, 0.999…, which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+    },
+    "case-filter": {
+      "classification": "UNSUPPORTED (diagnosed)",
+      "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-filter has filter: drop-shadow(rgba(0, 0, 0, 0.267) 0px 2px 2px), which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+    },
+    "case-will-change": {
+      "classification": "UNSUPPORTED (diagnosed)",
+      "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-will-change has will-change: transform, which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+    },
+    "case-contain": {
+      "classification": "UNSUPPORTED (diagnosed)",
+      "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-contain has contain: paint, which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+    },
+    "case-clip-path": {
+      "classification": "UNSUPPORTED (diagnosed)",
+      "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-clip-path has clip-path: inset(0px round 8px), which clips every descendant. Use XR Adaptive, or remove that style."
+    }
+  },
+  "babylon-chromium": {
+    "case-form": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-plain": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-scroll": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-hidden": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-clip": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-positioned": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-stacking": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-opacity": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-container": {
+      "classification": "SUPPORTED",
+      "hits": 5
+    },
+    "case-transform": {
+      "classification": "UNSUPPORTED (diagnosed)",
+      "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-transform has transform: matrix(0.999657, 0.0261769, -0.0261769, 0.999…, which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+    },
+    "case-filter": {
+      "classification": "UNSUPPORTED (diagnosed)",
+      "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-filter has filter: drop-shadow(rgba(0, 0, 0, 0.267) 0px 2px 2px), which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+    },
+    "case-will-change": {
+      "classification": "UNSUPPORTED (diagnosed)",
+      "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-will-change has will-change: transform, which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+    },
+    "case-contain": {
+      "classification": "UNSUPPORTED (diagnosed)",
+      "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-contain has contain: paint, which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+    },
+    "case-clip-path": {
+      "classification": "UNSUPPORTED (diagnosed)",
+      "diagnostic": "Native DOM is not supported here: ancestor div.hz-wrap.hz-clip-path has clip-path: inset(0px round 8px), which clips every descendant. Use XR Adaptive, or remove that style."
+    }
+  },
+  "rules-chromium": [
+    {
+      "rule": "transform: translate(1px, 1px)",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "translate: 1px 1px",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "rotate: 1deg",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "scale: 1.01",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "perspective: 800px",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "transform-style: preserve-3d",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "filter: blur(0.5px)",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "backdrop-filter: blur(1px)",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "will-change: transform",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "will-change: filter",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "contain: paint",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "contain: layout",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "contain: strict",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "contain: content",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "content-visibility: auto",
+      "effect": "containing-block"
+    },
+    {
+      "rule": "clip-path: inset(0)",
+      "effect": "clip"
+    },
+    {
+      "rule": "mask-image: linear-gradient(black, black)",
+      "effect": "clip"
+    },
+    {
+      "rule": "will-change: opacity",
+      "effect": "none"
+    },
+    {
+      "rule": "contain: style",
+      "effect": "none"
+    },
+    {
+      "rule": "container-type: inline-size",
+      "effect": "none"
+    },
+    {
+      "rule": "container-type: size",
+      "effect": "none"
+    },
+    {
+      "rule": "opacity: 0.85",
+      "effect": "none"
+    },
+    {
+      "rule": "isolation: isolate",
+      "effect": "none"
+    },
+    {
+      "rule": "overflow: hidden",
+      "effect": "none"
+    },
+    {
+      "rule": "overflow: clip",
+      "effect": "none"
+    },
+    {
+      "rule": "position: relative; z-index: 1",
+      "effect": "none"
+    },
+    {
+      "rule": "position: sticky",
+      "effect": "none"
+    }
+  ]
+}

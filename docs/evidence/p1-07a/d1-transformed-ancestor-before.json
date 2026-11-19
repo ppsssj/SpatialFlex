@@ -1,0 +1,18 @@
+{
+  "mode": "before",
+  "reportedPlaced": true,
+  "expected": {
+    "left": 1007.3612270729353,
+    "top": 272.0997934267745,
+    "right": 1166.621307300171,
+    "bottom": 374.6914796108987
+  },
+  "actual": {
+    "left": 1158.484375,
+    "top": 486.766845703125,
+    "right": 1306.9039306640625,
+    "bottom": 579.300048828125
+  },
+  "errorPx": 214.6670522763505,
+  "hitAtExpectedCenter": "CANVAS"
+}

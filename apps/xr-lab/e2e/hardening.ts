@@ -50,7 +50,9 @@ export const countListeners = () => {
     listener: EventListenerOrEventListenerObject | null,
     options?: boolean | AddEventListenerOptions,
   ) {
-    if (listener) {
+    // Playwright's own injected script (hit-target interceptors) is not the
+    // application: its listeners are not counted.
+    if (listener && !new Error().stack?.includes("InjectedScript")) {
       const byListener = live.get(this) ?? new Map<unknown, Set<string>>();
       live.set(this, byListener);
       const keys = byListener.get(listener) ?? new Set<string>();
@@ -359,4 +361,22 @@ export async function subscriptions(page: Page) {
     active: await subs.textContent(),
     subscribes: await subs.getAttribute("data-total-subscribes"),
   };
+}
+
+/**
+ * A point on a handle where the browser actually hit-tests that handle
+ * (parts of a native panel can be cut out by an XR panel in front of it).
+ */
+export async function grabPoint(locator: Locator): Promise<Point> {
+  const box = (await locator.boundingBox())!;
+  const point = await locator.evaluate((el, box) => {
+    for (const f of [0.5, 0.25, 0.75, 0.1, 0.9]) {
+      const p = { x: box.x + box.width * f, y: box.y + box.height / 2 };
+      const hit = document.elementFromPoint(p.x, p.y);
+      if (hit && el.contains(hit)) return p;
+    }
+    return null;
+  }, box);
+  expect(point, "a visible, hit-testable part of the handle").not.toBeNull();
+  return point!;
 }

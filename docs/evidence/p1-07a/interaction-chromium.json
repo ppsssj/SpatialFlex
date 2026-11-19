@@ -1,0 +1,74 @@
+{
+  "occlusion-three-chromium": {
+    "behindPage": ["page", "page", "page", "page", "page"],
+    "xrInFront": {
+      "overNext": "canvas",
+      "corners": ["native", "native", "native"]
+    },
+    "nativeInFront": {
+      "overNext": "native"
+    }
+  },
+  "lifecycle-three-chromium": {
+    "cycles": 4,
+    "presentationInstances": [
+      "native-1",
+      "presentation-1",
+      "native-2",
+      "presentation-2",
+      "native-3",
+      "presentation-3",
+      "native-4",
+      "presentation-4"
+    ],
+    "listeners": {
+      "move": 0,
+      "up": 0,
+      "key": 0,
+      "blur": 0,
+      "subs": {
+        "active": "6",
+        "subscribes": "7"
+      },
+      "mounts": "1",
+      "instances": "1",
+      "textures": 0
+    }
+  },
+  "occlusion-babylon-chromium": {
+    "behindPage": ["page", "page", "page", "page", "page"],
+    "xrInFront": {
+      "overNext": "canvas",
+      "corners": ["native", "native", "native"]
+    },
+    "nativeInFront": {
+      "overNext": "native"
+    }
+  },
+  "lifecycle-babylon-chromium": {
+    "cycles": 4,
+    "presentationInstances": [
+      "native-1",
+      "presentation-1",
+      "native-2",
+      "presentation-2",
+      "native-3",
+      "presentation-3",
+      "native-4",
+      "presentation-4"
+    ],
+    "listeners": {
+      "move": 1,
+      "up": 0,
+      "key": 0,
+      "blur": 4,
+      "subs": {
+        "active": "6",
+        "subscribes": "7"
+      },
+      "mounts": "1",
+      "instances": "1",
+      "textures": 0
+    }
+  }
+}
