@@ -382,6 +382,9 @@ importers:
       '@spatialflex/core':
         specifier: workspace:*
         version: link:../core
+      '@spatialflex/dom':
+        specifier: workspace:*
+        version: link:../dom
     devDependencies:
       '@types/react':
         specifier: ^19.3.0

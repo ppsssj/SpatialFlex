@@ -10,6 +10,11 @@
       "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./spatial": {
+      "source": "./src/spatial.ts",
+      "types": "./dist/spatial.d.ts",
+      "default": "./dist/spatial.js"
     }
   },
   "files": [
@@ -21,7 +26,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@spatialflex/core": "workspace:*"
+    "@spatialflex/core": "workspace:*",
+    "@spatialflex/dom": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0"

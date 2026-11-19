@@ -6,7 +6,8 @@ import type {
   SpatialViewRecord,
 } from "@spatialflex/core";
 import { useCallback, useSyncExternalStore } from "react";
-import { useSpatialRegistry } from "./context.js";
+import { useSpatialRegistry, useWorkspace } from "./context.js";
+import type { ItemPlacement } from "./controller.js";
 
 // Server rendering policy: <SpatialItem> registers in an effect, and effects
 // never run on the server, so the server snapshot is always the empty state.
@@ -72,3 +73,24 @@ function useSubscribe(registry: SpatialRegistry) {
     [registry],
   );
 }
+
+/**
+ * Where the item's panel is placed while detached (`viewport` for a 2D
+ * Move, `external` for a Native DOM extraction), or `null` when attached or
+ * unknown. Reactive: placement changes are always published with the
+ * registry change that causes them (detach, attach, unregister), so this
+ * re-renders on extraction, restore and unmount. Read-only.
+ */
+export function useSpatialPlacement(id: SpatialItemId): ItemPlacement | null {
+  const { registry, controller } = useWorkspace();
+  const subscribe = useCallback(
+    (listener: SpatialRegistryListener) => registry.subscribe(listener),
+    [registry],
+  );
+  return useSyncExternalStore(
+    subscribe,
+    () => controller.placement(id),
+    getServerPlacement,
+  );
+}
+const getServerPlacement = () => null;

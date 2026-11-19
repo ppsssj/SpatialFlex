@@ -14,7 +14,11 @@ export {
   type ItemPlacement,
   type SpatialController,
 } from "./controller.js";
-export { useSpatialItem, useSpatialItems } from "./hooks.js";
+export {
+  useSpatialItem,
+  useSpatialItems,
+  useSpatialPlacement,
+} from "./hooks.js";
 export { useSpatialViews } from "./hooks.js";
 export type {
   PresentationStrategy,
