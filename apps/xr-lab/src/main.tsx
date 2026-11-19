@@ -54,6 +54,9 @@ createRoot(root).render(
       store={store}
       emulator={emulator.detail}
       surface={params.get("surface") === "website"}
+      fixture={
+        params.get("fixture") === "hardening" ? "hardening" : "dashboard"
+      }
       header={
         <>
           <h1>SpatialFlex XR Lab</h1>

@@ -411,3 +411,115 @@ button.surface-outline {
   padding-left: 18px;
   font-size: 0.875rem;
 }
+
+/* P1-07A hardening fixture (?fixture=hardening): plain application CSS
+   around registered components; the compositor neither knows nor changes it. */
+.hardening .hz-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+}
+.hz-cell {
+  min-width: 0;
+}
+.hz-caption {
+  font-size: 0.75rem;
+  color: #57606a;
+}
+.hz-wrap {
+  border: 1px dashed #8c959f;
+  border-radius: 6px;
+  padding: 4px;
+}
+.hz-widget h3 {
+  margin: 0 0 4px;
+  font-size: 0.875rem;
+}
+.hz-scroll {
+  height: 110px;
+  overflow: auto;
+}
+.hz-spacer {
+  height: 80px;
+}
+.hz-hidden {
+  height: 70px;
+  overflow: hidden;
+}
+.hz-clip {
+  height: 70px;
+  overflow: clip;
+}
+.hz-overhang {
+  margin-top: -24px;
+}
+.hz-positioned {
+  position: relative;
+  height: 90px;
+}
+.hz-sticky {
+  position: sticky;
+  top: 0;
+}
+.hz-absolute {
+  position: absolute;
+  left: 10px;
+  top: 6px;
+  right: 4px;
+}
+.hz-stacking {
+  position: relative;
+  z-index: 1;
+}
+.hz-opacity {
+  opacity: 0.85;
+}
+.hz-transform {
+  transform: translate(6px, 4px) rotate(1.5deg);
+}
+.hz-filter {
+  filter: drop-shadow(0 2px 2px #0004);
+}
+.hz-will-change {
+  will-change: transform;
+}
+.hz-contain {
+  contain: paint;
+}
+.hz-container {
+  container-type: inline-size;
+}
+.hz-clip-path {
+  clip-path: inset(0 round 8px);
+}
+.hz-form {
+  display: grid;
+  gap: 4px;
+}
+.hz-form label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.hz-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.hz-card {
+  padding: 4px 6px;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.hz-extra {
+  margin: 0;
+}
+.hz-form-host {
+  width: 300px;
+}
+.hz-form output {
+  font-size: inherit;
+  font-weight: normal;
+}

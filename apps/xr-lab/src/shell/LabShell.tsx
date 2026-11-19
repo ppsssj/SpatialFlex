@@ -1,7 +1,12 @@
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { testHooksEnabled } from "../contracts/hostProbe";
 import type { HostModule } from "../contracts/xrHost";
-import { Dashboard, LabStoreContext, type LabStore } from "../fixtures";
+import {
+  Dashboard,
+  HardeningPage,
+  LabStoreContext,
+  type LabStore,
+} from "../fixtures";
 import type {
   IntegrationModule,
   LabIntegration,
@@ -26,6 +31,11 @@ export interface LabShellProps {
   header?: ReactNode;
   /** Start in Spatial Website mode, if supported (`?surface=website`). */
   surface?: boolean;
+  /**
+   * The website shown: the dashboard, or the P1-07A hardening fixture
+   * (`?fixture=hardening`).
+   */
+  fixture?: "dashboard" | "hardening";
 }
 
 /**
@@ -40,6 +50,7 @@ export function LabShell({
   emulator,
   header,
   surface = false,
+  fixture = "dashboard",
 }: LabShellProps) {
   const { Provider } = integration;
   return (
@@ -51,6 +62,7 @@ export function LabShell({
           emulator={emulator}
           header={header}
           surfaceRequested={surface}
+          fixture={fixture}
         />
       </Provider>
     </LabStoreContext>
@@ -63,13 +75,16 @@ function ShellLayout({
   emulator,
   header,
   surfaceRequested,
+  fixture,
 }: {
   integration: IntegrationModule;
   host: HostModule;
   emulator: string;
   header: ReactNode;
   surfaceRequested: boolean;
+  fixture: "dashboard" | "hardening";
 }) {
+  const Page = fixture === "hardening" ? HardeningPage : Dashboard;
   const lab: LabIntegration = integration.useIntegration();
   // Unmounting the workspace disposes the host's engine, scene and render
   // loop; used to check resource cleanup.
@@ -167,7 +182,7 @@ function ShellLayout({
             lab.detach && <StrategyControls lab={lab} />
           )}
           <SpatialWebSurface active={surfaceActive} surface={surface} lab={lab}>
-            <Dashboard
+            <Page
               {...(lab.renderWidget && { renderWidget: lab.renderWidget })}
             />
           </SpatialWebSurface>

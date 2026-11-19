@@ -11,6 +11,8 @@ export {
   type RenderWidget,
   type WidgetId,
 } from "./Dashboard";
+export { FORM_ID, HARDENING_CASES, HardeningPage } from "./HardeningPage";
+export type { HardeningCase } from "./HardeningPage";
 export {
   createLabStore,
   HISTORY_LENGTH,
