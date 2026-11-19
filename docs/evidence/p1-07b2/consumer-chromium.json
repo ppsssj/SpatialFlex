@@ -1,0 +1,52 @@
+{
+  "e2-chromium": {
+    "start": {
+      "position": [-0.4, 1.6, -1],
+      "rotation": [0, 0, 0, 1],
+      "scale": 1
+    },
+    "moved": {
+      "position": [0.058990705910137664, 1.3714680134328991, -1],
+      "rotation": [0, 0, 0, 1],
+      "scale": 1
+    },
+    "rotated": {
+      "position": [0.058990705910137664, 1.3714680134328991, -1],
+      "rotation": [0, 0.2857308058891511, 0, 0.9583099219803248],
+      "scale": 1
+    },
+    "scaled": {
+      "position": [0.058990705910137664, 1.3714680134328991, -1],
+      "rotation": [0, 0.2857308058891511, 0, 0.9583099219803248],
+      "scale": 1.7699998866513222
+    },
+    "committed": {
+      "position": [0.058990705910137664, 1.3914680134328992, -1],
+      "rotation": [0, 0.2857308058891511, 0, 0.9583099219803248],
+      "scale": 1.7699998866513222
+    }
+  },
+  "e4-chromium": {
+    "presentationInstances": [
+      "native-1",
+      "adaptive-2",
+      "native-3",
+      "adaptive-4",
+      "native-5",
+      "adaptive-6"
+    ],
+    "listeners": {
+      "move": 0,
+      "up": 0,
+      "key": 0,
+      "diagnostics": {
+        "subscriptions": "2",
+        "subscribes": "2",
+        "mounts": "{\"incident-counter\":1,\"shift-notes\":1,\"throughput-chart\":1,\"region-status\":1}"
+      }
+    }
+  },
+  "e5-chromium": {
+    "diagnostic": "Native DOM is not supported here: ancestor div.carousel has will-change: transform, which captures the element's fixed positioning (it would be placed and clipped relative to that ancestor). Use XR Adaptive, or remove that style."
+  }
+}

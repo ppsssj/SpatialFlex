@@ -4,7 +4,7 @@
 
 > 개발자는 공간형 UI와 제약 조건을 정의하고, 사용자는 필요한 웹 요소를 독립시켜 자신만의 작업 공간을 구성합니다.
 
-**Status:** P0 Detach + P1 Cross-Context XR Mirror — P1-07B External React Integration (Experimental, desktop)
+**Status:** P0 Detach + P1 Cross-Context XR Mirror — P1-07B2 React Runtime Bindings (Experimental, desktop)
 
 **Type:** Open-source Spatial Layout & Element Detachment SDK  
 **Focus:** Adaptive Layout · Element Detachment · Live Components · User Composition · Layout Persistence
@@ -536,6 +536,7 @@ SpatialFlex는 WebSpatial이나 React Three Fiber와 같은 렌더링 기술을 
 - [x] **P1-06B — Spatial Panel Manipulation (Experimental, desktop):** Native DOM·XR Adaptive 패널을 공통 엔진으로 마우스·키보드 이동·회전·크기 조절
 - [x] **P1-07A — Native DOM & Compositor Hardening:** 실제 CSS·입력·가림·수명주기 조건에서의 안정화와 미지원 CSS 구성의 명시적 진단
 - [x] **P1-07B — External React Integration:** XR Lab 코드 없이 패키지 진입점만으로 통합하는 독립 React 앱과 `@spatialflex/dom` 런타임, 워크스페이스 밖 패키지 소비 검증
+- [x] **P1-07B2 — React Runtime Bindings:** `@spatialflex/react/spatial`의 `useSpatialPresentations`와 SDK 소유의 Native/Adaptive 프레젠테이션 수명주기, 반응형 배치, 등록 식별자
 - [ ] **Future — Generalized Detach to XR:** 런타임 capability에 따른 더 폭넓은 presentation 재사용; 자동 DOM 변환을 뜻하지 않음
 - [ ] **Future — Adaptive Layout / Persistence:** 자동 배치, 충돌 방지, 레이아웃 저장·복원
 - [ ] **Future — Open-Source Release:** API 안정화, 기기 호환성 검증, 문서 및 npm 배포
@@ -579,7 +580,7 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 ## 12. Project Status
 
-**Current stage: P1-07B External React Integration (Experimental, desktop)**
+**Current stage: P1-07B2 React Runtime Bindings (Experimental, desktop)**
 
 P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.com/ppsssj/SpatialFlex/issues/5))에서 **같은 브라우저 페이지 안의 2D 개념 증명(PoC)** 을 구현하고 자동화 테스트로 검증했습니다. 이는 위에서 설명한 SpatialFlex 비전의 첫 단계이며, XR 환경에서의 동작이나 SDK 전체의 완성을 뜻하지 않습니다. 실행 방법과 세부 동작은 [13. Local Development](#13-local-development)에 있습니다.
 
@@ -602,6 +603,7 @@ P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.co
 - **P1-06B Spatial Panel Manipulation (실험적, 데스크톱):** 추출된 패널(Native DOM과 XR Adaptive 모두)을 렌더러 중립 `SpatialManipulator`(`@spatialflex/core`)로 이동(Move)·회전(Yaw)·균일 공간 스케일 조절합니다. Host는 핸들 입력을 월드 Ray로만 보고하고, Native DOM은 같은 노드·React 인스턴스를 유지한 채 CSS 레이아웃 크기 변경 없이 공간 pose만 바뀝니다. 핸들 드래그 중 카메라 조작은 중지되고, Escape·pointercancel·blur는 조작 전 pose로 되돌립니다. [아키텍처 / 검증](docs/spatial-panel-manipulation.md).
 - **P1-07A Native DOM & Compositor Hardening:** 새 기능 없이 기존 동작을 실제 조건에서 검증·안정화했습니다. 고정 위치를 가로채거나(`transform`·`filter`·`will-change`·`contain` 등) 잘라내는(`clip-path`·mask) 조상 아래의 Native DOM은 잘못된 위치에 조용히 놓이는 대신 이유와 함께 거부되거나(추출 전) 숨겨지고 보고됩니다(추출 후). 복원 시 compositor가 소유하지 않은 스타일은 건드리지 않고, 요소가 교체되어도 핸들과 합성이 새 요소를 따릅니다. 실제 폼 컨트롤·포커스·Tab, 가림과 hit testing, 반복 추출과 중단된 드래그를 Chromium·Firefox × Three.js·Babylon.js에서 검증합니다. [호환성 매트릭스 / 결함 / 한계](docs/p1-07a-native-compositor-hardening.md).
 - **P1-07B External React Integration (실험적, 데스크톱):** XR Lab에 갇혀 있던 재사용 런타임을 SDK로 옮겼습니다. 새 `@spatialflex/dom`(React·렌더러 없음)은 Native DOM 배치(`NativeCompositor`), 포함 관계 진단, 핸들 입력 바인딩, 투영 수학을 제공하고, `@spatialflex/core`에는 아이템 단위 조작 `ItemManipulator`가 추가되었습니다. `examples/external-react-consumer`(MUI·Recharts·Three.js)는 패키지 진입점만으로 통합하며, `pnpm smoke:pack`이 tarball을 워크스페이스 밖에 설치해 타입 검사·빌드·브라우저 테스트를 수행합니다. npm에는 배포하지 않습니다(`private`). [감사 / API / DX 평가 / 한계](docs/p1-07b-external-react-integration.md).
+- **P1-07B2 React Runtime Bindings (실험적, 데스크톱):** 외부 앱이 직접 작성하던 연결 코드를 SDK로 옮겼습니다. `PresentationRuntime`(`@spatialflex/dom`)이 Native DOM·XR Adaptive 인스턴스, 등록 단위 생존 판정(`registry.registrationOf`), 전략 전환 트랜잭션, 오래된 입력·액션 거부, 호스트 해제 시 정리를 담당하고, `@spatialflex/react/spatial`의 `useSpatialPresentations`가 이를 워크스페이스마다 연결합니다. 배치는 `useSpatialPlacement`로 구독할 수 있습니다. 소비자 앱의 연결 코드는 316줄에서 78줄(앱 정책만)로 줄었습니다. XR Lab의 이전은 후속 작업([#33](https://github.com/ppsssj/SpatialFlex/issues/33))입니다. [설계 / 수명주기 / DX / 한계](docs/p1-07b2-react-runtime-bindings.md).
 
 ### 아직 구현되지 않은 것
 
