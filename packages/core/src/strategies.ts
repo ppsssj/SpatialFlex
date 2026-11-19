@@ -1,4 +1,4 @@
-import { SpatialFlexError } from "./errors";
+import { SpatialFlexError } from "./errors.js";
 
 export interface DetachmentStrategy {
   readonly mode: "move" | "mirror" | "snapshot";

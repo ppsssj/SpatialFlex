@@ -1,7 +1,7 @@
 import { SpatialRegistry } from "@spatialflex/core";
 import { useMemo, useState, type ReactNode } from "react";
-import { WorkspaceContext } from "./context";
-import { createController } from "./controller";
+import { WorkspaceContext } from "./context.js";
+import { createController } from "./controller.js";
 
 export interface SpatialWorkspaceProps {
   /**

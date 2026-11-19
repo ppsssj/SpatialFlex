@@ -1,17 +1,17 @@
-import { SpatialFlexError } from "./errors";
+import { SpatialFlexError } from "./errors.js";
 import {
   assertPresentationStrategy,
   type PresentationStrategy,
-} from "./presentation";
+} from "./presentation.js";
 import {
   assertSourceVisibility,
   type SourceVisibility,
-} from "./sourceVisibility";
+} from "./sourceVisibility.js";
 import {
   prepareView,
   type SpatialViewBinding,
   type SpatialViewRecord,
-} from "./spatialView";
+} from "./spatialView.js";
 let nextViewWorkspace = 0;
 import type {
   SpatialDetachOptions,
@@ -22,7 +22,7 @@ import type {
   SpatialItemRecord,
   SpatialPosition,
   SpatialSize,
-} from "./types";
+} from "./types.js";
 
 export type SpatialRegistryListener = () => void;
 

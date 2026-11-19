@@ -6,7 +6,7 @@ import type {
   SpatialViewRecord,
 } from "@spatialflex/core";
 import { useCallback, useSyncExternalStore } from "react";
-import { useSpatialRegistry } from "./context";
+import { useSpatialRegistry } from "./context.js";
 
 // Server rendering policy: <SpatialItem> registers in an effect, and effects
 // never run on the server, so the server snapshot is always the empty state.

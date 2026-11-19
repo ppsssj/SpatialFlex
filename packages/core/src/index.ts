@@ -12,7 +12,7 @@ export {
   XR_MIRROR_STRATEGY,
   type DetachmentStrategy,
   type SupportedDetachmentStrategy,
-} from "./strategies";
+} from "./strategies.js";
 export {
   assertExtraction,
   assertPresentationStrategy,
@@ -25,19 +25,19 @@ export {
   type ExtractionSource,
   type PresentationStrategy,
   type SupportedExtraction,
-} from "./presentation";
+} from "./presentation.js";
 export {
   assertSourceVisibility,
   validateSourceVisibility,
   type SourceVisibility,
   type SourceVisibilityRequest,
-} from "./sourceVisibility";
+} from "./sourceVisibility.js";
 export type {
   SpatialViewBody,
   SpatialViewAction,
   SpatialViewBinding,
   SpatialViewRecord,
-} from "./spatialView";
+} from "./spatialView.js";
 
 export {
   assertTransform,
@@ -64,13 +64,13 @@ export {
   type SpatialRay,
   type SpatialTransform,
   type SpatialVector3,
-} from "./manipulation";
-export { SpatialFlexError, type SpatialFlexErrorCode } from "./errors";
+} from "./manipulation.js";
+export { SpatialFlexError, type SpatialFlexErrorCode } from "./errors.js";
 export {
   SpatialRegistry,
   type SpatialItemRegistration,
   type SpatialRegistryListener,
-} from "./registry";
+} from "./registry.js";
 export type {
   AttachmentStatus,
   SpatialDetachOptions,
@@ -81,4 +81,4 @@ export type {
   SpatialItemRecord,
   SpatialPosition,
   SpatialSize,
-} from "./types";
+} from "./types.js";

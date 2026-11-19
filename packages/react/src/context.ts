@@ -1,6 +1,6 @@
 import { SpatialFlexError, type SpatialRegistry } from "@spatialflex/core";
 import { createContext, useContext } from "react";
-import type { SpatialController, WorkspaceController } from "./controller";
+import type { SpatialController, WorkspaceController } from "./controller.js";
 
 export interface WorkspaceContextValue {
   readonly registry: SpatialRegistry;
