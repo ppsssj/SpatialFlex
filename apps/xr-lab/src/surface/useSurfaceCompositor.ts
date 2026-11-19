@@ -9,19 +9,16 @@ import {
   type Vec3,
 } from "../contracts/xrHost";
 import {
-  describeElement,
-  nativeContainmentIssues,
-  type ContainmentIssue,
-} from "./nativeContainment";
+  NativeCompositor,
+  quaternionFromEuler,
+  type NativeIssues,
+  type NativeTarget,
+} from "@spatialflex/dom";
 import { DEFAULT_SURFACE_POSE, SURFACE_RESOLUTION } from "./surfaceConfig";
 import {
-  eulerFromQuaternion,
-  nativePanelTransform,
-  occlusionClipPath,
   pageClipPath,
   planeVisibility,
   surfaceMatrix,
-  surfaceQuad,
   transformedQuad,
   viewportRay,
   type Occluder,
@@ -54,76 +51,7 @@ export type PoseResolver = (
 
 const noPose: PoseResolver = () => undefined;
 
-interface Written {
-  transform: string;
-  clip: string;
-  visibility: string;
-  pose: string;
-  /**
-   * Inline values as the compositor last left them (serialized by the
-   * browser), per owned property: release removes a property only while it
-   * still holds that value, so a value that another owner set in the
-   * meantime is kept.
-   */
-  owned: Map<NativeProperty, string>;
-  /**
-   * Containment issues of its ancestors (see nativeContainment.ts), from a
-   * style walk when compositing starts and again whenever the browser
-   * reports a containing block other than the page (`offsetParent`, checked
-   * every frame).
-   */
-  issues: readonly ContainmentIssue[] | null;
-  capturedBy: Element | null;
-}
-
-/** Natively extracted ids that cannot be composited, with the reasons. */
-export type NativeIssues = ReadonlyMap<string, readonly ContainmentIssue[]>;
-
-/**
- * Inline properties the compositor owns on a native element. Visibility is
- * not one of them: it is the `data-spatial-visibility` attribute (styled by
- * the surface's stylesheet), so the compositor never writes or removes the
- * inline `visibility` that React owns, such as the SDK's reserved-source
- * `visibility: hidden`, committed in the same React commit that ends a
- * native extraction.
- */
-const NATIVE_PROPERTIES = ["transform", "clip-path"] as const;
-type NativeProperty = (typeof NATIVE_PROPERTIES)[number];
-
-const newWritten = (): Written => ({
-  transform: "",
-  clip: "",
-  visibility: "",
-  pose: "",
-  owned: new Map(),
-  issues: null,
-  capturedBy: null,
-});
-
-function write(
-  element: HTMLElement,
-  written: Written,
-  property: NativeProperty,
-  value: string,
-) {
-  element.style.setProperty(property, value);
-  written.owned.set(property, element.style.getPropertyValue(property));
-}
-
-function release(element: HTMLElement, written: Written | undefined) {
-  for (const property of NATIVE_PROPERTIES) {
-    const value = written?.owned.get(property);
-    if (
-      value !== undefined &&
-      element.style.getPropertyValue(property) === value
-    )
-      element.style.removeProperty(property);
-  }
-  delete element.dataset.spatialPlaced;
-  delete element.dataset.spatialPose;
-  delete element.dataset.spatialVisibility;
-  delete element.dataset.spatialIssue;
-}
+export type { NativeIssues };
 
 /**
  * The DOM compositor of the spatial web surface. It owns presentation only:
@@ -131,10 +59,11 @@ function release(element: HTMLElement, written: Written | undefined) {
  * without React renders), occlusion clipping and pointer routing.
  *
  * It composites the page and, for Native DOM extraction, the original
- * elements that the SpatialFlex controller placed externally. Those stay
- * where React rendered them (inside the page); only their transform, clip
- * and visibility are written here, and removed again on restore. Nothing is
- * moved, cloned or remounted.
+ * elements that the SpatialFlex controller placed externally, through the
+ * SDK's {@link NativeCompositor} (`@spatialflex/dom`) with the page as their
+ * containing surface. Those stay where React rendered them (inside the
+ * page); only their transform, clip and visibility are written, and removed
+ * again on restore. Nothing is moved, cloned or remounted.
  */
 export function useSurfaceCompositor(
   active: boolean,
@@ -153,6 +82,9 @@ export function useSurfaceCompositor(
   const [nativeIssues, setNativeIssues] = useState<NativeIssues>(
     () => new Map(),
   );
+  const [natives] = useState(
+    () => new NativeCompositor({ onIssues: setNativeIssues }),
+  );
   const state = useRef({
     pose,
     panels: [] as readonly HostPanel[],
@@ -166,9 +98,7 @@ export function useSurfaceCompositor(
       eye: [number, number, number];
     } | null,
     anchors: new Map() as ReadonlyMap<string, NativeAnchor>,
-    written: new Map<HTMLElement, Written>(),
     border: 0,
-    issueKey: "[]",
     layer: "",
     transform: "",
     clip: "",
@@ -197,25 +127,8 @@ export function useSurfaceCompositor(
   }, [resolveNative]);
   useLayoutEffect(() => {
     const s = state.current;
-    const natives = (JSON.parse(nativeKey) as string[]).flatMap((id) => {
-      const element = resolveNative(id);
-      return element ? [{ id, element }] : [];
-    });
-    const current = new Set(natives.map((n) => n.element));
-    for (const [element, written] of [...s.written])
-      if (!current.has(element)) {
-        release(element, written);
-        s.written.delete(element);
-      }
-    s.natives = natives.map((n) => n.id);
-    // Not placed until the next camera frame.
-    for (const { element } of natives)
-      if (!s.written.has(element)) {
-        const written = newWritten();
-        written.visibility = "hidden";
-        element.dataset.spatialVisibility = "hidden";
-        s.written.set(element, written);
-      }
+    s.natives = JSON.parse(nativeKey) as string[];
+    natives.setTargets(nativeTargets(s));
     // The resolver may change identity every render; the id list decides.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nativeKey]);
@@ -235,222 +148,105 @@ export function useSurfaceCompositor(
       for (const property of ["transform", "clip-path", "visibility"])
         page.style.removeProperty(property);
       delete page.dataset.surfaceVisibility;
-      for (const [element, written] of current.written)
-        release(element, written);
-      current.written.clear();
+      natives.dispose();
       current.layer = current.transform = current.clip = "";
-      current.issueKey = "[]";
-      setNativeIssues(new Map());
       current.visibility = "waiting";
       setStatus("waiting");
     };
-  }, [active]);
+  }, [active, natives]);
 
-  const onCameraFrame = useCallback((frame: HostCameraFrame) => {
-    const layer = layerRef.current;
-    const page = pageRef.current;
-    if (!layer || !page) return;
-    const s = state.current;
-    const { left, top, width, height } = frame.viewport;
-    // Copied into one reused buffer: hosts reuse their frame objects.
-    const camera = (s.camera ??= {
-      viewProjection: new Array<number>(16).fill(0),
-      viewport: { left: 0, top: 0, width: 0, height: 0 },
-      eye: [0, 0, 0],
-    });
-    for (let i = 0; i < 16; i++)
-      camera.viewProjection[i] = frame.viewProjection[i]!;
-    Object.assign(camera.viewport, frame.viewport);
-    camera.eye[0] = frame.eye[0];
-    camera.eye[1] = frame.eye[1];
-    camera.eye[2] = frame.eye[2];
-    // XR panels in front of the page (or of a native element) cut it out,
-    // at their current (possibly manipulated) pose.
-    const occluders: Occluder[] = s.panels.map((panel) => {
-      const p = s.poseOf(panel.id);
-      // A manipulable panel also shows its handle row below its face.
-      return p
-        ? transformedQuad(
-            p.position,
-            p.rotation,
-            HANDLED_PANEL_BOUNDS.width * p.scale,
-            HANDLED_PANEL_BOUNDS.height * p.scale,
-            [0, HANDLED_PANEL_BOUNDS.center[1] * p.scale, 0],
-          )
-        : {
-            center: panel.position,
-            width: PANEL_SIZE.width,
-            height: PANEL_SIZE.height,
-          };
-    });
-    const layerKey = `${left},${top},${width},${height}`;
-    if (layerKey !== s.layer) {
-      // The layer covers exactly the canvas, clipping the page to it.
-      layer.style.left = `${left}px`;
-      layer.style.top = `${top}px`;
-      layer.style.width = `${width}px`;
-      layer.style.height = `${height}px`;
-      s.layer = layerKey;
-    }
-    const visibility = planeVisibility(frame, s.pose, SURFACE_RESOLUTION);
-    // Natively extracted elements are composited through the page's
-    // transform, so it stays current even when the page itself is hidden
-    // (seen from behind).
-    if (visibility !== "behind") {
-      const matrix = surfaceMatrix(frame, s.pose, SURFACE_RESOLUTION);
-      if (matrix !== s.transform) {
-        page.style.transform = matrix;
-        s.transform = matrix;
-      }
-    }
-    const keep: [number, number][][] = [];
-    const composited = new Set<HTMLElement>();
-    const frameIssues: [string, readonly ContainmentIssue[]][] = [];
-    for (const id of s.natives) {
-      // Resolved per frame: only the controller's current native element.
-      const element = s.resolve(id);
-      if (!element) continue;
-      composited.add(element);
-      const w = element.offsetWidth;
-      const h = element.offsetHeight;
-      const anchor = s.anchors.get(id);
-      const written = s.written.get(element) ?? newWritten();
-      s.written.set(element, written);
-      // Containment: the page must be the element's containing block, and
-      // no ancestor may clip it. The browser's own answer for the containing
-      // block is offsetParent (layout is already flushed by offsetWidth).
-      written.issues ??= nativeContainmentIssues(element.parentElement, page);
-      const containingBlock = element.offsetParent;
-      if (containingBlock && containingBlock !== page) {
-        if (written.capturedBy !== containingBlock) {
-          written.capturedBy = containingBlock;
-          const found = nativeContainmentIssues(element.parentElement, page);
-          written.issues = found.some((i) => i.effect === "containing-block")
-            ? found
-            : [
-                ...found,
-                {
-                  element: describeElement(containingBlock),
-                  property: "containing block",
-                  value: "established by an ancestor style",
-                  effect: "containing-block",
-                },
-              ];
-        }
-      } else if (written.capturedBy) {
-        written.capturedBy = null;
-        written.issues = nativeContainmentIssues(element.parentElement, page);
-      }
-      const issues = written.issues;
-      if (issues.length > 0) frameIssues.push([id, issues]);
-      // The manipulated pose, once the manipulator owns it; until then the
-      // extraction anchor. Scale is spatial: the element's CSS layout size
-      // (w × h) is unchanged, only its world size.
-      const manipulated = s.poseOf(id);
-      const panelPose: SpatialWebSurfacePose | null = anchor
-        ? {
-            position: manipulated?.position ?? anchor.position,
-            rotation: manipulated
-              ? eulerFromQuaternion(manipulated.rotation)
-              : anchor.rotation,
-            width: w * anchor.metersPerPixel * (manipulated?.scale ?? 1),
-            height: h * anchor.metersPerPixel * (manipulated?.scale ?? 1),
-          }
-        : null;
-      // An element that cannot be composited faithfully is not shown (it
-      // would be misplaced or clipped, and take input there) and is
-      // reported instead.
-      if (issues.length > 0) {
-        element.dataset.spatialIssue = issues[0]!.effect;
-        delete element.dataset.spatialPlaced;
-        delete element.dataset.spatialPose;
-        written.pose = "";
-      } else delete element.dataset.spatialIssue;
-      const placed =
-        issues.length === 0 &&
-        panelPose &&
-        w > 0 &&
-        h > 0 &&
-        visibility !== "behind"
-          ? nativePanelTransform(
-              frame,
-              {
-                pose: s.pose,
-                resolution: SURFACE_RESOLUTION,
-                border: s.border,
-              },
-              { pose: panelPose, resolution: { width: w, height: h } },
+  const onCameraFrame = useCallback(
+    (frame: HostCameraFrame) => {
+      const layer = layerRef.current;
+      const page = pageRef.current;
+      if (!layer || !page) return;
+      const s = state.current;
+      const { left, top, width, height } = frame.viewport;
+      // Copied into one reused buffer: hosts reuse their frame objects.
+      const camera = (s.camera ??= {
+        viewProjection: new Array<number>(16).fill(0),
+        viewport: { left: 0, top: 0, width: 0, height: 0 },
+        eye: [0, 0, 0],
+      });
+      for (let i = 0; i < 16; i++)
+        camera.viewProjection[i] = frame.viewProjection[i]!;
+      Object.assign(camera.viewport, frame.viewport);
+      camera.eye[0] = frame.eye[0];
+      camera.eye[1] = frame.eye[1];
+      camera.eye[2] = frame.eye[2];
+      // XR panels in front of the page (or of a native element) cut it out,
+      // at their current (possibly manipulated) pose.
+      const occluders: Occluder[] = s.panels.map((panel) => {
+        const p = s.poseOf(panel.id);
+        // A manipulable panel also shows its handle row below its face.
+        return p
+          ? transformedQuad(
+              p.position,
+              p.rotation,
+              HANDLED_PANEL_BOUNDS.width * p.scale,
+              HANDLED_PANEL_BOUNDS.height * p.scale,
+              [0, HANDLED_PANEL_BOUNDS.center[1] * p.scale, 0],
             )
-          : null;
-      const shown = placed?.visibility === "visible" ? "visible" : "hidden";
-      if (placed?.visibility === "visible") {
-        if (placed.matrix3d !== written.transform) {
-          write(element, written, "transform", placed.matrix3d);
-          written.transform = placed.matrix3d;
-        }
-        // 3D panels in front of it are cut out; so is the page when the
-        // element lies behind the page plane.
-        const clip = occlusionClipPath(
-          frame,
-          panelPose!,
-          { width: w, height: h },
-          placed.behindPage
-            ? [...occluders, surfaceQuad(s.pose, SURFACE_RESOLUTION)]
-            : occluders,
-        );
-        if (clip !== written.clip) {
-          write(element, written, "clip-path", clip);
-          written.clip = clip;
-        }
-        if (!placed.behindPage) keep.push(placed.pageQuad);
-        const poseKey = JSON.stringify({
-          ...panelPose,
-          resolution: { width: w, height: h },
-        });
-        if (poseKey !== written.pose) {
-          element.dataset.spatialPose = poseKey;
-          element.dataset.spatialPlaced = "";
-          written.pose = poseKey;
+          : {
+              center: panel.position,
+              width: PANEL_SIZE.width,
+              height: PANEL_SIZE.height,
+            };
+      });
+      const layerKey = `${left},${top},${width},${height}`;
+      if (layerKey !== s.layer) {
+        // The layer covers exactly the canvas, clipping the page to it.
+        layer.style.left = `${left}px`;
+        layer.style.top = `${top}px`;
+        layer.style.width = `${width}px`;
+        layer.style.height = `${height}px`;
+        s.layer = layerKey;
+      }
+      const visibility = planeVisibility(frame, s.pose, SURFACE_RESOLUTION);
+      // Natively extracted elements are composited through the page's
+      // transform, so it stays current even when the page itself is hidden
+      // (seen from behind).
+      if (visibility !== "behind") {
+        const matrix = surfaceMatrix(frame, s.pose, SURFACE_RESOLUTION);
+        if (matrix !== s.transform) {
+          page.style.transform = matrix;
+          s.transform = matrix;
         }
       }
-      if (shown !== written.visibility) {
-        // Explicit: the page may be hidden while this element is not.
-        element.dataset.spatialVisibility = shown;
-        written.visibility = shown;
-      }
-    }
-    const issueKey = JSON.stringify(frameIssues);
-    if (issueKey !== s.issueKey) {
-      s.issueKey = issueKey;
-      setNativeIssues(new Map(frameIssues));
-    }
-    // An element that is no longer the current element of any natively
-    // extracted id (replaced while the id list stayed the same) is released.
-    for (const [element, written] of s.written)
-      if (!composited.has(element)) {
-        release(element, written);
-        s.written.delete(element);
-      }
-    if (visibility === "visible") {
-      const clip = pageClipPath(
-        frame,
-        s.pose,
-        SURFACE_RESOLUTION,
+      // Resolved per frame: only the controller's current native elements
+      // (a replaced element is released by setTargets).
+      natives.setTargets(nativeTargets(s));
+      const { keep } = natives.composite(frame, {
+        surface: {
+          element: page,
+          pose: s.pose,
+          resolution: SURFACE_RESOLUTION,
+          border: s.border,
+        },
         occluders,
-        keep,
-      );
-      if (clip !== s.clip) {
-        page.style.clipPath = clip;
-        s.clip = clip;
+      });
+      if (visibility === "visible") {
+        const clip = pageClipPath(
+          frame,
+          s.pose,
+          SURFACE_RESOLUTION,
+          occluders,
+          keep,
+        );
+        if (clip !== s.clip) {
+          page.style.clipPath = clip;
+          s.clip = clip;
+        }
       }
-    }
-    if (visibility !== s.visibility) {
-      page.style.visibility = visibility === "visible" ? "" : "hidden";
-      page.dataset.surfaceVisibility = visibility;
-      s.visibility = visibility;
-      setStatus(visibility);
-    }
-  }, []);
+      if (visibility !== s.visibility) {
+        page.style.visibility = visibility === "visible" ? "" : "hidden";
+        page.dataset.surfaceVisibility = visibility;
+        s.visibility = visibility;
+        setStatus(visibility);
+      }
+    },
+    [natives],
+  );
 
   /** World ray under a client point, from the last rendered camera. */
   const rayAt = useCallback((clientX: number, clientY: number) => {
@@ -489,3 +285,38 @@ export function useSurfaceCompositor(
 }
 
 export type SurfaceCompositor = ReturnType<typeof useSurfaceCompositor>;
+
+/**
+ * Native targets of the current natively extracted ids: the original
+ * element, at its manipulated pose once the manipulator owns it, else at
+ * its extraction anchor. Scale is spatial: the CSS layout size is unchanged.
+ */
+function nativeTargets(s: {
+  natives: readonly string[];
+  resolve: NativeResolver;
+  anchors: ReadonlyMap<string, NativeAnchor>;
+  poseOf: PoseResolver;
+}): NativeTarget[] {
+  return s.natives.flatMap((id) => {
+    const element = s.resolve(id);
+    if (!element) return [];
+    return [
+      {
+        id,
+        element,
+        placement: () => {
+          const anchor = s.anchors.get(id);
+          if (!anchor) return undefined;
+          const manipulated = s.poseOf(id);
+          return {
+            position: manipulated?.position ?? anchor.position,
+            rotation:
+              manipulated?.rotation ?? quaternionFromEuler(anchor.rotation),
+            scale: manipulated?.scale ?? 1,
+            metersPerPixel: anchor.metersPerPixel,
+          };
+        },
+      },
+    ];
+  });
+}
