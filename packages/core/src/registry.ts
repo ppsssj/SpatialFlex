@@ -73,6 +73,9 @@ export class SpatialRegistry {
   #viewSnapshot: readonly SpatialViewRecord[] = Object.freeze([]);
   readonly #items = new Map<SpatialItemId, SpatialItemRecord>();
   readonly #owners = new Map<SpatialItemId, object>();
+  /** Public key of the current registration of each item id. */
+  readonly #registrations = new Map<SpatialItemId, string>();
+  #registrationGeneration = 0;
   readonly #presentations = new Map<SpatialItemId, PresentationStrategy>();
   readonly #listeners = new Set<SpatialRegistryListener>();
   #snapshot: readonly SpatialItemRecord[] = Object.freeze([]);
@@ -107,6 +110,10 @@ export class SpatialRegistry {
     // change, so ownership is tracked by token rather than record identity.
     const token = {};
     this.#owners.set(id, token);
+    this.#registrations.set(
+      id,
+      `${this.#viewWorkspace}/${++this.#registrationGeneration}`,
+    );
     this.#items.set(id, record);
     this.#commit();
     const isCurrent = () => this.#owners.get(id) === token;
@@ -168,6 +175,7 @@ export class SpatialRegistry {
   unregister(id: SpatialItemId): boolean {
     if (!this.#items.delete(id)) return false;
     this.#owners.delete(id);
+    this.#registrations.delete(id);
     this.#presentations.delete(id);
     this.#viewHandlers.delete(id);
     if (this.#views.delete(id)) this.#commitViews();
@@ -355,6 +363,19 @@ export class SpatialRegistry {
   /** The presentation strategy declared by the current registration, if any. */
   presentationOf(id: SpatialItemId): PresentationStrategy | undefined {
     return this.#presentations.get(id);
+  }
+
+  /**
+   * Identity of the item's current registration, `undefined` when it is not
+   * registered. Unique across registries and never reused: a component that
+   * registers the same id again (remount, replacement) gets a new key, so
+   * state keyed by it (presentations, manipulation targets, pending input)
+   * cannot reach the new registration. Unlike a view's `registrationId`
+   * (the epoch of its XR declaration), it exists for every item and does
+   * not change while the registration lives.
+   */
+  registrationOf(id: SpatialItemId): string | undefined {
+    return this.#registrations.get(id);
   }
 
   has(id: SpatialItemId): boolean {
