@@ -7,13 +7,25 @@ import {
   type RefObject,
 } from "react";
 import { PANEL_SIZE, type Vec3 } from "../contracts/xrHost";
-import type { LabIntegration, SurfaceItem } from "../integrations/contract";
+import type {
+  LabIntegration,
+  PresentationOption,
+  SurfaceItem,
+} from "../integrations/contract";
+import {
+  containmentReason,
+  nativeContainmentIssues,
+  type ContainmentIssue,
+} from "./nativeContainment";
 import { SURFACE_RESOLUTION } from "./surfaceConfig";
 import { extractionPosition } from "./surfaceMath";
 import type { SurfaceCompositor } from "./useSurfaceCompositor";
 
 type SourcePolicy = "visible" | "reserved" | "collapsed";
 type Presentation = "native" | "adaptive";
+type Support =
+  | { readonly supported: true }
+  | { readonly supported: false; readonly reason: string };
 const SOURCES: readonly { value: SourcePolicy; label: string }[] = [
   { value: "reserved", label: "Reserve space" },
   { value: "visible", label: "Keep original" },
@@ -36,7 +48,15 @@ interface Box {
  */
 export function SpatialWebSurface({
   active,
-  surface: { attachLayer, attachPage, pose, anchors, placeNative },
+  surface: {
+    attachLayer,
+    attachPage,
+    pose,
+    anchors,
+    placeNative,
+    nativeIssues,
+    pageElement,
+  },
   lab,
   children,
 }: {
@@ -56,18 +76,57 @@ export function SpatialWebSurface({
   const [policy, setPolicy] = useState<SourcePolicy>("reserved");
   const [presentation, setPresentation] = useState<Presentation>("adaptive");
   const [notice, setNotice] = useState<string | null>(null);
+  // Containment diagnostics of the selected component's ancestors, checked
+  // when it is picked and again right before a Native DOM extraction.
+  const [containment, setContainment] = useState<{
+    readonly id: string;
+    readonly issues: readonly ContainmentIssue[];
+  } | null>(null);
   const items = lab.surfaceItems ?? [];
   const selected = items.find((item) => item.id === selectedId) ?? null;
+  const checkContainment = (id: string) => {
+    const source = lab.sourceElement?.(id);
+    const page = pageElement();
+    const issues = source && page ? nativeContainmentIssues(source, page) : [];
+    setContainment({ id, issues });
+    return issues;
+  };
+  const containmentOf = (id: string | undefined) =>
+    containment && containment.id === id ? containment.issues : [];
+  // The integration's support, narrowed by the containment diagnostics.
+  const presentationsOf = (
+    item: SurfaceItem,
+    issues: readonly ContainmentIssue[] = containmentOf(item.id),
+  ): Readonly<Record<Presentation, PresentationOption>> =>
+    item.presentations.native.supported && issues.length > 0
+      ? {
+          ...item.presentations,
+          native: { supported: false, reason: containmentReason(issues) },
+        }
+      : item.presentations;
   // Selection follows the registration: an unmounted component is deselected
   // (React's pattern for adjusting state while rendering; converges at once).
   if (selectedId && !selected) setSelectedId(null);
   const selectionMode = active && selecting;
 
   // Which source policies the chosen presentation supports, with reasons.
-  const supportOf = (value: SourcePolicy, as: Presentation = presentation) =>
-    selected && lab.validateExtraction
-      ? lab.validateExtraction(selected.id, { presentation: as, source: value })
-      : ({ supported: false, reason: "Nothing selected." } as const);
+  const supportOf = (
+    value: SourcePolicy,
+    as: Presentation = presentation,
+  ): Support => {
+    if (!selected || !lab.validateExtraction)
+      return { supported: false, reason: "Nothing selected." };
+    const presentationSupport = presentationsOf(selected)[as];
+    if (!presentationSupport.supported)
+      return {
+        supported: false,
+        reason: presentationSupport.reason ?? "Unsupported presentation.",
+      };
+    return lab.validateExtraction(selected.id, {
+      presentation: as,
+      source: value,
+    });
+  };
   const choosePresentation = (next: Presentation) => {
     setPresentation(next);
     setNotice(null);
@@ -79,8 +138,10 @@ export function SpatialWebSurface({
 
   const pick = (item: SurfaceItem) => {
     setSelectedId(item.id);
+    const presentations = presentationsOf(item, checkContainment(item.id));
     // Start from the component's declared (or derived) default strategy.
-    const preferred = item.presentations[item.defaultPresentation].supported
+    // An unsupported default stays visible as unsupported, with its reason.
+    const preferred = presentations[item.defaultPresentation].supported
       ? item.defaultPresentation
       : item.defaultPresentation === "native"
         ? "adaptive"
@@ -98,6 +159,14 @@ export function SpatialWebSurface({
 
   const extract = () => {
     if (!selected || !lab.extract) return;
+    // Ancestor styles may have changed since the component was picked.
+    if (presentation === "native") {
+      const issues = checkContainment(selected.id);
+      if (issues.length > 0) {
+        setNotice(containmentReason(issues));
+        return;
+      }
+    }
     const validation = supportOf(policy);
     if (!validation.supported) {
       setNotice(validation.reason);
@@ -180,7 +249,13 @@ export function SpatialWebSurface({
             selected={selected}
             policy={policy}
             presentation={presentation}
+            presentations={selected ? presentationsOf(selected) : null}
             supportOf={supportOf}
+            nativeIssue={
+              selected && nativeIssues.has(selected.id)
+                ? containmentReason(nativeIssues.get(selected.id)!)
+                : null
+            }
             notice={notice}
             toggleRef={selectToggleRef}
             extractRef={extractRef}
@@ -252,7 +327,9 @@ function SurfaceChrome({
   selected,
   policy,
   presentation,
+  presentations,
   supportOf,
+  nativeIssue,
   notice,
   toggleRef,
   extractRef,
@@ -266,11 +343,10 @@ function SurfaceChrome({
   selected: SurfaceItem | null;
   policy: SourcePolicy;
   presentation: Presentation;
-  supportOf(
-    value: SourcePolicy,
-  ):
-    | { readonly supported: true }
-    | { readonly supported: false; readonly reason: string };
+  presentations: Readonly<Record<Presentation, PresentationOption>> | null;
+  supportOf(value: SourcePolicy): Support;
+  /** A Native DOM extraction of the selected component that cannot be composited. */
+  nativeIssue: string | null;
   notice: string | null;
   toggleRef: RefObject<HTMLButtonElement | null>;
   extractRef: RefObject<HTMLButtonElement | null>;
@@ -334,7 +410,7 @@ function SurfaceChrome({
                 ["adaptive", "XR Adaptive", "spatial redesign"],
               ] as const
             ).map(([value, name, hint]) => {
-              const option = selected.presentations[value];
+              const option = (presentations ?? selected.presentations)[value];
               return (
                 <label
                   key={value}
@@ -391,6 +467,15 @@ function SurfaceChrome({
           Restore
         </button>
       ) : null}
+      {nativeIssue ? (
+        <span
+          className="web-surface-message web-surface-issue"
+          role="alert"
+          data-testid="surface-native-issue"
+        >
+          {`Not composited, hidden until restored. ${nativeIssue}`}
+        </span>
+      ) : null}
       <span
         className="web-surface-message"
         role="status"
@@ -398,6 +483,18 @@ function SurfaceChrome({
       >
         {message}
       </span>
+      {selected &&
+      !extraction &&
+      presentations &&
+      !presentations.native.supported &&
+      selected.presentations.native.supported ? (
+        <span
+          className="web-surface-message web-surface-issue"
+          data-testid="surface-native-diagnostic"
+        >
+          {presentations.native.reason}
+        </span>
+      ) : null}
       {selected && !extraction ? (
         <span className="web-surface-message" data-testid="surface-unsupported">
           {blocked
