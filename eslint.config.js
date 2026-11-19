@@ -12,6 +12,7 @@ export default tseslint.config(
       "packages/react/**/*.{ts,tsx}",
       "apps/playground/**/*.{ts,tsx}",
       "apps/xr-lab/src/**/*.{ts,tsx}",
+      "examples/*/src/**/*.{ts,tsx}",
     ],
     extends: [reactHooks.configs.flat.recommended],
     languageOptions: { globals: globals.browser },
@@ -161,7 +162,7 @@ export default tseslint.config(
     languageOptions: { globals: globals.browser },
   },
   {
-    files: ["apps/xr-lab/scripts/*.mjs"],
+    files: ["apps/xr-lab/scripts/*.mjs", "scripts/*.mjs"],
     languageOptions: { globals: globals.node },
   },
   {

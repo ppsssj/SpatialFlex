@@ -61,6 +61,11 @@ jobs:
         env:
           XR_LAB_FIREFOX_HEADED: "1"
 
+      # P1-07B: the SDK packed into tarballs and consumed by the reference
+      # app from a directory outside the workspace (npm install, typecheck
+      # against the emitted declarations, production build, browser test).
+      - run: pnpm smoke:pack
+
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
@@ -68,4 +73,6 @@ jobs:
           path: |
             apps/*/playwright-report/
             apps/*/test-results/
+            examples/*/playwright-report/
+            examples/*/test-results/
           retention-days: 7
