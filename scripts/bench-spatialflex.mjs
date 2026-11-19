@@ -10,6 +10,7 @@
 //   pnpm bench:spatial --quick              1 repeat, short windows, subset
 //   pnpm bench:spatial --headed --label gpu headed browsers (hardware GPU)
 //   pnpm bench:spatial --aggregate-only     re-aggregate existing raw data
+// Raw records are stored as raw/<label>/*.json.gz (every sample kept).
 // Options: --repeats N --warmup-ms N --sample-ms N --seed N
 //          --browsers chromium,firefox --engines three,babylon
 //          --counts 1,5,10,20 --cycles N --out DIR --label NAME
@@ -27,6 +28,7 @@ import {
 import { arch, cpus, platform, release, totalmem } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gunzipSync, gzipSync } from "node:zlib";
 import { summarize, variation } from "../apps/xr-lab/src/performance/stats.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -185,10 +187,22 @@ for (const lbl of labels) {
   const dir = join(out, "raw", lbl);
   const run = JSON.parse(readFileSync(join(dir, "_run.json"), "utf8"));
   environments[lbl] = { run, browsers: {} };
+  // Raw records are kept gzip-compressed (every sample, ~8x smaller).
   for (const file of readdirSync(dir).filter(
     (f) => f.endsWith(".json") && !f.startsWith("_"),
   )) {
-    const data = JSON.parse(readFileSync(join(dir, file), "utf8"));
+    writeFileSync(
+      join(dir, `${file}.gz`),
+      gzipSync(readFileSync(join(dir, file)), { level: 9 }),
+    );
+    rmSync(join(dir, file));
+  }
+  for (const file of readdirSync(dir)
+    .filter((f) => f.endsWith(".json.gz"))
+    .sort()) {
+    const data = JSON.parse(
+      gunzipSync(readFileSync(join(dir, file))).toString("utf8"),
+    );
     if (data.environment)
       environments[lbl].browsers[data.environment.browser] ??= data.environment;
     if (data.schema === "spatialflex-bench-lifecycle/1") {
@@ -329,6 +343,7 @@ const host = {
     ? "CI-host measurement: shared virtual hardware, software WebGL; not representative of consumer GPUs or headsets."
     : "Local workstation measurement.",
 };
+rmSync(join(out, "charts"), { recursive: true, force: true });
 mkdirSync(join(out, "charts"), { recursive: true });
 writeFileSync(
   join(out, "environment.json"),
@@ -405,6 +420,7 @@ function methodology() {
 
 // --- Charts (SVG, no dependencies) ------------------------------------------
 function lineChart({ title, yLabel, series, file }) {
+  if (!series.some((s) => s.points.some((p) => p[1] !== null))) return;
   const W = 640;
   const H = 360;
   const m = { l: 60, r: 180, t: 36, b: 44 };
