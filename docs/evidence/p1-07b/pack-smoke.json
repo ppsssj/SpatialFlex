@@ -1,0 +1,109 @@
+{
+  "steps": [
+    {
+      "name": "built and packed",
+      "ok": true,
+      "tarballs": {
+        "core": "spatialflex-core-0.0.0.tgz",
+        "dom": "spatialflex-dom-0.0.0.tgz",
+        "react": "spatialflex-react-0.0.0.tgz"
+      }
+    },
+    {
+      "name": "tarball @spatialflex/core",
+      "ok": true,
+      "files": 41,
+      "dependencies": {},
+      "peerDependencies": {},
+      "exports": {
+        "source": "./src/index.ts",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "note": "The `source` export condition points to ./src (not packed); only workspace tooling that opts into the condition uses it."
+    },
+    {
+      "name": "tarball @spatialflex/dom",
+      "ok": true,
+      "files": 25,
+      "dependencies": {
+        "@spatialflex/core": "0.0.0"
+      },
+      "peerDependencies": {},
+      "exports": {
+        "source": "./src/index.ts",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "note": "The `source` export condition points to ./src (not packed); only workspace tooling that opts into the condition uses it."
+    },
+    {
+      "name": "tarball @spatialflex/react",
+      "ok": true,
+      "files": 25,
+      "dependencies": {
+        "@spatialflex/core": "0.0.0"
+      },
+      "peerDependencies": {
+        "react": "^19.0.0"
+      },
+      "exports": {
+        "source": "./src/index.ts",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "note": "The `source` export condition points to ./src (not packed); only workspace tooling that opts into the condition uses it."
+    },
+    {
+      "name": "consumer copied outside the workspace",
+      "ok": true,
+      "sdkImports": [
+        "@spatialflex/core",
+        "@spatialflex/dom",
+        "@spatialflex/react"
+      ]
+    },
+    {
+      "name": "installed from tarballs",
+      "ok": true,
+      "installed": {
+        "@spatialflex/core": "0.0.0",
+        "@spatialflex/dom": "0.0.0",
+        "@spatialflex/react": "0.0.0"
+      }
+    },
+    {
+      "name": "Node ESM resolution inside the app's node_modules",
+      "ok": true,
+      "resolved": {
+        "@spatialflex/core": {
+          "path": "node_modules/@spatialflex/core/dist/index.js",
+          "exports": 28
+        },
+        "@spatialflex/dom": {
+          "path": "node_modules/@spatialflex/dom/dist/index.js",
+          "exports": 25
+        },
+        "@spatialflex/react": {
+          "path": "node_modules/@spatialflex/react/dist/index.js",
+          "exports": 9
+        }
+      }
+    },
+    {
+      "name": "typecheck against emitted declarations (skipLibCheck: false)",
+      "ok": true
+    },
+    {
+      "name": "production build",
+      "ok": true,
+      "bundleBytes": 1401995
+    },
+    {
+      "name": "browser tests E1 and E5 against the packaged build (Chromium)",
+      "ok": true
+    }
+  ],
+  "workDirectoryOutsideRepository": true,
+  "ok": true
+}

@@ -1,0 +1,36 @@
+{
+  "name": "external-react-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Reference application: an independent React app that integrates SpatialFlex through its package entry points only.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^9.5.0",
+    "@spatialflex/core": "workspace:*",
+    "@spatialflex/dom": "workspace:*",
+    "@spatialflex/react": "workspace:*",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "recharts": "^3.11.0",
+    "three": "~0.187.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "~1.65.1",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "~0.187.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.8"
+  }
+}

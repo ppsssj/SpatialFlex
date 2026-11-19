@@ -1,4 +1,4 @@
-import { SpatialFlexError } from "./errors";
+import { SpatialFlexError } from "./errors.js";
 
 /**
  * Renderer-neutral spatial manipulation (P1-06B).

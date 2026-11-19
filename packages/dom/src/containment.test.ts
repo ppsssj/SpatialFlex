@@ -5,7 +5,7 @@ import {
   describeElement,
   nativeContainmentIssues,
   type StyleOf,
-} from "./nativeContainment";
+} from "./containment.js";
 
 /** Computed styles from a table (jsdom has no full cascade). */
 const stylesFrom =

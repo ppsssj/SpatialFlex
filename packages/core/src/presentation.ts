@@ -1,4 +1,4 @@
-import { SpatialFlexError } from "./errors";
+import { SpatialFlexError } from "./errors.js";
 
 /**
  * How an extracted component is presented. This is independent of the

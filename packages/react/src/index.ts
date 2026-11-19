@@ -8,14 +8,14 @@ export function useSpatialFlexVersion(): string {
   return VERSION;
 }
 
-export { useSpatialController, useSpatialRegistry } from "./context";
+export { useSpatialController, useSpatialRegistry } from "./context.js";
 export {
   MIN_PANEL_SIZE,
   type ItemPlacement,
   type SpatialController,
-} from "./controller";
-export { useSpatialItem, useSpatialItems } from "./hooks";
-export { useSpatialViews } from "./hooks";
+} from "./controller.js";
+export { useSpatialItem, useSpatialItems } from "./hooks.js";
+export { useSpatialViews } from "./hooks.js";
 export type {
   PresentationStrategy,
   SpatialViewBody,
@@ -23,8 +23,8 @@ export type {
   SpatialViewBinding,
   SpatialViewRecord,
 } from "@spatialflex/core";
-export { SpatialItem, type SpatialItemProps } from "./SpatialItem";
+export { SpatialItem, type SpatialItemProps } from "./SpatialItem.js";
 export {
   SpatialWorkspace,
   type SpatialWorkspaceProps,
-} from "./SpatialWorkspace";
+} from "./SpatialWorkspace.js";

@@ -1,4 +1,4 @@
-import { SpatialFlexError } from "./errors";
+import { SpatialFlexError } from "./errors.js";
 
 /**
  * Visual policy for an attached source component while an independent

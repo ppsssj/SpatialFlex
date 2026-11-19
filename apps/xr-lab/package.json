@@ -16,6 +16,7 @@
     "@react-three/fiber": "~9.8.2",
     "@react-three/xr": "~6.6.32",
     "@spatialflex/core": "workspace:*",
+    "@spatialflex/dom": "workspace:*",
     "@spatialflex/react": "workspace:*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

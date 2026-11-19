@@ -16,9 +16,9 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { useWorkspace } from "./context";
-import type { ItemPlacement } from "./controller";
-import { useSpatialItem } from "./hooks";
+import { useWorkspace } from "./context.js";
+import type { ItemPlacement } from "./controller.js";
+import { useSpatialItem } from "./hooks.js";
 
 export interface SpatialItemProps {
   /** Stable ID, unique within the workspace. */
