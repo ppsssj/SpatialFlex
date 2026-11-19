@@ -36,7 +36,7 @@ type W = Window & {
   __liveListeners?: (target: EventTarget, type: string) => number;
 };
 
-const EVIDENCE = process.env.CONSUMER_EVIDENCE ?? "../../docs/evidence/p1-07b2";
+const EVIDENCE = process.env.CONSUMER_EVIDENCE ?? "../../docs/evidence/p1-07b3";
 const COUNTER = "incident-counter";
 const NOTES = "shift-notes";
 const CHART = "throughput-chart";
