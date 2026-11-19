@@ -69,15 +69,13 @@ function OperationsMonitor() {
           <button
             type="button"
             data-testid="toggle-view"
-            onClick={() => {
-              // Without a 3D view nothing can place extracted panels.
-              if (viewOpen) runtime.restoreAll();
-              setViewOpen((open) => !open);
-            }}
+            // Closing the view disconnects the last host: the SDK restores
+            // every presentation.
+            onClick={() => setViewOpen((open) => !open)}
           >
             {viewOpen ? "Close 3D view" : "Open 3D view"}
           </button>
-          {viewOpen && <SpatialView runtime={runtime} />}
+          {viewOpen && <SpatialView runtime={runtime.runtime} />}
         </section>
       </main>
     </div>
@@ -90,13 +88,7 @@ function SpatialControls({ runtime }: { runtime: SpatialRuntime }) {
   const [blocker, setBlocker] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const current = records.find((r) => r.id === selected) ?? null;
-  const extracted =
-    current &&
-    (runtime.natives.has(current.id)
-      ? "native"
-      : runtime.adaptives.has(current.id)
-        ? "adaptive"
-        : null);
+  const extracted = current && runtime.kindOf(current.id);
   const issue = current ? runtime.issues.get(current.id) : undefined;
 
   const choose = (id: string) => {
@@ -131,8 +123,9 @@ function SpatialControls({ runtime }: { runtime: SpatialRuntime }) {
               onChange={() => choose(record.id)}
             />{" "}
             {LABELS[record.id] ?? record.id}
-            {runtime.natives.has(record.id) && " · Native DOM in space"}
-            {runtime.adaptives.has(record.id) && " · XR Adaptive in space"}
+            {runtime.kindOf(record.id) === "native" && " · Native DOM in space"}
+            {runtime.kindOf(record.id) === "adaptive" &&
+              " · XR Adaptive in space"}
           </label>
         ))}
       </fieldset>
@@ -147,7 +140,7 @@ function SpatialControls({ runtime }: { runtime: SpatialRuntime }) {
             <button
               type="button"
               data-testid="extract-native"
-              disabled={!!extracted || !!blocker}
+              disabled={extracted === "native" || !!blocker}
               onClick={() => extract("native")}
             >
               Extract as Native DOM
@@ -155,7 +148,7 @@ function SpatialControls({ runtime }: { runtime: SpatialRuntime }) {
             <button
               type="button"
               data-testid="extract-adaptive"
-              disabled={!!extracted}
+              disabled={extracted === "adaptive"}
               onClick={() => extract("adaptive")}
             >
               Extract as XR Adaptive
