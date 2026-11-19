@@ -31,4 +31,14 @@ export {
   type NativeHandleManipulation,
 } from "./nativeHandles.js";
 export { trackManipulationPointer } from "./pointer.js";
+export {
+  PresentationRuntime,
+  type ExtractResult,
+  type PresentationController,
+  type PresentationHost,
+  type PresentationPlacement,
+  type PresentationSnapshot,
+  type PresentationSupport,
+  type SpatialPresentation,
+} from "./presentationRuntime.js";
 export * from "./projection.js";
