@@ -1,0 +1,24 @@
+{
+  "command": "pnpm bench:spatial [options] (scripts/bench-spatialflex.mjs)",
+  "build": "Production build (vite build) of apps/xr-lab with VITE_XR_LAB_TEST_HOOKS=1, served by vite preview with COOP/COEP headers (cross-origin isolated: fine performance.now() resolution).",
+  "fixture": "?fixture=benchmark&panels=N: N real React components (local state, a button, fixed 160x100 CSS px, deterministic data, declared XR Adaptive view). Presentations are started through the lab's LabIntegration at deterministic non-overlapping grid positions (5 columns, 0.7 m x 0.62 m pitch, z = -0.4 m); camera at (0, 1.42, 4) looking at (0, 1.42, -0.4) in both engines.",
+  "workloads": {
+    "W0": "Idle: panels presented, camera stationary, no data updates.",
+    "W1": "Dynamic data: every panel's value changes every 100 ms (setInterval).",
+    "W2": "Camera motion: yaw orbit of ±0.14 rad around the target with a 240-frame period, set every animation frame through the hosts' setCamera test hook.",
+    "W3": "Manipulation: real mouse drags on panel 1's translate, rotate and resize handles (30 pointer steps each, one per animation frame). Always the last workload of a page, since it changes poses.",
+    "W4": "Lifecycle stress (20 panels): N cycles of extract all → switch all to the other strategy → restore all, then 5 workspace (renderer host) unmount/mount cycles; heap with forced GC (Chromium CDP) after each cycle."
+  },
+  "matrix": "Renderers three/babylon × browsers chromium/firefox × Native/Adaptive × 1/5/10/20 panels (W0, W2), plus 0-panel controls; W1 and W3 for the subset counts; W4 at 20 panels.",
+  "order": "Scenario order shuffled with a seeded PRNG (mulberry32, seed recorded); W0/W1/W2 order per page shuffled with a derived seed; W3 last.",
+  "repeats": "Each repeat is a fresh page load (fresh renderer, runtime and React tree). Warm-up before every measured window; explicit collector start/stop markers.",
+  "metrics": {
+    "frames": "requestAnimationFrame timestamps of the page (browser frame cadence). Over-budget: interval > 1.5 × the run's own median interval. Not GPU time.",
+    "spans": "Synchronous JavaScript time (performance.now() around a call) of SDK methods wrapped on their prototypes in benchmark mode: dom.composite (NativeCompositor.composite), dom.hostFrame (PresentationHost.frame), dom.setTargets, core.itemSync, core.manipulationUpdate; lab.surfaceFrame (the page surface's whole frame: page transform, host frame, page clip); render.three (WebGLRenderer.render) / render.babylon (Scene.render): CPU submission time, not GPU execution. None include the browser's later style, layout, paint or compositing work.",
+    "latency": "inputToCommit: manipulation store notification time minus the triggering event's timeStamp. inputToNextFrame: first rAF callback after that commit minus the event timeStamp.",
+    "memory": "Chromium only: CDP Runtime.getHeapUsage (page JS heap, not total browser or GPU memory). Firefox: unsupported (null). W4 forces GC (HeapProfiler.collectGarbage) before each sample.",
+    "longTasks": "PerformanceObserver 'longtask' where supported (Chromium); unsupported elsewhere (null, not zero).",
+    "react": "Render invocations counted in component bodies (react.panel.render, react.page.render, react.shell.render) and commits in layout effects (react.panel.commit)."
+  },
+  "instrumentationCost": "instrumentationCostMs: median cost of one empty timed call in the same page, reported per run."
+}

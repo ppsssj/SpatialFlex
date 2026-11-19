@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" font-family="sans-serif" font-size="11">
+<rect width="640" height="360" fill="#fff"/>
+<text x="60" y="20" font-size="13" font-weight="bold">Input → next frame, median (W3 manipulation, optimized-headed-gpu)</text>
+<line x1="60" x2="460" y1="316" y2="316" stroke="#e5e5e5"/><text x="54" y="320" text-anchor="end">0.00</text>
+<line x1="60" x2="460" y1="246" y2="246" stroke="#e5e5e5"/><text x="54" y="250" text-anchor="end">4.93</text>
+<line x1="60" x2="460" y1="176" y2="176" stroke="#e5e5e5"/><text x="54" y="180" text-anchor="end">9.85</text>
+<line x1="60" x2="460" y1="106" y2="106" stroke="#e5e5e5"/><text x="54" y="110" text-anchor="end">15</text>
+<line x1="60" x2="460" y1="36" y2="36" stroke="#e5e5e5"/><text x="54" y="40" text-anchor="end">20</text>
+<text x="60" y="332" text-anchor="middle">0</text>
+<text x="160" y="332" text-anchor="middle">1</text>
+<text x="260" y="332" text-anchor="middle">5</text>
+<text x="360" y="332" text-anchor="middle">10</text>
+<text x="460" y="332" text-anchor="middle">20</text>
+<text x="260" y="352" text-anchor="middle">panels</text>
+<text transform="translate(14 176) rotate(-90)" text-anchor="middle">ms</text>
+<polyline fill="none" stroke="#1f77b4" stroke-width="2" points="160,208.2694279478199 360,213.5280442617126 460,213.45698187909244"/>
+<circle cx="160" cy="208.2694279478199" r="3" fill="#1f77b4"/>
+<circle cx="360" cy="213.5280442617126" r="3" fill="#1f77b4"/>
+<circle cx="460" cy="213.45698187909244" r="3" fill="#1f77b4"/>
+<rect x="472" y="36" width="10" height="10" fill="#1f77b4"/><text x="486" y="45">babylon chromium native</text>
+<polyline fill="none" stroke="#d62728" stroke-width="2" points="160,206.20861885183496 360,212.46210852241003 460,212.10679660930919"/>
+<circle cx="160" cy="206.20861885183496" r="3" fill="#d62728"/>
+<circle cx="360" cy="212.46210852241003" r="3" fill="#d62728"/>
+<circle cx="460" cy="212.10679660930919" r="3" fill="#d62728"/>
+<rect x="472" y="54" width="10" height="10" fill="#d62728"/><text x="486" y="63">three chromium native</text>
+<polyline fill="none" stroke="#2ca02c" stroke-width="2" points="160,70.12415613420637 360,70.40840566468705 460,68.84503324704329"/>
+<circle cx="160" cy="70.12415613420637" r="3" fill="#2ca02c"/>
+<circle cx="360" cy="70.40840566468705" r="3" fill="#2ca02c"/>
+<circle cx="460" cy="68.84503324704329" r="3" fill="#2ca02c"/>
+<rect x="472" y="72" width="10" height="10" fill="#2ca02c"/><text x="486" y="81">babylon firefox native</text>
+<polyline fill="none" stroke="#9467bd" stroke-width="2" points="160,64.154915994112 360,61.738794985026146 460,61.45454545454547"/>
+<circle cx="160" cy="64.154915994112" r="3" fill="#9467bd"/>
+<circle cx="360" cy="61.738794985026146" r="3" fill="#9467bd"/>
+<circle cx="460" cy="61.45454545454547" r="3" fill="#9467bd"/>
+<rect x="472" y="90" width="10" height="10" fill="#9467bd"/><text x="486" y="99">three firefox native</text>
+</svg>

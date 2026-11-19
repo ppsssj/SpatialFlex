@@ -1,0 +1,23 @@
+{
+  "commit": "0cf6fe63dec668767c481c539aac772a646d4a00",
+  "workingTreeDirty": false,
+  "label": "lifecycle-extended-chromium",
+  "headed": false,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium",
+    "engines": "three,babylon",
+    "counts": "1,5,10,20",
+    "subsetCounts": "1,10,20",
+    "cycles": "40",
+    "presentations": "none,native,adaptive",
+    "workloads": "W4",
+    "ablate": ""
+  },
+  "exitCode": 0,
+  "wallClockMs": 130174,
+  "finishedAt": "2026-11-19T16:37:26.131Z"
+}

@@ -1,0 +1,20 @@
+{
+  "commit": "087c57ff6e2ff2b4052f7a12953a3804a9d90227",
+  "workingTreeDirty": false,
+  "label": "headless",
+  "headed": false,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium,firefox",
+    "engines": "three,babylon",
+    "counts": "1,5,10,20",
+    "subsetCounts": "1,10,20",
+    "cycles": "10"
+  },
+  "exitCode": 0,
+  "wallClockMs": 1875869,
+  "finishedAt": "2026-11-19T15:07:35.382Z"
+}
