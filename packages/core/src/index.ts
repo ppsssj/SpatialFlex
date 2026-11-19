@@ -39,6 +39,32 @@ export type {
   SpatialViewRecord,
 } from "./spatialView";
 
+export {
+  assertTransform,
+  IDENTITY_ROTATION,
+  KEYBOARD_STEPS,
+  MIN_PLANE_FACING,
+  multiplyQuaternions,
+  rotateVector,
+  SCALE_LIMITS,
+  SpatialManipulator,
+  transformPoint,
+  validateTransform,
+  yawOf,
+  yawQuaternion,
+  type ActiveManipulation,
+  type ManipulationEnd,
+  type ManipulationInput,
+  type ManipulationMode,
+  type ManipulationSnapshot,
+  type ManipulationTarget,
+  type ManipulationTargetOptions,
+  type SpatialExtent,
+  type SpatialQuaternion,
+  type SpatialRay,
+  type SpatialTransform,
+  type SpatialVector3,
+} from "./manipulation";
 export { SpatialFlexError, type SpatialFlexErrorCode } from "./errors";
 export {
   SpatialRegistry,

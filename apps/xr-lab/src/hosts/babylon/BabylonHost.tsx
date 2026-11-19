@@ -16,6 +16,7 @@ export function BabylonHost({
   onPanelSelect,
   onPanelClose,
   onCameraFrame,
+  manipulation,
 }: XRHostProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<BabylonLabScene | null>(null);
@@ -47,8 +48,12 @@ export function BabylonHost({
   }, [onPanelButton, onPanelSelect, onPanelClose]);
 
   useEffect(() => {
-    sceneRef.current?.setPanels(panels);
-  }, [panels]);
+    // Handles are desktop-only: none in an immersive session.
+    sceneRef.current?.setPanels(
+      panels,
+      sessionMode ? null : (manipulation ?? null),
+    );
+  }, [panels, manipulation, sessionMode]);
 
   useEffect(() => {
     const scene = sceneRef.current;

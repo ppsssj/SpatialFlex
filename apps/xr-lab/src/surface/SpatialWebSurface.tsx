@@ -134,6 +134,10 @@ export function SpatialWebSurface({
       presentation,
       source: policy,
       position,
+      ...(presentation === "native" && {
+        rotation: pose.rotation,
+        extent: size,
+      }),
     });
     setNotice(done ? null : `${selected.label} could not be extracted.`);
   };

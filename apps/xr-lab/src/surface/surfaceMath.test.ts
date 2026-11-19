@@ -1,8 +1,20 @@
-import { Matrix4, PerspectiveCamera, Vector3 } from "three";
+import {
+  Euler,
+  Matrix4,
+  PerspectiveCamera,
+  Quaternion,
+  Raycaster,
+  Vector2,
+  Vector3,
+} from "three";
 import { describe, expect, it } from "vitest";
 import { CAMERA, PANEL_SIZE, type HostCameraFrame } from "../contracts/xrHost";
 import {
+  eulerFromQuaternion,
   extractionPosition,
+  quaternionFromEuler,
+  transformedQuad,
+  viewportRay,
   nativePanelTransform,
   occlusionClipPath,
   pageClipPath,
@@ -256,5 +268,90 @@ describe("spatial web surface projection", () => {
     );
     expect(placed).toMatchObject({ visibility: "visible", behindPage: true });
     expect(pageClipPath(frame, pose, res, [], [])).toBe("none");
+  });
+});
+
+describe("spatial manipulation interop", () => {
+  it("converts XYZ Euler angles and quaternions like Three.js", () => {
+    for (const angles of [
+      [0, 0.15, 0],
+      [0.3, -1.2, 0.4],
+      [-0.7, 2.5, -0.2],
+    ] as const) {
+      const expected = new Quaternion().setFromEuler(new Euler(...angles));
+      const q = quaternionFromEuler(angles);
+      [expected.x, expected.y, expected.z, expected.w].forEach((v, i) =>
+        expect(q[i]).toBeCloseTo(v, 12),
+      );
+      const back = new Euler().setFromQuaternion(expected, "XYZ");
+      const e = eulerFromQuaternion(q);
+      [back.x, back.y, back.z].forEach((v, i) =>
+        expect(e[i]).toBeCloseTo(v, 9),
+      );
+    }
+  });
+
+  it("transformed quads match Three.js object transforms", () => {
+    const rotation = quaternionFromEuler([0, 0.8, 0]);
+    const quad = transformedQuad([1, 1.5, -1], rotation, 0.6, 0.4);
+    const matrix = new Matrix4().compose(
+      new Vector3(1, 1.5, -1),
+      new Quaternion(...rotation),
+      new Vector3(1, 1, 1),
+    );
+    const expected = [
+      [-0.3, 0.2],
+      [0.3, 0.2],
+      [0.3, -0.2],
+      [-0.3, -0.2],
+    ].map(([x, y]) => new Vector3(x, y, 0).applyMatrix4(matrix));
+    quad.forEach((corner, i) =>
+      corner.forEach((v, j) =>
+        expect(v).toBeCloseTo(expected[i]!.getComponent(j), 9),
+      ),
+    );
+  });
+
+  it("viewport rays equal Three.js raycaster rays", () => {
+    for (const position of [CAMERA.position, [1.4, 2.1, 0.6] as const]) {
+      const camera = deskCamera(position);
+      const frame = frameFrom(camera);
+      const raycaster = new Raycaster();
+      for (const [x, y] of [
+        [490, 380],
+        [100, 650],
+        [900, 40],
+      ] as const) {
+        raycaster.setFromCamera(
+          new Vector2(
+            (x / VIEWPORT.width) * 2 - 1,
+            1 - (y / VIEWPORT.height) * 2,
+          ),
+          camera,
+        );
+        const ray = viewportRay(frame, x, y)!;
+        ray.origin.forEach((v, i) =>
+          expect(v).toBeCloseTo(raycaster.ray.origin.getComponent(i), 6),
+        );
+        ray.direction.forEach((v, i) =>
+          expect(v).toBeCloseTo(raycaster.ray.direction.getComponent(i), 6),
+        );
+        // And the ray projects back onto the same pixel.
+        const along = ray.origin.map((o, i) => o + ray.direction[i]! * 2);
+        const projected = projectPoint(
+          frame,
+          along as [number, number, number],
+        )!;
+        expect(projected.x).toBeCloseTo(x, 6);
+        expect(projected.y).toBeCloseTo(y, 6);
+      }
+    }
+    expect(
+      viewportRay(
+        { ...frameFrom(deskCamera()), viewport: { ...VIEWPORT, width: 0 } },
+        1,
+        1,
+      ),
+    ).toBeNull();
   });
 });

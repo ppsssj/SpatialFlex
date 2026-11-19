@@ -548,3 +548,224 @@ export function extractionPosition(
   const round = (n: number) => Math.round(n * 1000) / 1000;
   return [round(beside[0]), round(y), round(beside[2])];
 }
+
+// --- Spatial manipulation interop (P1-06B) ------------------------------
+
+export type Quaternion = readonly [x: number, y: number, z: number, w: number];
+
+/** Quaternion of XYZ Euler angles (the convention of {@link rotationMatrix}). */
+export function quaternionFromEuler([x, y, z]: Vec3): Quaternion {
+  const c1 = Math.cos(x / 2),
+    c2 = Math.cos(y / 2),
+    c3 = Math.cos(z / 2),
+    s1 = Math.sin(x / 2),
+    s2 = Math.sin(y / 2),
+    s3 = Math.sin(z / 2);
+  return [
+    s1 * c2 * c3 + c1 * s2 * s3,
+    c1 * s2 * c3 - s1 * c2 * s3,
+    c1 * c2 * s3 + s1 * s2 * c3,
+    c1 * c2 * c3 - s1 * s2 * s3,
+  ];
+}
+
+/** XYZ Euler angles of a unit quaternion (inverse of {@link quaternionFromEuler}). */
+export function eulerFromQuaternion([x, y, z, w]: Quaternion): Vec3 {
+  const m11 = 1 - 2 * (y * y + z * z),
+    m12 = 2 * (x * y - z * w),
+    m13 = 2 * (x * z + y * w),
+    m22 = 1 - 2 * (x * x + z * z),
+    m23 = 2 * (y * z - x * w),
+    m32 = 2 * (y * z + x * w),
+    m33 = 1 - 2 * (x * x + y * y);
+  const ry = Math.asin(Math.min(1, Math.max(-1, m13)));
+  return Math.abs(m13) < 0.9999999
+    ? [Math.atan2(-m23, m33), ry, Math.atan2(-m12, m11)]
+    : [Math.atan2(m32, m22), ry, 0];
+}
+
+/**
+ * World corners (TL, TR, BR, BL) of a rectangle at a pose, centered on the
+ * local point `center` (in the same, already scaled, units as the size).
+ */
+export function transformedQuad(
+  position: Vec3,
+  rotation: Quaternion,
+  width: number,
+  height: number,
+  center: Vec3 = [0, 0, 0],
+): WorldQuad {
+  const r = rotationMatrix(eulerFromQuaternion(rotation));
+  const corner = (u: number, v: number) =>
+    add(
+      position,
+      rotate(r, [center[0] + u * width, center[1] + v * height, center[2]]),
+    );
+  return [
+    corner(-0.5, 0.5),
+    corner(0.5, 0.5),
+    corner(0.5, -0.5),
+    corner(-0.5, -0.5),
+  ];
+}
+
+/** Inverse of a column-major 4x4 matrix, or null if singular. */
+function invert4(m: ArrayLike<number>): number[] | null {
+  const a = Array.from({ length: 16 }, (_, i) => m[i]!);
+  const inv = new Array<number>(16);
+  inv[0] =
+    a[5]! * a[10]! * a[15]! -
+    a[5]! * a[11]! * a[14]! -
+    a[9]! * a[6]! * a[15]! +
+    a[9]! * a[7]! * a[14]! +
+    a[13]! * a[6]! * a[11]! -
+    a[13]! * a[7]! * a[10]!;
+  inv[4] =
+    -a[4]! * a[10]! * a[15]! +
+    a[4]! * a[11]! * a[14]! +
+    a[8]! * a[6]! * a[15]! -
+    a[8]! * a[7]! * a[14]! -
+    a[12]! * a[6]! * a[11]! +
+    a[12]! * a[7]! * a[10]!;
+  inv[8] =
+    a[4]! * a[9]! * a[15]! -
+    a[4]! * a[11]! * a[13]! -
+    a[8]! * a[5]! * a[15]! +
+    a[8]! * a[7]! * a[13]! +
+    a[12]! * a[5]! * a[11]! -
+    a[12]! * a[7]! * a[9]!;
+  inv[12] =
+    -a[4]! * a[9]! * a[14]! +
+    a[4]! * a[10]! * a[13]! +
+    a[8]! * a[5]! * a[14]! -
+    a[8]! * a[6]! * a[13]! -
+    a[12]! * a[5]! * a[10]! +
+    a[12]! * a[6]! * a[9]!;
+  inv[1] =
+    -a[1]! * a[10]! * a[15]! +
+    a[1]! * a[11]! * a[14]! +
+    a[9]! * a[2]! * a[15]! -
+    a[9]! * a[3]! * a[14]! -
+    a[13]! * a[2]! * a[11]! +
+    a[13]! * a[3]! * a[10]!;
+  inv[5] =
+    a[0]! * a[10]! * a[15]! -
+    a[0]! * a[11]! * a[14]! -
+    a[8]! * a[2]! * a[15]! +
+    a[8]! * a[3]! * a[14]! +
+    a[12]! * a[2]! * a[11]! -
+    a[12]! * a[3]! * a[10]!;
+  inv[9] =
+    -a[0]! * a[9]! * a[15]! +
+    a[0]! * a[11]! * a[13]! +
+    a[8]! * a[1]! * a[15]! -
+    a[8]! * a[3]! * a[13]! -
+    a[12]! * a[1]! * a[11]! +
+    a[12]! * a[3]! * a[9]!;
+  inv[13] =
+    a[0]! * a[9]! * a[14]! -
+    a[0]! * a[10]! * a[13]! -
+    a[8]! * a[1]! * a[14]! +
+    a[8]! * a[2]! * a[13]! +
+    a[12]! * a[1]! * a[10]! -
+    a[12]! * a[2]! * a[9]!;
+  inv[2] =
+    a[1]! * a[6]! * a[15]! -
+    a[1]! * a[7]! * a[14]! -
+    a[5]! * a[2]! * a[15]! +
+    a[5]! * a[3]! * a[14]! +
+    a[13]! * a[2]! * a[7]! -
+    a[13]! * a[3]! * a[6]!;
+  inv[6] =
+    -a[0]! * a[6]! * a[15]! +
+    a[0]! * a[7]! * a[14]! +
+    a[4]! * a[2]! * a[15]! -
+    a[4]! * a[3]! * a[14]! -
+    a[12]! * a[2]! * a[7]! +
+    a[12]! * a[3]! * a[6]!;
+  inv[10] =
+    a[0]! * a[5]! * a[15]! -
+    a[0]! * a[7]! * a[13]! -
+    a[4]! * a[1]! * a[15]! +
+    a[4]! * a[3]! * a[13]! +
+    a[12]! * a[1]! * a[7]! -
+    a[12]! * a[3]! * a[5]!;
+  inv[14] =
+    -a[0]! * a[5]! * a[14]! +
+    a[0]! * a[6]! * a[13]! +
+    a[4]! * a[1]! * a[14]! -
+    a[4]! * a[2]! * a[13]! -
+    a[12]! * a[1]! * a[6]! +
+    a[12]! * a[2]! * a[5]!;
+  inv[3] =
+    -a[1]! * a[6]! * a[11]! +
+    a[1]! * a[7]! * a[10]! +
+    a[5]! * a[2]! * a[11]! -
+    a[5]! * a[3]! * a[10]! -
+    a[9]! * a[2]! * a[7]! +
+    a[9]! * a[3]! * a[6]!;
+  inv[7] =
+    a[0]! * a[6]! * a[11]! -
+    a[0]! * a[7]! * a[10]! -
+    a[4]! * a[2]! * a[11]! +
+    a[4]! * a[3]! * a[10]! +
+    a[8]! * a[2]! * a[7]! -
+    a[8]! * a[3]! * a[6]!;
+  inv[11] =
+    -a[0]! * a[5]! * a[11]! +
+    a[0]! * a[7]! * a[9]! +
+    a[4]! * a[1]! * a[11]! -
+    a[4]! * a[3]! * a[9]! -
+    a[8]! * a[1]! * a[7]! +
+    a[8]! * a[3]! * a[5]!;
+  inv[15] =
+    a[0]! * a[5]! * a[10]! -
+    a[0]! * a[6]! * a[9]! -
+    a[4]! * a[1]! * a[10]! +
+    a[4]! * a[2]! * a[9]! +
+    a[8]! * a[1]! * a[6]! -
+    a[8]! * a[2]! * a[5]!;
+  const det =
+    a[0]! * inv[0]! + a[1]! * inv[4]! + a[2]! * inv[8]! + a[3]! * inv[12]!;
+  if (!Number.isFinite(det) || Math.abs(det) < 1e-12) return null;
+  return inv.map((v) => v / det);
+}
+
+/**
+ * World ray through a client (CSS pixel) point, from the camera of a
+ * rendered frame: the inverse of the projection the host drew with. Used
+ * for Native DOM handles, which receive DOM events rather than engine
+ * raycasts.
+ */
+export function viewportRay(
+  frame: HostCameraFrame,
+  clientX: number,
+  clientY: number,
+): { origin: Vec3; direction: Vec3 } | null {
+  const { left, top, width, height } = frame.viewport;
+  if (!(width > 0 && height > 0)) return null;
+  const inv = invert4(frame.viewProjection);
+  if (!inv) return null;
+  const x = ((clientX - left) / width) * 2 - 1;
+  const y = 1 - ((clientY - top) / height) * 2;
+  // A point between the near and far planes (in both NDC depth ranges).
+  const z = 0.5;
+  const w = inv[3]! * x + inv[7]! * y + inv[11]! * z + inv[15]!;
+  if (!Number.isFinite(w) || Math.abs(w) < 1e-12) return null;
+  const point: Vec3 = [
+    (inv[0]! * x + inv[4]! * y + inv[8]! * z + inv[12]!) / w,
+    (inv[1]! * x + inv[5]! * y + inv[9]! * z + inv[13]!) / w,
+    (inv[2]! * x + inv[6]! * y + inv[10]! * z + inv[14]!) / w,
+  ];
+  const direction = sub(point, frame.eye);
+  const length = Math.hypot(...direction);
+  if (!(length > 1e-9)) return null;
+  return {
+    origin: [...frame.eye] as Vec3,
+    direction: [
+      direction[0] / length,
+      direction[1] / length,
+      direction[2] / length,
+    ],
+  };
+}

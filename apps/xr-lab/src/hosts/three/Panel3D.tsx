@@ -2,22 +2,34 @@ import type { ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
 import { recordDrawn } from "../../contracts/hostProbe";
 import {
+  handleLayout,
   PANEL_SIZE,
   panelLayout,
   type HostEvents,
+  type HostManipulationMode,
   type HostPanel,
   type PanelPart,
 } from "../../contracts/xrHost";
 import { describeBody } from "../shared/panelFace";
 import { CanvasFace } from "./panelTexture";
+import type { HandleDown } from "./ThreeHost";
 
-/** One floating panel: a textured plane, a button row and a close control. */
+/**
+ * One floating panel: a textured plane, a button row and a close control,
+ * plus manipulation handles when `handles` is given. Its pose (position,
+ * rotation and uniform scale) comes from the panel data.
+ */
 export function Panel3D({
   panel,
   events,
+  handles,
 }: {
   panel: HostPanel;
   events: HostEvents;
+  handles: {
+    active: HostManipulationMode | null;
+    onDown: HandleDown;
+  } | null;
 }) {
   const face = useMemo(
     () => new CanvasFace(PANEL_SIZE.width, PANEL_SIZE.height),
@@ -33,7 +45,11 @@ export function Panel3D({
   const [background, ...controls] = panelLayout(panel);
 
   return (
-    <group position={[...panel.position]}>
+    <group
+      position={[...panel.position]}
+      quaternion={[...(panel.rotation ?? IDENTITY)]}
+      scale={panel.scale ?? 1}
+    >
       <mesh
         userData={{ hostPanelId: panel.id, hostPart: background!.part }}
         onClick={(event: ThreeEvent<MouseEvent>) => {
@@ -56,18 +72,39 @@ export function Panel3D({
           }
         />
       ))}
+      {handles
+        ? handleLayout().map((part) => (
+            <PanelControl
+              key={part.part}
+              panelId={panel.id}
+              part={part}
+              pressed={handles.active === part.handle}
+              onPointerDown={(event) =>
+                handles.onDown(panel.id, part.handle!, event)
+              }
+              // A handle press selects nothing and activates nothing.
+              onActivate={() => {}}
+            />
+          ))
+        : null}
     </group>
   );
 }
+
+const IDENTITY = [0, 0, 0, 1] as const;
 
 function PanelControl({
   panelId,
   part,
   onActivate,
+  pressed = false,
+  onPointerDown,
 }: {
   panelId: string;
   part: PanelPart;
   onActivate: () => void;
+  pressed?: boolean;
+  onPointerDown?: (event: ThreeEvent<PointerEvent>) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const face = useMemo(
@@ -76,14 +113,15 @@ function PanelControl({
   );
   useEffect(() => () => face.dispose(), [face]);
   useEffect(
-    () => face.drawButton(part.label ?? "", hovered),
-    [face, part.label, hovered],
+    () => face.drawButton(part.label ?? "", hovered || pressed),
+    [face, part.label, hovered, pressed],
   );
 
   return (
     <mesh
       position={[...part.center]}
       userData={{ hostPanelId: panelId, hostPart: part.part, hovered }}
+      {...(onPointerDown && { onPointerDown })}
       onClick={(event) => {
         event.stopPropagation();
         onActivate();

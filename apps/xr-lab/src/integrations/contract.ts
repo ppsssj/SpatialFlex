@@ -1,5 +1,12 @@
 import type { ComponentType, ReactNode } from "react";
-import type { HostEvents, HostPanel, Vec3 } from "../contracts/xrHost";
+import type {
+  HostEvents,
+  HostManipulationMode,
+  HostPanel,
+  HostRay,
+  Quat,
+  Vec3,
+} from "../contracts/xrHost";
 import type { RenderWidget } from "../fixtures";
 /** UI capability request. Structurally compatible with SDK strategies without
  * adding an SDK dependency to the baseline, shared shell or renderer contract. */
@@ -75,6 +82,82 @@ export interface LabIntegration extends HostEvents {
   ):
     | { readonly supported: true }
     | { readonly supported: false; readonly reason: string };
+  /**
+   * Spatial manipulation of extracted presentations (Native DOM and XR
+   * Adaptive alike), implemented only by SpatialFlex. Stable across renders.
+   */
+  readonly manipulation?: LabManipulation;
+}
+
+/** World pose of a presentation: meters, unit quaternion, uniform scale. */
+export interface LabPose {
+  readonly position: Vec3;
+  readonly rotation: Quat;
+  readonly scale: number;
+}
+
+export interface LabManipulationTarget {
+  /** Registered component (and its panel id). */
+  readonly itemId: string;
+  /** Presentation instance (`native-N` or `presentation-N`). */
+  readonly presentationId: string;
+  readonly registrationId: string;
+  readonly kind: PresentationId;
+  readonly transform: LabPose;
+  /** Pose the instance started with; Reset returns here. */
+  readonly initial: LabPose;
+}
+
+export interface LabManipulationSnapshot {
+  /** Changes whenever a pose, the session or the selection changes. */
+  readonly version: number;
+  readonly active: {
+    readonly token: number;
+    readonly itemId: string;
+    readonly presentationId: string;
+    readonly mode: HostManipulationMode;
+    readonly input: "pointer" | "keyboard";
+  } | null;
+  /** Item selected for manipulation (last manipulated or picked). */
+  readonly selected: string | null;
+}
+
+export type NudgeDirection = "left" | "right" | "up" | "down";
+
+/**
+ * Renderer-neutral manipulation of the current presentation of each item.
+ * Input arrives as world rays (hosts, DOM handles) or keyboard steps; poses
+ * are read back per frame by the compositor and the host adapter.
+ */
+export interface LabManipulation {
+  subscribe(listener: () => void): () => void;
+  getSnapshot(): LabManipulationSnapshot;
+  targets(): readonly LabManipulationTarget[];
+  /** Current pose of an item's presentation, if it is manipulable. */
+  poseOf(itemId: string): LabPose | undefined;
+  /** Natural (scale 1) size of a Native DOM presentation, in meters. */
+  setExtent(itemId: string, extent: { width: number; height: number }): void;
+  begin(
+    itemId: string,
+    mode: HostManipulationMode,
+    pointerId: number,
+    ray: HostRay,
+  ): number | null;
+  update(token: number, ray: HostRay): void;
+  end(token: number, commit: boolean): void;
+  /** One keyboard step; starts or continues a keyboard session. */
+  nudge(
+    itemId: string,
+    mode: HostManipulationMode,
+    direction: NudgeDirection,
+    large: boolean,
+  ): number | null;
+  /** Ends a keyboard session on the item, keeping (or reverting) its steps. */
+  endKeyboard(itemId: string, commit: boolean): boolean;
+  /** Cancels whatever session is active (Escape). */
+  cancel(): boolean;
+  reset(itemId: string): boolean;
+  select(itemId: string | null): boolean;
 }
 
 export interface ExtractOptions {
@@ -82,8 +165,12 @@ export interface ExtractOptions {
   readonly presentation?: unknown;
   /** Untrusted source layout policy, validated by the integration. */
   readonly source: unknown;
-  /** World position of an adaptive panel. */
+  /** Initial world position of the presentation. */
   readonly position: Vec3;
+  /** Initial facing of a Native DOM presentation (XYZ Euler radians). */
+  readonly rotation?: Vec3;
+  /** Natural world size of a Native DOM presentation, in meters. */
+  readonly extent?: { readonly width: number; readonly height: number };
 }
 
 export type PresentationId = "native" | "adaptive";
