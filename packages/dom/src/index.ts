@@ -34,8 +34,12 @@ export { trackManipulationPointer } from "./pointer.js";
 export {
   PresentationRuntime,
   type ExtractResult,
+  type HostFrameOptions,
+  type HostFrameResult,
+  type HostOptions,
   type PresentationController,
   type PresentationHost,
+  type PresentationRuntimeOptions,
   type PresentationPlacement,
   type PresentationSnapshot,
   type PresentationSupport,

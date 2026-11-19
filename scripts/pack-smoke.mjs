@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// P1-07B package-consumption smoke test (E6).
+// P1-07B package-consumption smoke test (E6), extended in P1-07B2 (subpath
+// exports, one React runtime) and P1-07B3 (page-surface runtime API, M8).
 //
 // Proves that an application outside this pnpm workspace can consume the
 // SpatialFlex packages from their packed artifacts, not from monorepo
@@ -36,7 +37,7 @@ const example = join(root, "examples/external-react-consumer");
 // Evidence of the current milestone (earlier milestones keep their own).
 const evidence = join(
   root,
-  process.env.SMOKE_EVIDENCE ?? "docs/evidence/p1-07b2",
+  process.env.SMOKE_EVIDENCE ?? "docs/evidence/p1-07b3",
 );
 const skipBrowser = process.argv.includes("--skip-browser");
 const PACKAGES = ["core", "dom", "react"];
@@ -230,19 +231,57 @@ for (const name of ["@spatialflex/core", "@spatialflex/dom", "@spatialflex/react
   const module = await import(name);
   out[name] = { url, exports: Object.keys(module).length };
 }
+// P1-07B3 page-surface runtime API, from the packed ESM build: one
+// PresentationRuntime class behind both entry points.
+const dom = await import("@spatialflex/dom");
+const spatial = await import("@spatialflex/react/spatial");
+out.pageSurfaceApi = {
+  sameClass: dom.PresentationRuntime === spatial.PresentationRuntime,
+  relocate: typeof dom.PresentationRuntime.prototype.relocate === "function",
+  connectHost:
+    typeof dom.PresentationRuntime.prototype.connectHost === "function",
+};
 console.log(JSON.stringify(out));
 `,
 );
 const resolution = run("node", ["check-resolution.mjs"], app, {
   capture: true,
 });
-const resolved = JSON.parse(resolution.trim().split(/\r?\n/).at(-1));
+const { pageSurfaceApi, ...resolved } = JSON.parse(
+  resolution.trim().split(/\r?\n/).at(-1),
+);
+if (!Object.values(pageSurfaceApi).every(Boolean))
+  fail(`page-surface runtime API missing: ${JSON.stringify(pageSurfaceApi)}`);
 for (const [name, { url }] of Object.entries(resolved)) {
   const path = fileURLToPath(url);
   if (!path.startsWith(join(app, "node_modules")) || /xr-lab/.test(path))
     fail(`${name} resolves outside the app: ${path}`);
   if (path.startsWith(root)) fail(`${name} resolves into the repository`);
 }
+// The page-surface contract is in the packed declarations of both entries.
+const declarations = {
+  dom: readFileSync(
+    join(app, "node_modules/@spatialflex/dom/dist/presentationRuntime.d.ts"),
+    "utf8",
+  ),
+  spatial: readFileSync(
+    join(app, "node_modules/@spatialflex/react/dist/spatial.d.ts"),
+    "utf8",
+  ),
+};
+const missing = [
+  ["dom", "HostFrameOptions"],
+  ["dom", "drawsAdaptive"],
+  ["dom", "relocate("],
+  ["dom", "instancePrefix"],
+  ["spatial", "HostFrameOptions"],
+  ["spatial", "PresentationRuntimeOptions"],
+].filter(([entry, needle]) => !declarations[entry].includes(needle));
+if (missing.length)
+  fail(`page-surface declarations missing: ${JSON.stringify(missing)}`);
+step("page-surface runtime API in the packed ESM and declarations", {
+  pageSurfaceApi,
+});
 step("Node ESM resolution inside the app's node_modules", {
   // Relative to the app directory (absolute temp paths are machine-specific).
   resolved: Object.fromEntries(

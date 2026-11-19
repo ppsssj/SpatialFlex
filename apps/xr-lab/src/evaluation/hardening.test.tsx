@@ -5,7 +5,7 @@
 // a stub same-document host that reports Three.js camera frames (no WebGL).
 // jsdom has no layout, so element sizes are fixed; everything else (React
 // commits, effects, style writes, listeners) is real.
-import { act, StrictMode, useEffect, useState } from "react";
+import { act, StrictMode, useEffect } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Matrix4, PerspectiveCamera, Vector3 } from "three";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,18 +13,14 @@ import {
   CAMERA,
   type HostCameraFrame,
   type HostModule,
-  type HostRay,
   type XRHostProps,
 } from "../contracts/xrHost";
 import { createLabStore, type LabStore } from "../fixtures";
 import type {
   IntegrationModule,
   LabIntegration,
-  LabManipulation,
 } from "../integrations/contract";
 import { spatialflexIntegration } from "../integrations/spatialflex";
-import { useNativeHandles } from "../manipulation/useNativeHandles";
-import { useSurfaceCompositor } from "../surface/useSurfaceCompositor";
 import { LabShell } from "../shell/LabShell";
 
 (
@@ -170,26 +166,17 @@ describe("compositor style ownership", () => {
   });
 });
 
+// P1-07B3: Native DOM handles and composition moved from the lab's own
+// hooks (`useNativeHandles`, the surface's NativeCompositor) to the SDK
+// PresentationRuntime. The same invariants, through the lab's real path:
+// a remounted component extracted again is a new element under the same
+// id; only the new one takes input and is composited.
 describe("element replacement under an unchanged id list", () => {
-  const ray: HostRay = { origin: [0, 0, 0], direction: [0, 0, -1] };
-  function fakeManipulation() {
-    return {
-      begin: vi.fn(() => 1),
-      update: vi.fn(),
-      end: vi.fn(),
-      nudge: vi.fn(() => null),
-      endKeyboard: vi.fn(() => false),
-      subscribe: () => () => {},
-      getSnapshot: () => ({ version: 0, active: null, selected: null }),
-    } as unknown as LabManipulation & { begin: ReturnType<typeof vi.fn> };
-  }
-  const nativePanel = () => {
-    const element = document.createElement("div");
-    element.innerHTML =
-      '<div data-spatialflex-handle="translate"><span data-spatialflex-handle="translate" role="button" tabindex="0">t</span></div>';
-    document.body.append(element);
-    return element;
-  };
+  const IMAGE = "image-panel";
+  const handleOf = () =>
+    q(
+      `[data-spatialflex-item="${IMAGE}"] [data-spatialflex-handle="translate"][role=button]`,
+    );
   const pointerDown = (target: Element) => {
     const event = Object.assign(
       new MouseEvent("pointerdown", { bubbles: true, cancelable: true }),
@@ -197,73 +184,36 @@ describe("element replacement under an unchanged id list", () => {
     );
     target.dispatchEvent(event);
   };
+  /** Extract, then unmount, remount and extract the new element again. */
+  function replace() {
+    renderShell();
+    extract(IMAGE, "native");
+    const old = { panel: panelOf(IMAGE), handle: handleOf() };
+    expect(old.panel.style.transform).toMatch(/^matrix3d/);
+    act(() => store.actions.setImageMounted(false));
+    act(() => store.actions.setImageMounted(true));
+    frame();
+    extract(IMAGE, "native");
+    const next = { panel: panelOf(IMAGE), handle: handleOf() };
+    expect(next.panel).not.toBe(old.panel);
+    return { old, next };
+  }
 
   it("Native DOM handles follow the element, not only the id", () => {
-    const manipulation = fakeManipulation();
-    const a = nativePanel();
-    const b = nativePanel();
-    let swap: (element: HTMLElement) => void = () => {};
-    function Harness() {
-      const [element, setElement] = useState<HTMLElement>(a);
-      useEffect(() => {
-        swap = setElement;
-      }, []);
-      useNativeHandles(
-        manipulation,
-        ["item"],
-        (id) => (id === "item" ? element : null),
-        () => ray,
-      );
-      return null;
-    }
-    act(() => root.render(<Harness />));
-    act(() => swap(b));
-    pointerDown(a.querySelector("[role=button]")!);
-    expect(manipulation.begin).not.toHaveBeenCalled();
-    pointerDown(b.querySelector("[role=button]")!);
-    expect(manipulation.begin).toHaveBeenCalledTimes(1);
-    a.remove();
-    b.remove();
+    const { old, next } = replace();
+    const begin = vi.spyOn(lab.manipulation!, "begin");
+    pointerDown(old.handle);
+    expect(begin).not.toHaveBeenCalled();
+    pointerDown(next.handle);
+    expect(begin).toHaveBeenCalledTimes(1);
+    expect(begin.mock.calls[0]![0]).toBe(IMAGE);
   });
 
   it("the compositor releases a replaced element", () => {
-    const a = document.createElement("div");
-    const b = document.createElement("div");
-    let swap: (element: HTMLElement) => void = () => {};
-    let compositor: ReturnType<typeof useSurfaceCompositor> | null = null;
-    function Harness() {
-      const [element, setElement] = useState<HTMLElement>(a);
-      useEffect(() => {
-        swap = setElement;
-      }, []);
-      const c = useSurfaceCompositor(true, [], ["item"], (id) =>
-        id === "item" ? element : null,
-      );
-      useEffect(() => {
-        compositor = c;
-      });
-      const { attachLayer, attachPage } = c;
-      return (
-        <div ref={attachLayer}>
-          <div ref={attachPage} />
-        </div>
-      );
-    }
-    act(() => root.render(<Harness />));
-    act(() =>
-      compositor!.placeNative("item", {
-        position: [0.9, 1.5, -1],
-        rotation: [0, 0.15, 0],
-        metersPerPixel: 0.00225,
-      }),
-    );
-    act(() => compositor!.onCameraFrame(cameraFrame()));
-    expect(a.style.transform).toMatch(/^matrix3d/);
-    act(() => swap(b));
-    act(() => compositor!.onCameraFrame(cameraFrame()));
-    expect(b.style.transform).toMatch(/^matrix3d/);
-    expect(a.style.transform).toBe("");
-    expect(a.dataset.spatialVisibility).toBeUndefined();
-    expect(a.dataset.spatialPlaced).toBeUndefined();
+    const { old, next } = replace();
+    expect(next.panel.style.transform).toMatch(/^matrix3d/);
+    expect(old.panel.style.transform).toBe("");
+    expect(old.panel.dataset.spatialVisibility).toBeUndefined();
+    expect(old.panel.dataset.spatialPlaced).toBeUndefined();
   });
 });

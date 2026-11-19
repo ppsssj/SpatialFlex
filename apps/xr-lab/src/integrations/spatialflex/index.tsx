@@ -7,28 +7,30 @@ import {
   useSpatialItems,
 } from "@spatialflex/react";
 import {
+  useSpatialPresentations,
+  type SpatialPresentation,
+} from "@spatialflex/react/spatial";
+import {
   assertDetachmentStrategy,
   assertExtraction,
   defaultPresentation,
   presentationSupport,
   validateExtraction,
   type ExtractionContext,
-  assertSourceVisibility,
   SpatialFlexError,
   XR_MIRROR_STRATEGY,
   validateDetachmentStrategy,
   validateSourceVisibility,
 } from "@spatialflex/core";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 import { PANEL_SIZE, type Vec3 } from "../../contracts/xrHost";
 import type { RenderWidget } from "../../fixtures";
 import { quaternionFromEuler } from "../../surface/surfaceMath";
-import { usePresentation } from "../common/presentation";
-import type { IntegrationModule, LabIntegration } from "../contract";
-import {
-  ManipulationAdapter,
-  type ManipulablePresentation,
-} from "./manipulation";
+import type {
+  IntegrationModule,
+  LabIntegration,
+  LabNativeHost,
+} from "../contract";
 
 // Generic translation only: no widget IDs, application state or action table.
 const renderWidget: RenderWidget = (id, widget, view) => (
@@ -43,110 +45,169 @@ const renderWidget: RenderWidget = (id, widget, view) => (
     {widget}
   </SpatialItem>
 );
+/**
+ * The lab's source policies mapped to the SDK runtime's source names. The
+ * Lab says `collapsed` (a presentation policy); the controller argument is
+ * `collapse`, and the reserved Native DOM source is the controller's
+ * `placeholder`.
+ */
+const NATIVE_SOURCE = {
+  reserved: "placeholder",
+  collapsed: "collapse",
+} as const;
+const LAB_NATIVE_SOURCE = {
+  placeholder: "reserved",
+  collapse: "collapsed",
+} as const;
+
+/**
+ * Lab layout policy of one Adaptive presentation instance: an explicit
+ * extraction position (else its renderer slot) and the Move-button offset.
+ * Keyed by the SDK instance id, so it can never apply to a later instance.
+ */
+interface PanelLayout {
+  readonly anchor: Vec3 | null;
+  readonly offset: Vec3;
+}
+
+/**
+ * The SpatialFlex adapter of the lab (P1-07B3): a thin translation of the
+ * shared `LabIntegration` contract onto the workspace's SDK
+ * `PresentationRuntime` (`useSpatialPresentations`), the same runtime the
+ * external consumer uses. The runtime owns presentation instances, their
+ * liveness, the manipulator, the Native DOM compositor and its handles.
+ * The adapter keeps lab policy only: panel slots, Move offsets, the
+ * selection highlight and the lab's names for strategies.
+ */
 function useSpatialFlexIntegration(): LabIntegration {
   const registry = useSpatialRegistry();
   const controller = useSpatialController();
   const records = useSpatialItems();
   const views = useSpatialViews();
-  // Presentation membership follows the registration, not its reusable item ID.
-  const available = useMemo(() => views.map((v) => v.registrationId), [views]);
-  const { presentation, show, hide, move, select } = usePresentation(available);
-  const instances = useRef(new Map<string, string>());
-  const [natives, setNatives] = useState<
-    ReadonlyMap<
-      string,
-      {
-        source: "reserved" | "collapsed";
-        instance: string;
-        /** Start pose and natural size of this Native DOM presentation. */
-        position: Vec3;
-        rotation: Vec3;
-        extent: { width: number; height: number };
-      }
-    >
-  >(() => new Map());
-  // One manipulation target per presentation instance (P1-06B).
-  const [manipulation] = useState(() => new ManipulationAdapter());
-  useEffect(() => () => manipulation.dispose(), [manipulation]);
-  const nativeGeneration = useRef(0);
-  const generation = useRef(0);
-  const [capturedInstances, setInstances] = useState<
-    ReadonlyMap<string, string>
-  >(() => new Map());
-  const publishInstances = () => setInstances(new Map(instances.current));
-  useEffect(() => {
-    const unsubscribe = registry.subscribeViews(() => {
-      const current = new Set(registry.views().map((v) => v.registrationId));
-      let changed = false;
-      for (const id of instances.current.keys()) {
-        if (!current.has(id)) {
-          instances.current.delete(id);
-          changed = true;
-        }
-      }
-      if (changed) setInstances(new Map(instances.current));
-    });
-    const activeInstances = instances.current;
-    return () => {
-      unsubscribe();
-      activeInstances.clear();
-    };
-  }, [registry]);
-  const panels = presentation.shown.flatMap((registrationId) => {
-    const index = views.findIndex((v) => v.registrationId === registrationId);
+  // XR Adaptive instances keep the lab's established `presentation-N` ids.
+  const { runtime, presentations, issues } =
+    useSpatialPresentations(INSTANCE_PREFIX);
+  const [layouts, setLayouts] = useState<ReadonlyMap<string, PanelLayout>>(
+    () => new Map(),
+  );
+  const [selected, setSelected] = useState<string | null>(null);
+
+  // The rendered presentations (what the host draws from this render).
+  const rendered = new Map(presentations.map((p) => [p.itemId, p]));
+  /** The Adaptive presentation of an item whose current view it presents. */
+  const adaptiveOf = (id: string) => {
+    const p = rendered.get(id);
+    return p?.kind === "adaptive" &&
+      views.some(
+        (v) => v.id === id && v.registrationId === p.viewRegistrationId,
+      )
+      ? p
+      : undefined;
+  };
+  const nativeOf = (id: string) => {
+    const p = rendered.get(id);
+    return p?.kind === "native" ? p : undefined;
+  };
+  const originOf = (p: SpatialPresentation, index: number): Vec3 => {
+    const layout = layouts.get(p.instanceId);
+    const [x, y, z] = layout?.anchor ?? slot(index);
+    const [ox, oy, oz] = layout?.offset ?? [0, 0, 0];
+    return [round(x + ox), round(y + oy), round(z + oz)];
+  };
+  const panels = presentations.flatMap((p) => {
+    const index = views.findIndex(
+      (v) => v.id === p.itemId && v.registrationId === p.viewRegistrationId,
+    );
     const view = views[index];
-    if (!view) return [];
-    const id = view.id;
-    const [x, y, z] = presentation.anchors?.[registrationId] ?? slot(index);
-    const [ox, oy, oz] = presentation.offsets[registrationId] ?? [0, 0, 0];
+    if (p.kind !== "adaptive" || !view) return [];
     return [
       {
-        id,
+        id: view.id,
         title: view.title,
-        position: [round(x + ox), round(y + oy), round(z + oz)] as const,
+        position: originOf(p, index),
         body: view.body,
         buttons: view.actions,
-        selected: presentation.selected === registrationId,
+        selected: selected === p.instanceId,
       },
     ];
   });
-  // Host callbacks are bound to the presentation that actually drew them.
-  // A stale close/select must not affect a later instance either.
+  // Lab layout (slots, Move offsets) moves each panel's layout origin in
+  // the runtime, which shifts its manipulated pose by the same amount.
+  const origins = JSON.stringify(
+    presentations.flatMap((p) => {
+      const panel = panels.find((q) => q.id === p.itemId);
+      return panel && p.kind === "adaptive"
+        ? [[p.instanceId, panel.position]]
+        : [];
+    }),
+  );
+  useLayoutEffect(() => {
+    for (const [instance, position] of JSON.parse(origins) as [string, Vec3][])
+      runtime.relocate(instance, position);
+  }, [runtime, origins]);
+
+  // Host callbacks are bound to the presentation that actually drew them:
+  // the rendered instance must still be the runtime's live one, for the
+  // same registration and view epoch. A stale close/select/button never
+  // reaches a later instance of a reused item id.
   const currentPresentation = (id: string) => {
-    const view = views.find((v) => v.id === id);
-    if (!view || !presentation.shown.includes(view.registrationId)) return;
-    const instance = capturedInstances.get(view.registrationId);
-    if (
-      instance &&
-      instance === instances.current.get(view.registrationId) &&
-      registry.getView(id)?.registrationId === view.registrationId
-    )
-      return view;
+    const drawn = adaptiveOf(id);
+    if (!drawn || runtime.presentationOf(id) !== drawn) return;
+    if (registry.registrationOf(id) !== drawn.registrationKey) return;
+    if (registry.getView(id)?.registrationId !== drawn.viewRegistrationId)
+      return;
+    return drawn;
   };
-  // Ending a presentation always presents the original again.
   const showSource = (id: string) => {
     if (registry.get(id)?.layout.visible === false)
       controller.setSourceVisibility(id, "visible");
   };
-  const beginPresentation = (registrationId: string) => {
-    if (!instances.current.has(registrationId)) {
-      instances.current.set(
-        registrationId,
-        `presentation-${++generation.current}`,
+  /** Updates one instance's layout; layouts of ended instances are dropped. */
+  const updateLayout = (
+    instance: string,
+    update: (previous: PanelLayout | undefined) => PanelLayout,
+  ) =>
+    setLayouts((current) => {
+      const live = new Set(
+        runtime.getSnapshot().presentations.map((p) => p.instanceId),
       );
-      publishInstances();
+      const next = new Map([...current].filter(([key]) => live.has(key)));
+      return next.set(instance, update(current.get(instance)));
+    });
+  /** Starts an Adaptive presentation at its layout origin. */
+  const startAdaptive = (
+    id: string,
+    anchor: Vec3 | null,
+    source: "visible" | "reserved",
+  ) => {
+    const index = views.findIndex((v) => v.id === id);
+    const [x, y, z] = anchor ?? slot(index);
+    const result = runtime.extract(id, "adaptive", {
+      position: [round(x), round(y), round(z)],
+      extent: PANEL_SIZE,
+      source,
+    });
+    if (result.ok)
+      updateLayout(result.presentation.instanceId, () => ({
+        anchor,
+        offset: [0, 0, 0],
+      }));
+    return result.ok;
+  };
+  // A same-document Move is undone before an XR presentation starts.
+  const attachMoved = (id: string) => {
+    if (controller.placement(id) === "viewport") controller.attach(id);
+  };
+  const end = (id: string) => {
+    if (runtime.presentationOf(id)) {
+      showSource(id);
+      return runtime.restore(id);
     }
-  };
-  const endPresentation = (id: string, registrationId: string) => {
+    // Not presented by the runtime: return an external original anyway.
+    if (controller.placement(id) === "external") return controller.attach(id);
     showSource(id);
-    instances.current.delete(registrationId);
-    publishInstances();
-    return hide(registrationId);
+    return false;
   };
-  // Native DOM extractions: presentation instance and source policy per id.
-  // Valid only while the controller reports the external placement.
-  const nativeOf = (id: string) =>
-    controller.placement(id) === "external" ? natives.get(id) : undefined;
   const contextOf = (id: string): ExtractionContext => {
     const record = registry.get(id);
     return {
@@ -157,96 +218,41 @@ function useSpatialFlexIntegration(): LabIntegration {
       nativeHost: true,
     };
   };
-  const hideItem = (id: string) => {
-    if (controller.placement(id) === "external") {
-      setNatives((current) => {
-        const next = new Map(current);
-        next.delete(id);
-        return next;
-      });
-      return controller.attach(id);
-    }
-    const view = registry.getView(id);
-    if (!view) {
-      showSource(id);
-      return false;
-    }
-    return endPresentation(id, view.registrationId);
-  };
-  // Manipulable presentations: every live Native DOM extraction and every
-  // shown XR Adaptive panel, each with the pose it started from.
-  const manipulable: ManipulablePresentation[] = [
-    ...records.flatMap((record) => {
-      const native = nativeOf(record.id);
-      return native
-        ? [
-            {
-              itemId: record.id,
-              presentationId: native.instance,
-              registrationId:
-                registry.getView(record.id)?.registrationId ?? record.id,
-              kind: "native" as const,
-              initial: {
-                position: native.position,
-                rotation: quaternionFromEuler(native.rotation),
-                scale: 1,
-              },
-              extent: native.extent,
-            },
-          ]
-        : [];
-    }),
-    ...panels.flatMap((panel) => {
-      const view = views.find((v) => v.id === panel.id);
-      const instance = view && capturedInstances.get(view.registrationId);
-      return view && instance
-        ? [
-            {
-              itemId: panel.id,
-              presentationId: instance,
-              registrationId: view.registrationId,
-              kind: "adaptive" as const,
-              initial: {
-                position: panel.position,
-                rotation: [0, 0, 0, 1] as const,
-                scale: 1,
-              },
-              extent: PANEL_SIZE,
-            },
-          ]
-        : [];
-    }),
-  ];
-  // Synced whenever the set of instances or their layout placement changes:
-  // new instances are attached at their start pose, ended ones detached,
-  // and a moved placement shifts its instance. Manipulation itself never
-  // re-renders the integration.
-  const manipulableKey = JSON.stringify(manipulable);
-  useLayoutEffect(() => {
-    manipulation.sync(JSON.parse(manipulableKey) as ManipulablePresentation[]);
-  }, [manipulation, manipulableKey]);
+  // The page surface is the runtime's Native DOM host; renderer hosts draw
+  // the Adaptive panels on their own, so it ends Native presentations only.
+  const connectNativeHost = useCallback(
+    (): LabNativeHost => runtime.connectHost({ drawsAdaptive: false }),
+    [runtime],
+  );
+  const manipulation = runtime.manipulation;
+  const targets = new Map(
+    manipulation.targets().map((t) => [t.presentationId, t]),
+  );
+
   return {
     source: "SpatialFlex registry",
     manipulation,
+    connectNativeHost,
+    nativeIssues: issues,
     validateStrategy: validateDetachmentStrategy,
-    items: views.map((v) => ({
-      id: v.id,
-      label: v.title,
-      shown: presentation.shown.includes(v.registrationId),
-      selected: presentation.selected === v.registrationId,
-      detached: records.find((r) => r.id === v.id)?.status === "detached",
-      ...(capturedInstances.get(v.registrationId) && {
-        presentationId: capturedInstances.get(v.registrationId)!,
-      }),
-    })),
+    items: views.map((v) => {
+      const p = adaptiveOf(v.id);
+      return {
+        id: v.id,
+        label: v.title,
+        shown: !!p,
+        selected: !!p && selected === p.instanceId,
+        detached: records.find((r) => r.id === v.id)?.status === "detached",
+        ...(p && { presentationId: p.instanceId }),
+      };
+    }),
     panels,
     actionOwners: Object.fromEntries(
-      views
-        .filter((v) => presentation.shown.includes(v.registrationId))
-        .map((v) => [
-          v.id,
-          `${v.registrationId}/${capturedInstances.get(v.registrationId)}`,
-        ]),
+      presentations.flatMap((p) =>
+        adaptiveOf(p.itemId) === p
+          ? [[p.itemId, `${p.viewRegistrationId}/${p.instanceId}`]]
+          : [],
+      ),
     ),
     show(id, options = XR_MIRROR_STRATEGY) {
       const strategy = assertDetachmentStrategy(options);
@@ -256,17 +262,17 @@ function useSpatialFlexIntegration(): LabIntegration {
           "XR show accepts Mirror + Visible + XR only.",
         );
       const view = registry.getView(id);
-      if (!view || !available.includes(view.registrationId)) return false;
-      controller.attach(id);
-      beginPresentation(view.registrationId);
-      return show(view.registrationId);
+      if (!view || !views.some((v) => v.registrationId === view.registrationId))
+        return false;
+      if (runtime.presentationOf(id)?.kind === "adaptive") return true;
+      attachMoved(id);
+      return startAdaptive(id, null, "visible");
     },
-    hide: hideItem,
+    hide: end,
     surfaceItems: records.map((record) => {
       const view = views.find((v) => v.id === record.id);
-      const shown = !!view && presentation.shown.includes(view.registrationId);
-      const panel = shown ? panels.find((p) => p.id === record.id) : undefined;
-      const presentationId = view && capturedInstances.get(view.registrationId);
+      const adaptive = adaptiveOf(record.id);
+      const panel = adaptive && panels.find((p) => p.id === record.id);
       const native = nativeOf(record.id);
       const context = contextOf(record.id);
       const support = {
@@ -276,6 +282,7 @@ function useSpatialFlexIntegration(): LabIntegration {
       const moved = record.status === "detached" && !native;
       const extractable =
         !moved && (support.native.supported || support.adaptive.supported);
+      const start = native && targets.get(native.instanceId);
       return {
         id: record.id,
         label: view?.title ?? record.id,
@@ -295,14 +302,16 @@ function useSpatialFlexIntegration(): LabIntegration {
         extraction: native
           ? {
               presentation: "native",
-              source: native.source,
-              presentationId: native.instance,
+              source:
+                LAB_NATIVE_SOURCE[native.source as "placeholder" | "collapse"],
+              presentationId: native.instanceId,
+              ...(start && { position: start.initial.position }),
             }
-          : panel
+          : adaptive && panel
             ? {
                 presentation: "adaptive",
                 source: record.layout.visible ? "visible" : "reserved",
-                ...(presentationId && { presentationId }),
+                presentationId: adaptive.instanceId,
                 position: panel.position,
               }
             : null,
@@ -323,53 +332,42 @@ function useSpatialFlexIntegration(): LabIntegration {
         position,
         rotation,
         extent,
+        metersPerPixel,
       },
     ) {
       if (!registry.has(id)) return false;
+      // Untrusted lab input, validated with the SDK's reasons.
       const request = assertExtraction(
         { presentation: requested, source },
         contextOf(id),
       );
       if (request.presentation === "native") {
-        if (controller.placement(id) === "external") return false;
-        // One presentation per item: end an adaptive mirror first.
-        const view = registry.getView(id);
-        if (view && presentation.shown.includes(view.registrationId))
-          endPresentation(id, view.registrationId);
-        if (
-          !controller.extractNative(
-            id,
-            request.source === "collapsed" ? "collapse" : "placeholder",
-          )
-        )
-          return false;
-        const native = {
-          source: request.source,
-          instance: `native-${++nativeGeneration.current}`,
-          position: [position[0], position[1], position[2]] as Vec3,
-          rotation: [...(rotation ?? [0, 0, 0])] as unknown as Vec3,
+        if (runtime.presentationOf(id)?.kind === "native") return false;
+        return runtime.extract(id, "native", {
+          position: [position[0], position[1], position[2]],
+          rotation: quaternionFromEuler(rotation ?? [0, 0, 0]),
+          ...(metersPerPixel !== undefined && { metersPerPixel }),
           extent: extent ?? PANEL_SIZE,
-        };
-        setNatives((current) => new Map(current).set(id, native));
-        return true;
+          source: NATIVE_SOURCE[request.source as keyof typeof NATIVE_SOURCE],
+        }).ok;
       }
-      const visibility = assertSourceVisibility(request.source);
       if (position.length !== 3 || !position.every(Number.isFinite))
         throw new SpatialFlexError(
           "INVALID_LAYOUT",
           "An extraction position must be three finite meters.",
         );
       const view = registry.getView(id);
-      if (!view || !available.includes(view.registrationId)) return false;
-      if (presentation.shown.includes(view.registrationId)) return false;
-      controller.attach(id);
-      beginPresentation(view.registrationId);
-      if (!show(view.registrationId, [position[0], position[1], position[2]]))
+      if (!view || !views.some((v) => v.registrationId === view.registrationId))
         return false;
-      controller.setSourceVisibility(id, visibility);
-      return true;
+      if (runtime.presentationOf(id)?.kind === "adaptive") return false;
+      attachMoved(id);
+      return startAdaptive(
+        id,
+        [position[0], position[1], position[2]],
+        request.source === "reserved" ? "reserved" : "visible",
+      );
     },
-    restore: hideItem,
+    restore: end,
     detach(id, options) {
       const strategy = assertDetachmentStrategy(options);
       if (strategy.mode !== "move")
@@ -379,33 +377,45 @@ function useSpatialFlexIntegration(): LabIntegration {
         );
       // Validate/carry out the move before removing a valid existing mirror.
       const result = controller.detach(id, strategy);
-      const view = registry.getView(id);
-      if (view) endPresentation(id, view.registrationId);
+      if (registry.getView(id)) {
+        showSource(id);
+        if (runtime.presentationOf(id)?.kind === "adaptive")
+          runtime.restore(id);
+      }
       return result;
     },
     attach: controller.attach,
-    move(id, delta) {
-      const view = registry.getView(id);
-      return view ? move(view.registrationId, delta) : false;
+    move(id, [dx, dy, dz]) {
+      const p = runtime.presentationOf(id);
+      if (p?.kind !== "adaptive" || adaptiveOf(id) !== p) return false;
+      updateLayout(p.instanceId, (layout) => {
+        const [x, y, z] = layout?.offset ?? [0, 0, 0];
+        return {
+          anchor: layout?.anchor ?? null,
+          offset: [round(x + dx), round(y + dy), round(z + dz)],
+        };
+      });
+      return true;
     },
     onPanelButton(id, action) {
-      const view = currentPresentation(id);
-      if (view) registry.invokeView(id, view.registrationId, action);
+      const p = currentPresentation(id);
+      if (p) runtime.invoke(p.instanceId, action);
     },
     onPanelSelect(id) {
-      const view = currentPresentation(id);
-      if (view) {
-        select(view.registrationId);
+      const p = currentPresentation(id);
+      if (p) {
+        setSelected(p.instanceId);
         manipulation.select(id);
       }
     },
     onPanelClose(id) {
-      const view = currentPresentation(id);
-      if (view) endPresentation(id, view.registrationId);
+      if (currentPresentation(id)) end(id);
     },
     renderWidget,
   };
 }
+
+const INSTANCE_PREFIX = { instancePrefix: { adaptive: "presentation" } };
 
 // Renderer-owned placement; independent of component identity or domain state.
 const slot = (index: number): readonly [number, number, number] => {

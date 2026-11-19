@@ -1,0 +1,12 @@
+{
+  "ownership": {
+    "insidePage": true,
+    "elementTransform": "matrix3d(",
+    "visibility": "visible",
+    "pageSdkMarks": [],
+    "visibilityRules": 1
+  },
+  "geometryErrorPx": 0.12361907387821702,
+  "hitTarget": "counter-local",
+  "pageClipPath": "path(\"M 0 0 L 720 0 L 720 600 L 0 600 Z M 832.6 -48.1 L 1160"
+}

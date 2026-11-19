@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import type {
+  HostCameraFrame,
   HostEvents,
   HostManipulationMode,
   HostPanel,
@@ -7,6 +8,10 @@ import type {
   Quat,
   Vec3,
 } from "../contracts/xrHost";
+// Type-only: the surface geometry types (the SDK's projection types, which
+// the lab surface already uses). Nothing is imported at run time.
+import type { ContainmentIssue } from "../surface/nativeContainment";
+import type { ContainingSurface, Occluder } from "../surface/surfaceMath";
 import type { RenderWidget } from "../fixtures";
 /** UI capability request. Structurally compatible with SDK strategies without
  * adding an SDK dependency to the baseline, shared shell or renderer contract. */
@@ -73,8 +78,19 @@ export interface LabIntegration extends HostEvents {
   ):
     | { readonly supported: true }
     | { readonly supported: false; readonly reason: string };
-  /** The original element of a natively extracted item, for its compositor. */
+  /** The original element of a natively extracted item (read-only). */
   nativeElement?(id: string): HTMLElement | null;
+  /**
+   * Connects the Spatial Website's page surface as the Native DOM host of
+   * the integration's presentation runtime, which owns every natively
+   * extracted element's transform, clip, visibility and input handles.
+   * The surface reports camera frames with its page context; when it
+   * disconnects, Native presentations end (XR Adaptive panels, drawn by the
+   * renderer host, stay). Stable across renders. SpatialFlex only.
+   */
+  readonly connectNativeHost?: () => LabNativeHost;
+  /** Native presentations that cannot be composited, with the reasons. */
+  readonly nativeIssues?: ReadonlyMap<string, readonly ContainmentIssue[]>;
   /** Element of a registered component, for read-only selection geometry. */
   sourceElement?(id: string): HTMLElement | null;
   validateSourceVisibility?(
@@ -99,7 +115,7 @@ export interface LabPose {
 export interface LabManipulationTarget {
   /** Registered component (and its panel id). */
   readonly itemId: string;
-  /** Presentation instance (`native-N` or `presentation-N`). */
+  /** Presentation instance (`native-N` or `presentation-N`, from the SDK runtime). */
   readonly presentationId: string;
   readonly registrationId: string;
   readonly kind: PresentationId;
@@ -160,6 +176,23 @@ export interface LabManipulation {
   select(itemId: string | null): boolean;
 }
 
+/** The page surface's connection to the Native DOM presentation runtime. */
+export interface LabNativeHost {
+  /**
+   * After each rendered frame: composites the native elements through the
+   * page. Returns their footprints in page pixels (kept out of the page's
+   * occlusion clip, which would clip them too).
+   */
+  frame(
+    frame: HostCameraFrame,
+    options: {
+      readonly surface: ContainingSurface;
+      readonly occluders: readonly Occluder[];
+    },
+  ): { readonly keep: [number, number][][] };
+  disconnect(): void;
+}
+
 export interface ExtractOptions {
   /** Untrusted presentation strategy; defaults to `adaptive`. */
   readonly presentation?: unknown;
@@ -171,6 +204,8 @@ export interface ExtractOptions {
   readonly rotation?: Vec3;
   /** Natural world size of a Native DOM presentation, in meters. */
   readonly extent?: { readonly width: number; readonly height: number };
+  /** World meters per CSS pixel of a Native DOM presentation (page scale). */
+  readonly metersPerPixel?: number;
 }
 
 export type PresentationId = "native" | "adaptive";
@@ -196,7 +231,11 @@ export interface SurfaceItem {
     readonly source: "visible" | "reserved" | "collapsed";
     /** Presentation instance identity (not the strategy). */
     readonly presentationId?: string;
-    /** World position of an adaptive panel (native poses belong to the compositor). */
+    /**
+     * Layout origin: an Adaptive panel's slot or extraction position (plus
+     * Move offsets), a Native DOM presentation's start position. The
+     * manipulated pose is `manipulation.poseOf`.
+     */
     readonly position?: Vec3;
   } | null;
 }
