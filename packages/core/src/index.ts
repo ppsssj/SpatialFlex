@@ -65,6 +65,13 @@ export {
   type SpatialTransform,
   type SpatialVector3,
 } from "./manipulation.js";
+export {
+  ItemManipulator,
+  type ItemManipulationSnapshot,
+  type ItemManipulationTarget,
+  type ManipulablePresentation,
+  type NudgeDirection,
+} from "./items.js";
 export { SpatialFlexError, type SpatialFlexErrorCode } from "./errors.js";
 export {
   SpatialRegistry,
