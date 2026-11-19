@@ -152,8 +152,7 @@ export function SurfaceInspector({
                 <>
                   Native DOM (the original element),{" "}
                   {item.extraction!.presentationId} at (
-                  {fmt(surface.anchors.get(item.id)?.position ?? [0, 0, 0])}) m;
-                  source{" "}
+                  {fmt(item.extraction!.position ?? [0, 0, 0])}) m; source{" "}
                   {item.extraction!.source === "collapsed"
                     ? "collapsed"
                     : "space reserved"}

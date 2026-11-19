@@ -48,15 +48,7 @@ interface Box {
  */
 export function SpatialWebSurface({
   active,
-  surface: {
-    attachLayer,
-    attachPage,
-    pose,
-    anchors,
-    placeNative,
-    nativeIssues,
-    pageElement,
-  },
+  surface: { attachLayer, attachPage, pose, pageElement },
   lab,
   children,
 }: {
@@ -83,6 +75,7 @@ export function SpatialWebSurface({
     readonly issues: readonly ContainmentIssue[];
   } | null>(null);
   const items = lab.surfaceItems ?? [];
+  const nativeIssues = lab.nativeIssues ?? NO_ISSUES;
   const selected = items.find((item) => item.id === selectedId) ?? null;
   const checkContainment = (id: string) => {
     const source = lab.sourceElement?.(id);
@@ -182,23 +175,13 @@ export function SpatialWebSurface({
             height: (source.offsetHeight + NATIVE_BAR) * metersPerPixel,
           }
         : PANEL_SIZE;
-    const taken = items.flatMap((item) => {
-      if (item.extraction?.presentation === "native") {
-        const anchor = anchors.get(item.id);
-        return anchor ? [anchor.position] : [];
-      }
-      return item.extraction?.position ? [item.extraction.position] : [];
-    });
+    const taken = items.flatMap((item) =>
+      item.extraction?.position ? [item.extraction.position] : [],
+    );
     let index = 0;
     let position = extractionPosition(pose, index, size);
     while (taken.some((p) => near(p, position)))
       position = extractionPosition(pose, ++index, size);
-    if (presentation === "native")
-      placeNative(selected.id, {
-        position,
-        rotation: pose.rotation,
-        metersPerPixel,
-      });
     const done = lab.extract(selected.id, {
       presentation,
       source: policy,
@@ -206,6 +189,7 @@ export function SpatialWebSurface({
       ...(presentation === "native" && {
         rotation: pose.rotation,
         extent: size,
+        metersPerPixel,
       }),
     });
     setNotice(done ? null : `${selected.label} could not be extracted.`);
@@ -319,6 +303,7 @@ export function SpatialWebSurface({
   );
 }
 
+const NO_ISSUES: ReadonlyMap<string, readonly ContainmentIssue[]> = new Map();
 const near = (a: Vec3, b: Vec3) =>
   Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) < 0.15;
 

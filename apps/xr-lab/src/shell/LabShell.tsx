@@ -18,9 +18,6 @@ import { SurfaceInspector } from "../surface/SurfaceInspector";
 import { useSurfaceCompositor } from "../surface/useSurfaceCompositor";
 import { ManipulatedHost } from "../manipulation/ManipulatedHost";
 import { ManipulationInspector } from "../manipulation/ManipulationInspector";
-import { useNativeHandles } from "../manipulation/useNativeHandles";
-
-const noElement = () => null;
 
 export interface LabShellProps {
   integration: IntegrationModule;
@@ -98,25 +95,20 @@ function ShellLayout({
   const [surfaceMode, setSurfaceMode] = useState(surfaceRequested);
   const website = surfaceMode && !surfaceSupport;
   const surfaceActive = website && workspaceMounted;
-  // Natively extracted originals, positioned by the surface compositor.
+  // Natively extracted originals (composited by the integration's runtime).
   const nativeList = (lab.surfaceItems ?? [])
     .filter((item) => item.extraction?.presentation === "native")
     .map((item) => item.id);
   const nativeIds = JSON.stringify(nativeList);
   const manipulation = lab.manipulation;
+  // The page surface; while active it is the Native DOM host of the
+  // integration's presentation runtime (which also binds the native
+  // handles to the same manipulation controller as the 3D handles).
   const surface = useSurfaceCompositor(
     surfaceActive,
     lab.panels,
-    nativeList,
-    lab.nativeElement ?? noElement,
     manipulation?.poseOf,
-  );
-  // Native DOM handles feed the same manipulation controller as 3D handles.
-  useNativeHandles(
-    surfaceActive ? manipulation : undefined,
-    nativeList,
-    lab.nativeElement ?? noElement,
-    surface.rayAt,
+    lab.connectNativeHost,
   );
   // Read-only test hook: poses and sessions, never a way to change them.
   useEffect(() => {
@@ -136,8 +128,9 @@ function ShellLayout({
       delete target.__xrLabManipulation;
     };
   }, [manipulation]);
-  // Without an active surface (mode off, workspace unmounted) there is no
-  // compositor to place them: the originals return to their place.
+  // Lab policy: Native DOM is presented on the Spatial Website only. The
+  // runtime ends Native presentations when the surface host disconnects;
+  // this also returns any extracted while no surface was connected.
   useLayoutEffect(() => {
     if (surfaceActive) return;
     for (const id of JSON.parse(nativeIds) as string[]) lab.restore?.(id);
