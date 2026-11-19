@@ -127,6 +127,39 @@ export default tseslint.config(
       "**/integrations/spatialflex",
     ],
   }),
+  // SDK layering: core is framework-, DOM- and renderer-free; the DOM
+  // runtime adds the browser DOM only (no React, no rendering engine).
+  {
+    files: ["packages/core/src/**/*.ts", "packages/dom/src/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "react",
+                "react-dom",
+                "react/*",
+                "react-dom/*",
+                "three",
+                "three/*",
+                "@react-three/*",
+                "@babylonjs/*",
+                "@spatialflex/react",
+              ],
+              message:
+                "SDK layering: core and dom must not depend on React or a rendering engine (see docs/p1-07b-external-react-integration.md).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["packages/dom/src/**/*.ts", "packages/core/src/**/*.ts"],
+    languageOptions: { globals: globals.browser },
+  },
   {
     files: ["apps/xr-lab/scripts/*.mjs"],
     languageOptions: { globals: globals.node },
