@@ -10,6 +10,7 @@ import {
 import type { LabNativeHost } from "../integrations/contract";
 import { DEFAULT_SURFACE_POSE, SURFACE_RESOLUTION } from "./surfaceConfig";
 import {
+  occlusionClipPath,
   pageClipPath,
   planeVisibility,
   surfaceMatrix,
@@ -165,13 +166,22 @@ export function useSurfaceCompositor(
         occluders,
       }).keep ?? [];
     if (visibility === "visible") {
-      const clip = pageClipPath(
+      // The page clip only cuts out occluders in front of the page. With
+      // none, it is `none` even while native elements are composited: their
+      // footprints (`keep`) only exempt them from a clip that cuts holes.
+      // A path clip on the transformed page with 3D-transformed descendants
+      // is the dominant browser-side cost of Native DOM presentations
+      // (P1-07C benchmark), so it is written only when it cuts something.
+      const holes = occlusionClipPath(
         frame,
         s.pose,
         SURFACE_RESOLUTION,
         occluders,
-        keep,
       );
+      const clip =
+        holes === "none" || keep.length === 0
+          ? holes
+          : pageClipPath(frame, s.pose, SURFACE_RESOLUTION, occluders, keep);
       if (clip !== s.clip) {
         page.style.clipPath = clip;
         s.clip = clip;
