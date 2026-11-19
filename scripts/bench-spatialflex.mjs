@@ -13,6 +13,8 @@
 // Options: --repeats N --warmup-ms N --sample-ms N --seed N
 //          --browsers chromium,firefox --engines three,babylon
 //          --counts 1,5,10,20 --cycles N --out DIR --label NAME
+//          --presentations none,native,adaptive --workloads W0,W2,...
+//          --ablate page-clip   (diagnostic only; label the run accordingly)
 import { execFileSync, spawnSync } from "node:child_process";
 import {
   existsSync,
@@ -50,6 +52,9 @@ const config = {
   counts: option("counts", quick ? "1,20" : "1,5,10,20"),
   subsetCounts: option("subset-counts", quick ? "20" : "1,10,20"),
   cycles: option("cycles", quick ? "3" : "10"),
+  presentations: option("presentations", "none,native,adaptive"),
+  workloads: option("workloads", "W0,W1,W2,W3,W4"),
+  ablate: option("ablate", ""),
 };
 const sh = (cmd, a) =>
   execFileSync(cmd, a, { cwd: root, encoding: "utf8" }).trim();
@@ -70,6 +75,9 @@ if (!flag("aggregate-only")) {
     BENCH_COUNTS: config.counts,
     BENCH_SUBSET_COUNTS: config.subsetCounts,
     BENCH_LIFECYCLE_CYCLES: config.cycles,
+    BENCH_PRESENTATIONS: config.presentations,
+    BENCH_WORKLOADS: config.workloads,
+    BENCH_ABLATE: config.ablate,
     BENCH_OUT: rawDir,
     BENCH_COMMIT: commit,
     ...(headed && { BENCH_HEADED: "1", XR_LAB_FIREFOX_HEADED: "1" }),

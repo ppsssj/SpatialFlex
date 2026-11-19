@@ -27,6 +27,11 @@ const CONFIG = {
   /** Panel counts that also run W1 (data) and W3 (manipulation). */
   subsetCounts: env("BENCH_SUBSET_COUNTS", "1,10,20").split(",").map(Number),
   lifecycleCycles: Number(env("BENCH_LIFECYCLE_CYCLES", "10")),
+  /** Presentations and workloads to run (all by default). */
+  presentations: env("BENCH_PRESENTATIONS", "none,native,adaptive").split(","),
+  workloads: env("BENCH_WORKLOADS", "W0,W1,W2,W3,W4").split(","),
+  /** Diagnostic ablation (`?ablate=`); empty for product measurements. */
+  ablate: env("BENCH_ABLATE", ""),
   /** W1 update interval. */
   dataIntervalMs: 100,
   /** W3: pointer steps per drag, one per animation frame. */
@@ -70,13 +75,13 @@ const scenarios: Scenario[] = shuffle(
     ),
   ]),
   prng(CONFIG.seed),
-);
+).filter((s) => CONFIG.presentations.includes(s.presentation));
 
 const BENCH_CAMERA = { position: [0, 1.42, 4], target: [0, 1.42, -0.4] };
 
 async function open(page: Page, engine: string, panels: number) {
   await page.goto(
-    `/?engine=${engine}&integration=spatialflex&bridge=off&xr-emulator=off&surface=website&fixture=benchmark&panels=${panels}`,
+    `/?engine=${engine}&integration=spatialflex&bridge=off&xr-emulator=off&surface=website&fixture=benchmark&panels=${panels}${CONFIG.ablate ? `&ablate=${CONFIG.ablate}` : ""}`,
   );
   await expect
     .poll(() =>
@@ -285,9 +290,10 @@ async function measure(
 }
 
 const workloadsFor = (s: Scenario): Workload[] =>
-  s.presentation !== "none" && CONFIG.subsetCounts.includes(s.panels)
-    ? ["W0", "W1", "W2", "W3"]
-    : ["W0", "W2"];
+  (s.presentation !== "none" && CONFIG.subsetCounts.includes(s.panels)
+    ? (["W0", "W1", "W2", "W3"] as const)
+    : (["W0", "W2"] as const)
+  ).filter((w) => CONFIG.workloads.includes(w));
 
 test.describe.configure({ mode: "serial" });
 
@@ -338,6 +344,7 @@ for (const [index, scenario] of scenarios.entries()) {
           orderInPage: position,
           scenarioOrder: index,
           seed: CONFIG.seed,
+          ablation: CONFIG.ablate || null,
           warmupMs: CONFIG.warmupMs,
           sampleMs: workload === "W3" ? null : CONFIG.sampleMs,
           ...(round(run) as Record<string, unknown>),
@@ -354,7 +361,7 @@ for (const [index, scenario] of scenarios.entries()) {
 
 // --- W4 lifecycle stress (representative subset: 20 panels) --------------
 
-for (const engine of CONFIG.engines)
+for (const engine of CONFIG.workloads.includes("W4") ? CONFIG.engines : [])
   for (const kind of ["native", "adaptive"] as const)
     test(`lifecycle ${engine}-${kind}-20`, async ({ page }, testInfo) => {
       const browser = testInfo.project.name;
