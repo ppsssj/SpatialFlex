@@ -298,6 +298,7 @@ const workloadsFor = (s: Scenario): Workload[] =>
 test.describe.configure({ mode: "serial" });
 
 for (const [index, scenario] of scenarios.entries()) {
+  if (workloadsFor(scenario).length === 0) continue;
   const id = `${scenario.engine}-${scenario.presentation}-${scenario.panels}`;
   test(`scaling ${id}`, async ({ page }, testInfo) => {
     const browser = testInfo.project.name;

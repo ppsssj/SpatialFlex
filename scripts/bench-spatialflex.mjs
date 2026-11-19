@@ -59,7 +59,15 @@ const config = {
 const sh = (cmd, a) =>
   execFileSync(cmd, a, { cwd: root, encoding: "utf8" }).trim();
 const commit = sh("git", ["rev-parse", "HEAD"]);
-const dirty = sh("git", ["status", "--porcelain"]).length > 0;
+// The benchmark's own output directory does not make the code dirty.
+const dirty =
+  sh("git", [
+    "status",
+    "--porcelain",
+    "--",
+    ".",
+    `:(exclude)${relative(root, out).replaceAll("\\", "/")}`,
+  ]).length > 0;
 
 // --- 1. Run ---------------------------------------------------------------
 if (!flag("aggregate-only")) {
