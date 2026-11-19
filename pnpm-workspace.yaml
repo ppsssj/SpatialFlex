@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - apps/*
+  - examples/*
 
 overrides:
   # @react-three/xr 6.6's bundled WebXR emulator pins @iwer/devui 1.x and
