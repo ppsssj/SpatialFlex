@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 import { SpatialRegistry } from "@spatialflex/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { NativeCompositor } from "./nativeCompositor.js";
 import {
   PresentationRuntime,
   type PresentationController,
 } from "./presentationRuntime.js";
+import type { CameraFrame } from "./projection.js";
 
 /**
  * A minimal controller over a real registry, with the semantics of
@@ -303,5 +305,176 @@ describe("PresentationRuntime lifecycle", () => {
     expect(otherRuntime.manipulation.getSnapshot().active).toBeNull();
     stop();
     expect(runtime.presentationOf("card")).toBeDefined();
+  });
+});
+
+/** A camera at `eye` looking down -z (column-major perspective × view). */
+function cameraFrame(eye: [number, number, number] = [0, 1.5, 1]): CameraFrame {
+  const viewport = { left: 0, top: 0, width: 800, height: 600 };
+  const f = 1 / Math.tan((50 * Math.PI) / 360);
+  const near = 0.01,
+    far = 100;
+  const p = [
+    f * 0.75,
+    0,
+    0,
+    0,
+    0,
+    f,
+    0,
+    0,
+    0,
+    0,
+    (far + near) / (near - far),
+    -1,
+  ];
+  p.push(0, 0, (2 * far * near) / (near - far), 0);
+  const v = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -eye[0], -eye[1], -eye[2], 1];
+  const m = new Array<number>(16).fill(0);
+  for (let c = 0; c < 4; c++)
+    for (let r = 0; r < 4; r++)
+      for (let k = 0; k < 4; k++)
+        m[c * 4 + r]! += p[k * 4 + r]! * v[c * 4 + k]!;
+  return { viewProjection: m, viewport, eye };
+}
+
+/** A transformed page (the XR Lab's spatial web surface) facing the camera. */
+function pageSurface() {
+  const element = document.createElement("div");
+  element.style.transform = "matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,10,20,0,1)";
+  document.body.append(element);
+  return {
+    element,
+    pose: {
+      position: [0, 1.5, -1.5] as const,
+      rotation: [0, 0, 0] as const,
+      width: 1.6,
+      height: 1,
+    },
+    resolution: { width: 1600, height: 1000 },
+    border: 0,
+  };
+}
+
+describe("PresentationRuntime page-surface mode and host authority (P1-07B3)", () => {
+  it("M1: composites a native element inside a transformed page through the same compositor, and reports its page footprint", () => {
+    const surface = pageSurface();
+    const { panel } = world.mount("card", false, surface.element);
+    const host = runtime.connectHost({ drawsAdaptive: false });
+    // Without a page surface the transformed page captures the element.
+    expect(runtime.nativeSupport("card")).toMatchObject({ supported: false });
+    expect(host.frame(cameraFrame(), { surface })).toEqual({ keep: [] });
+    // The authoritative host's page is the containing block now.
+    expect(runtime.nativeSupport("card")).toEqual({ supported: true });
+    const placement = {
+      position: [0.2, 1.5, -1.2] as const,
+      metersPerPixel: 0.001,
+    };
+    expect(runtime.extract("card", "native", placement).ok).toBe(true);
+    const { keep } = host.frame(cameraFrame(), { surface, occluders: [] });
+    expect(keep).toHaveLength(1);
+    expect(panel.style.transform).toMatch(/^matrix3d/);
+    expect(panel.dataset.spatialVisibility).toBe("visible");
+    // Identical to the SDK compositor's own page-surface placement.
+    const reference = document.createElement("div");
+    document.body.append(reference);
+    const compositor = new NativeCompositor();
+    compositor.setTargets([
+      {
+        id: "card",
+        element: reference,
+        placement: () => ({
+          position: placement.position,
+          rotation: [0, 0, 0, 1],
+          scale: 1,
+          metersPerPixel: 0.001,
+        }),
+      },
+    ]);
+    const expected = compositor.composite(cameraFrame(), {
+      surface,
+      occluders: [],
+    });
+    expect(reference.style.transform).toBe(panel.style.transform);
+    expect(keep).toEqual(expected.keep);
+    // Viewport mode for the same host: no footprints.
+    expect(host.frame(cameraFrame(), { occluders: [] }).keep).toEqual([]);
+    compositor.dispose();
+  });
+
+  it("only the authoritative frame source composites and gives rays", () => {
+    const { panel } = world.mount("card");
+    const a = runtime.connectHost();
+    const b = runtime.connectHost();
+    runtime.extract("card", "native", at);
+    b.frame(cameraFrame([0, 1.5, 1]));
+    const placed = panel.style.transform;
+    expect(placed).toMatch(/^matrix3d/);
+    // The other host's camera never places the elements of this one.
+    a.frame(cameraFrame([0.5, 1.5, 3]));
+    expect(panel.style.transform).toBe(placed);
+    expect(a.rayAt(400, 300)).toBeNull();
+    expect(b.rayAt(400, 300)).not.toBeNull();
+    // When the source disconnects, the next host that reports takes over.
+    b.disconnect();
+    a.frame(cameraFrame([0.5, 1.5, 3]));
+    expect(panel.style.transform).not.toBe(placed);
+    expect(a.rayAt(400, 300)).not.toBeNull();
+  });
+
+  it("a host that does not draw Adaptive panels ends only Native presentations when it disconnects", () => {
+    world.mount("card");
+    world.mount("other", true);
+    const surfaceHost = runtime.connectHost({ drawsAdaptive: false });
+    runtime.extract("card", "native", at);
+    runtime.extract("other", "adaptive", { ...at, source: "reserved" });
+    surfaceHost.disconnect();
+    expect(runtime.presentationOf("card")).toBeUndefined();
+    expect(registry.get("card")!.status).toBe("attached");
+    expect(runtime.presentationOf("other")).toMatchObject({ kind: "adaptive" });
+    expect(registry.get("other")!.layout.visible).toBe(false);
+    // A drawing host ends the Adaptive ones when it is the last of them.
+    const drawing = runtime.connectHost();
+    drawing.disconnect();
+    expect(runtime.presentationOf("other")).toBeUndefined();
+    expect(registry.get("other")!.layout.visible).toBe(true);
+  });
+
+  it("relocate moves the layout origin under the manipulated pose; stale instances are refused", () => {
+    world.mount("card", true);
+    const started = runtime.extract("card", "adaptive", at);
+    const instance = started.ok ? started.presentation.instanceId : "";
+    const token = runtime.manipulation.begin("card", "translate", 1, ray(0))!;
+    runtime.manipulation.update(token, ray(0.3));
+    runtime.manipulation.end(token, true);
+    const manipulated = runtime.manipulation.poseOf("card")!.position;
+    expect(runtime.relocate(instance, [0.1, 1.5, -1])).toBe(true);
+    const pose = runtime.manipulation.poseOf("card")!.position;
+    expect(pose[0]).toBeCloseTo(manipulated[0] + 0.1, 9);
+    expect(pose[1]).toBeCloseTo(manipulated[1], 9);
+    expect(runtime.manipulation.targets()[0]!.initial.position).toEqual([
+      0.1, 1.5, -1,
+    ]);
+    // Reset returns to the relocated origin, not the first one.
+    runtime.manipulation.reset("card");
+    expect(runtime.manipulation.poseOf("card")!.position).toEqual([
+      0.1, 1.5, -1,
+    ]);
+    runtime.restore("card");
+    expect(runtime.relocate(instance, [0, 0, 0])).toBe(false);
+    expect(runtime.relocate("nope", [0, 0, 0])).toBe(false);
+  });
+
+  it("instance prefixes are configurable; ids stay unique across kinds", () => {
+    const named = new PresentationRuntime(registry, world.controller, {
+      instancePrefix: { adaptive: "presentation" },
+    });
+    disconnect();
+    disconnect = named.connect();
+    world.mount("card", true);
+    const a = named.extract("card", "adaptive", at);
+    const n = named.extract("card", "native", at);
+    expect(a.ok && a.presentation.instanceId).toBe("presentation-1");
+    expect(n.ok && n.presentation.instanceId).toBe("native-2");
   });
 });

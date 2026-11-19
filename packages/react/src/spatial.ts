@@ -1,5 +1,6 @@
 import {
   PresentationRuntime,
+  type PresentationRuntimeOptions,
   type PresentationSnapshot,
 } from "@spatialflex/dom";
 import { useLayoutEffect, useState, useSyncExternalStore } from "react";
@@ -36,20 +37,30 @@ export interface SpatialPresentations extends PresentationSnapshot {
  * while this component is mounted, and its current presentations. Unmount
  * ends every presentation (the originals are restored) and releases what
  * the runtime owns. Use it once per workspace, in the component that owns
- * the spatial view.
+ * the spatial view. `options` are read when a runtime is created.
  */
-export function useSpatialPresentations(): SpatialPresentations {
+export function useSpatialPresentations(
+  options?: PresentationRuntimeOptions,
+): SpatialPresentations {
   const workspace = useWorkspace();
   const [entry, setEntry] = useState(() => ({
     workspace,
-    runtime: new PresentationRuntime(workspace.registry, workspace.controller),
+    runtime: new PresentationRuntime(
+      workspace.registry,
+      workspace.controller,
+      options,
+    ),
   }));
   // A replaced workspace (provider) gets its own runtime; adjusting state
   // while rendering is React's pattern for this. Construction has no side
   // effects: the runtime starts in the layout effect below.
   let { runtime } = entry;
   if (entry.workspace !== workspace) {
-    runtime = new PresentationRuntime(workspace.registry, workspace.controller);
+    runtime = new PresentationRuntime(
+      workspace.registry,
+      workspace.controller,
+      options,
+    );
     setEntry({ workspace, runtime });
   }
   // Before paint, so a presentation that ended is never drawn stale.
@@ -80,7 +91,11 @@ export function useSpatialManipulationState(runtime: PresentationRuntime) {
 export {
   PresentationRuntime,
   type ExtractResult,
+  type HostFrameOptions,
+  type HostFrameResult,
+  type HostOptions,
   type PresentationHost,
+  type PresentationRuntimeOptions,
   type PresentationPlacement,
   type PresentationSnapshot,
   type PresentationSupport,

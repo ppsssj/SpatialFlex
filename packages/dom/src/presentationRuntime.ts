@@ -8,7 +8,11 @@ import {
   type SpatialViewRecord,
 } from "@spatialflex/core";
 import { containmentReason, nativeContainmentIssues } from "./containment.js";
-import { NativeCompositor, type NativeIssues } from "./nativeCompositor.js";
+import {
+  NativeCompositor,
+  type ContainingSurface,
+  type NativeIssues,
+} from "./nativeCompositor.js";
 import {
   bindNativeHandles,
   type NativeHandleBinding,
@@ -72,7 +76,10 @@ export interface PresentationPlacement {
   readonly rotation?: Quaternion;
   /** Native: world meters per CSS pixel at scale 1 (default 0.002). */
   readonly metersPerPixel?: number;
-  /** Adaptive: the panel's natural world size (default 0.6 × 0.4 m). */
+  /**
+   * Natural world size at scale 1. Adaptive: default 0.6 × 0.4 m. Native
+   * DOM: default the element's layout size × `metersPerPixel`.
+   */
   readonly extent?: { readonly width: number; readonly height: number };
   /**
    * The original placement while presented: `placeholder` (default) or
@@ -81,22 +88,78 @@ export interface PresentationPlacement {
   readonly source?: SpatialPresentation["source"];
 }
 
+/** Per-frame options of {@link PresentationHost.frame}. */
+export interface HostFrameOptions {
+  /**
+   * Renderer-drawn rectangles that cut native elements behind them
+   * (default: the live Adaptive panels at their manipulated poses).
+   */
+  readonly occluders?: readonly Occluder[];
+  /**
+   * Page-surface mode: the transformed page that contains the native
+   * elements (the page is placed by the application; its pose is cancelled
+   * by each element's transform). Omitted: viewport mode, where the
+   * viewport is the native elements' containing block.
+   */
+  readonly surface?: ContainingSurface;
+}
+
+/** What a composited frame reports back to its host. */
+export interface HostFrameResult {
+  /**
+   * Page-surface mode: the native elements' footprints in page pixels, for
+   * the page's own clip (a page's clip-path also clips its descendants).
+   * Empty in viewport mode and for frames that are not authoritative.
+   */
+  readonly keep: [number, number][][];
+}
+
+export interface HostOptions {
+  /**
+   * Whether this host draws the Adaptive panels (default `true`). A host
+   * that only composites Native DOM (the XR Lab's page surface, whose
+   * renderer draws panels on its own) ends only the Native presentations
+   * when it is the last to disconnect.
+   */
+  readonly drawsAdaptive?: boolean;
+}
+
 /** A connected renderer (rendering host). */
 export interface PresentationHost {
-  /** After each rendered frame: places the native elements for it. */
-  frame(
-    frame: CameraFrame,
-    options?: { occluders?: readonly Occluder[] },
-  ): void;
-  /** World ray under a client point, from the last reported frame. */
+  /**
+   * After each rendered frame: places the native elements for it. Only the
+   * authoritative frame source (the earliest connected host that reports
+   * frames and is still connected) is composited; frames of other hosts
+   * are ignored, so the camera of one host never places elements for
+   * another.
+   */
+  frame(frame: CameraFrame, options?: HostFrameOptions): HostFrameResult;
+  /**
+   * World ray under a client point, from this host's last composited frame
+   * (`null` for a host that is not the authoritative frame source).
+   */
   rayAt(clientX: number, clientY: number): SpatialRay | null;
-  /** The last host to disconnect ends every presentation (nothing can show them). */
+  /**
+   * The last host to disconnect ends the Native presentations (nothing can
+   * composite them); the last host that draws Adaptive panels ends those.
+   */
   disconnect(): void;
+}
+
+/** Options of a {@link PresentationRuntime}. */
+export interface PresentationRuntimeOptions {
+  /**
+   * Prefixes of presentation instance ids (`<prefix>-<n>`); defaults
+   * `native` and `adaptive`. For applications that already expose instance
+   * ids in another format. Ids stay unique per runtime either way.
+   */
+  readonly instancePrefix?: Partial<Record<PresentationStrategy, string>>;
 }
 
 interface Entry {
   readonly presentation: SpatialPresentation;
-  readonly initial: ManipulablePresentation["initial"];
+  /** Layout origin (start pose); moved by `relocate`. */
+  initial: ManipulablePresentation["initial"];
   readonly extent: { readonly width: number; readonly height: number };
   readonly metersPerPixel: number;
 }
@@ -105,6 +168,12 @@ const DEFAULT_METERS_PER_PIXEL = 0.002;
 const DEFAULT_ADAPTIVE_EXTENT = { width: 0.6, height: 0.4 } as const;
 const IDENTITY: Quaternion = [0, 0, 0, 1];
 const EMPTY_ISSUES: NativeIssues = new Map();
+const NO_KEEP: HostFrameResult = Object.freeze({ keep: [] });
+
+interface HostState {
+  connected: boolean;
+  readonly drawsAdaptive: boolean;
+}
 
 /**
  * The presentation lifecycle of one workspace (one registry and its
@@ -131,6 +200,11 @@ export class PresentationRuntime {
   readonly #listeners = new Set<() => void>();
   #binding: NativeHandleBinding | null = null;
   #frame: CameraFrame | null = null;
+  /** The authoritative frame source, and its page surface (if any). */
+  #frameSource: HostState | null = null;
+  #surfaceElement: HTMLElement | null = null;
+  readonly #hosts = new Set<HostState>();
+  readonly #prefix: Record<PresentationStrategy, string>;
   #issues: NativeIssues = EMPTY_ISSUES;
   #snapshot: PresentationSnapshot = {
     version: 0,
@@ -140,12 +214,19 @@ export class PresentationRuntime {
   #generation = 0;
   #batch = 0;
   #dirty = false;
-  #hosts = 0;
   #connected = false;
 
-  constructor(registry: SpatialRegistry, controller: PresentationController) {
+  constructor(
+    registry: SpatialRegistry,
+    controller: PresentationController,
+    options: PresentationRuntimeOptions = {},
+  ) {
     this.#registry = registry;
     this.#controller = controller;
+    this.#prefix = {
+      native: options.instancePrefix?.native ?? "native",
+      adaptive: options.instancePrefix?.adaptive ?? "adaptive",
+    };
     this.#compositor = new NativeCompositor({
       onIssues: (issues) => {
         this.#issues = issues;
@@ -178,6 +259,8 @@ export class PresentationRuntime {
       this.#compositor.dispose();
       this.manipulation.dispose();
       this.#frame = null;
+      this.#frameSource = null;
+      this.#surfaceElement = null;
       this.#connected = false;
     };
   }
@@ -230,7 +313,11 @@ export class PresentationRuntime {
         supported: false,
         reason: `"${itemId}" has no connected element.`,
       };
-    const reason = containmentReason(nativeContainmentIssues(source, null));
+    // The containing block the compositor will assume: the page surface of
+    // the authoritative host, else the viewport.
+    const reason = containmentReason(
+      nativeContainmentIssues(source, this.#surfaceElement),
+    );
     return reason ? { supported: false, reason } : { supported: true };
   }
 
@@ -324,31 +411,75 @@ export class PresentationRuntime {
     return this.#registry.invokeView(itemId, viewRegistrationId!, actionId);
   }
 
+  /**
+   * Moves the layout origin (start pose position) of a live presentation,
+   * keeping what the user manipulated on top of it: application layout
+   * policy (slots, Move buttons) without a second pose store. Accepted only
+   * for the live instance.
+   */
+  relocate(instanceId: string, position: Vec3): boolean {
+    const entry = [...this.#entries.values()].find(
+      (e) => e.presentation.instanceId === instanceId,
+    );
+    if (!entry || position.length !== 3 || !position.every(Number.isFinite))
+      return false;
+    const [x, y, z] = entry.initial.position;
+    if (x === position[0] && y === position[1] && z === position[2])
+      return true;
+    entry.initial = {
+      ...entry.initial,
+      position: [position[0], position[1], position[2]],
+    };
+    this.#transaction(() => {});
+    return true;
+  }
+
   /** Connects a renderer. */
-  connectHost(): PresentationHost {
-    this.#hosts++;
-    let connected = true;
+  connectHost(options: HostOptions = {}): PresentationHost {
+    const host: HostState = {
+      connected: true,
+      drawsAdaptive: options.drawsAdaptive ?? true,
+    };
+    this.#hosts.add(host);
     return {
-      frame: (frame, options = {}) => {
-        if (!connected) return;
+      frame: (frame, frameOptions = {}) => {
+        if (!host.connected) return NO_KEEP;
+        this.#frameSource ??= host;
+        if (this.#frameSource !== host) return NO_KEEP;
         this.#frame = {
           viewProjection: Array.from(frame.viewProjection),
           viewport: { ...frame.viewport },
           eye: [frame.eye[0], frame.eye[1], frame.eye[2]],
         };
-        this.#compositor.composite(frame, {
-          occluders: options.occluders ?? this.#adaptiveOccluders(),
+        this.#surfaceElement = frameOptions.surface?.element ?? null;
+        return this.#compositor.composite(frame, {
+          occluders: frameOptions.occluders ?? this.#adaptiveOccluders(),
+          ...(frameOptions.surface && { surface: frameOptions.surface }),
         });
       },
       rayAt: (x, y) =>
-        connected && this.#frame ? viewportRay(this.#frame, x, y) : null,
+        host.connected && this.#frameSource === host && this.#frame
+          ? viewportRay(this.#frame, x, y)
+          : null,
       disconnect: () => {
-        if (!connected) return;
-        connected = false;
-        if (--this.#hosts === 0) {
-          this.restoreAll();
+        if (!host.connected) return;
+        host.connected = false;
+        this.#hosts.delete(host);
+        if (this.#frameSource === host) {
+          this.#frameSource = null;
           this.#frame = null;
+          this.#surfaceElement = null;
         }
+        const remaining = [...this.#hosts];
+        const endNative = remaining.length === 0;
+        const endAdaptive =
+          host.drawsAdaptive && !remaining.some((h) => h.drawsAdaptive);
+        if (endNative || endAdaptive)
+          this.#transaction(() => {
+            for (const { presentation } of [...this.#entries.values()])
+              if (presentation.kind === "native" ? endNative : endAdaptive)
+                this.#end(presentation);
+          });
       },
     };
   }
@@ -367,7 +498,7 @@ export class PresentationRuntime {
     const metersPerPixel = placement.metersPerPixel ?? DEFAULT_METERS_PER_PIXEL;
     this.#add({
       presentation: {
-        instanceId: `native-${++this.#generation}`,
+        instanceId: `${this.#prefix.native}-${++this.#generation}`,
         itemId,
         registrationKey,
         kind: "native",
@@ -379,7 +510,7 @@ export class PresentationRuntime {
         rotation: placement.rotation ?? IDENTITY,
         scale: 1,
       },
-      extent: {
+      extent: placement.extent ?? {
         width: (element?.offsetWidth || 1) * metersPerPixel,
         height: (element?.offsetHeight || 1) * metersPerPixel,
       },
@@ -397,7 +528,7 @@ export class PresentationRuntime {
     this.#controller.setSourceVisibility(itemId, source);
     this.#add({
       presentation: {
-        instanceId: `adaptive-${++this.#generation}`,
+        instanceId: `${this.#prefix.adaptive}-${++this.#generation}`,
         itemId,
         registrationKey: this.#registry.registrationOf(itemId)!,
         kind: "adaptive",
