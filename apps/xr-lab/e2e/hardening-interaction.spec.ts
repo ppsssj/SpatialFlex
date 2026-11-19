@@ -463,12 +463,22 @@ for (const engine of ENGINES) {
     );
     // --- Rotating toward the back-facing boundary: visible and hit-tested
     // until it faces away, then hidden and taking no input.
+    // No XR panel near it now: the facing boundary alone decides.
+    await page.getByRole("button", { name: "Restore Image" }).click();
+    await expect.poll(() => probe(page, "panels")).not.toContain(IMAGE);
+    // Room to turn it with a drag that stays inside the viewport (pointer
+    // moves outside the window are not delivered everywhere).
+    const before = await centerOf(handle(page, COUNTER, "rotate"));
+    const grabBar = await grabPoint(handle(page, COUNTER, "translate"));
+    await drag(page, grabBar, { x: grabBar.x + 600 - before.x, y: grabBar.y });
     const rot = await centerOf(handle(page, COUNTER, "rotate"));
+    expect(rot.x).toBeLessThan(700);
     await page.mouse.move(rot.x, rot.y);
     await page.mouse.down();
     const states: string[] = [];
     let near: Point[] = [];
-    for (let dx = 20; dx <= 400 && !states.includes("hidden"); dx += 20) {
+    const room = page.viewportSize()!.width - 10 - rot.x;
+    for (let dx = 20; dx <= room && !states.includes("hidden"); dx += 20) {
       await page.mouse.move(rot.x + dx, rot.y, { steps: 2 });
       // The compositor writes on the next rendered frames.
       const frames = await probe(page, "frames");
@@ -509,8 +519,6 @@ for (const engine of ENGINES) {
       "before: Two native panels and an XR panel are in",
     );
     // --- Two native panels and an XR panel are independent.
-    await page.getByRole("button", { name: "Restore Image" }).click();
-    await expect.poll(() => probe(page, "panels")).not.toContain(IMAGE);
     await extract(page, IMAGE, "native");
     const imagePose = await poseOf(page, IMAGE);
     const counterPose = await poseOf(page, COUNTER);
