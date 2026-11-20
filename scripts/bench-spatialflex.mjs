@@ -190,9 +190,12 @@ function runMetrics(record) {
 
 function textureMetrics(m) {
   const seconds = m.durationMs > 0 ? m.durationMs / 1000 : null;
+  // Records without any texture-pipeline event (P1-07C data, or a window
+  // with no texture work at all) report null rather than zero.
+  const texture = (k) => /^(gl|three|babylon)\./.test(k);
   const has =
-    Object.keys(m.counters).some((k) => k.startsWith("gl.")) ||
-    Object.keys(m.spans).some((k) => k.startsWith("gl."));
+    Object.keys(m.counters).some(texture) ||
+    Object.keys(m.spans).some(texture);
   const rate = (n) => (has && seconds ? n / seconds : null);
   const total = (name) => {
     const s = m.spans[name];
