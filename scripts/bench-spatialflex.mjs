@@ -194,8 +194,7 @@ function textureMetrics(m) {
   // with no texture work at all) report null rather than zero.
   const texture = (k) => /^(gl|three|babylon)\./.test(k);
   const has =
-    Object.keys(m.counters).some(texture) ||
-    Object.keys(m.spans).some(texture);
+    Object.keys(m.counters).some(texture) || Object.keys(m.spans).some(texture);
   const rate = (n) => (has && seconds ? n / seconds : null);
   const total = (name) => {
     const s = m.spans[name];

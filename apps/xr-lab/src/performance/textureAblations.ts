@@ -18,9 +18,10 @@ import { drawPanelFace } from "../hosts/shared/panelFace";
  *   (a quarter of the pixels); everything else is unchanged.
  * - `face-linear` (A5): the texture's color space is "none", so three.js
  *   allocates RGBA8 instead of SRGB8_ALPHA8 (colors are not decoded:
- *   lighter on screen). Isolates the sRGB texture format. Measured on the
- *   pre-P1-07D face; since the P1-07D fix the face already uses RGBA8
- *   (decoded in its shader), so this ablation changes nothing there.
+ *   lighter on screen). Isolates the sRGB texture format. It runs after
+ *   React Three Fiber applied the material's map (which re-tags textures
+ *   as sRGB), and re-allocates. Measured on the pre-P1-07D face; since the
+ *   P1-07D fix the face stores RGBA8 itself, so this changes nothing there.
  * - `face-no-mipmap` (A6): no mipmap generation (linear minification).
  * - `face-realloc` (A7): nothing changes except that the texture is
  *   released once, at the first draw, so three.js allocates and uploads it
