@@ -31,6 +31,7 @@ import {
   type HostRay,
   type XRHostProps,
 } from "../../contracts/xrHost";
+import { perfCount } from "../../performance/collector";
 import { describeError, HostToolbar } from "../shared/HostToolbar";
 import { trackManipulationPointer } from "../shared/manipulationPointer";
 import { useXRAvailability } from "../shared/useXRAvailability";
@@ -144,6 +145,7 @@ function Scene({
   sessionMode: string | null;
   viewKey: number;
 }) {
+  perfCount("three.sceneRender");
   const { camera, gl } = useThree();
   const controlsRef = useRef<OrbitControls | null>(null);
   // The pointer session in progress; cancelled if the scene unmounts.

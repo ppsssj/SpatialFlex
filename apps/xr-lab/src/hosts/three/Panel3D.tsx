@@ -1,6 +1,7 @@
 import type { ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
 import { recordDrawn } from "../../contracts/hostProbe";
+import { perfCount } from "../../performance/collector";
 import {
   handleLayout,
   PANEL_SIZE,
@@ -31,6 +32,9 @@ export function Panel3D({
     onDown: HandleDown;
   } | null;
 }) {
+  // Benchmark counters (no-ops unless a P1-07C/D collector is measuring).
+  perfCount("three.panelRender");
+  useEffect(() => perfCount("three.panelCommit"));
   const face = useMemo(
     () => new CanvasFace(PANEL_SIZE.width, PANEL_SIZE.height),
     [],
