@@ -16,8 +16,8 @@ class FakeGL {
   texSubImage2D(...args: unknown[]) {
     this.calls.push(`texSubImage2D:${args.length}`);
   }
-  texStorage2D() {
-    this.calls.push("texStorage2D");
+  texStorage2D(...args: unknown[]) {
+    this.calls.push(`texStorage2D:${args.length}`);
   }
   generateMipmap() {
     this.calls.push("generateMipmap");
@@ -73,7 +73,8 @@ describe("D8 texture instrumentation isolation", () => {
     collector.start();
     const texture = gl.createTexture();
     gl.texSubImage2D(0, 0, 0, 0, 0, 0, canvas);
-    gl.texImage2D(0, 0, 0, 0, 0, new Uint8Array(4)); // not a DOM source
+    gl.texImage2D(0, 0, 0x8058, 0, 0, new Uint8Array(4)); // not a DOM source
+    gl.texStorage2D(0, 10, 0x8c43, 600, 400);
     gl.generateMipmap();
     gl.deleteTexture();
     const result = collector.stop();
@@ -83,12 +84,15 @@ describe("D8 texture instrumentation isolation", () => {
       "createTexture",
       "texSubImage2D:7",
       "texImage2D:6",
+      "texStorage2D:5",
       "generateMipmap",
       "deleteTexture",
     ]);
     expect(result.counters["gl.uploadCalls"]).toBe(1);
     expect(result.counters["gl.uploadPixels"]).toBe(600 * 400);
     expect(result.counters["gl.createTexture"]).toBe(1);
+    expect(result.counters["gl.allocate.RGBA8"]).toBe(1);
+    expect(result.counters["gl.allocate.SRGB8_ALPHA8"]).toBe(1);
     expect(result.counters["gl.deleteTexture"]).toBe(1);
     expect(result.spans["gl.texSubImage2D"]!.count).toBe(1);
     expect(result.spans["gl.texImage2D"]!.count).toBe(1);

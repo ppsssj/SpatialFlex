@@ -291,6 +291,63 @@ for (const engine of ENGINES) {
     await fresh.close();
   });
 
+  test(`${engine}: D1 face textures are stored as RGBA8 and render the canvas colors`, async ({
+    page,
+  }) => {
+    const errors = watchConsole(page);
+    await open(page, engine);
+    // Allocation format of every face created while presenting (observed
+    // WebGL calls): never SRGB8_ALPHA8, whose canvas re-upload was the
+    // measured P1-07D bottleneck.
+    const created = await page.evaluate(async () => {
+      const b = (window as unknown as W).__spatialBench!;
+      b.collector.start();
+      b.extractAll("adaptive");
+      await new Promise((r) => setTimeout(r, 600));
+      return b.collector.stop();
+    });
+    await settled(page, (i) => String(valueOf(0, i)));
+    expect(counters(created, "gl.allocate.SRGB8_ALPHA8")).toBe(0);
+    expect(counters(created, "gl.allocate.RGBA8")).toBeGreaterThanOrEqual(
+      PANELS,
+    );
+    // Color fidelity: the most common rendered color of a face is the
+    // canvas background #f6f8fa (a missing or doubled sRGB decode shifts it
+    // by ~10 levels).
+    const color = await page.evaluate(
+      async (data) => {
+        const bitmap = await createImageBitmap(
+          await (await fetch(`data:image/png;base64,${data}`)).blob(),
+        );
+        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(bitmap, 0, 0);
+        const { data: px } = ctx.getImageData(
+          0,
+          0,
+          bitmap.width,
+          bitmap.height,
+        );
+        const counts = new Map<string, number>();
+        for (let i = 0; i < px.length; i += 4) {
+          const key = `${px[i]},${px[i + 1]},${px[i + 2]}`;
+          counts.set(key, (counts.get(key) ?? 0) + 1);
+        }
+        return [...counts]
+          .sort((a, b) => b[1] - a[1])[0]![0]
+          .split(",")
+          .map(Number);
+      },
+      await shoot(page, await faceClip(page, "bench-1")),
+    );
+    for (const [channel, expected] of [246, 248, 250].entries())
+      expect(
+        Math.abs(color[channel]! - expected),
+        `channel ${channel}`,
+      ).toBeLessThanOrEqual(3);
+    expect(errors).toEqual([]);
+  });
+
   test(`${engine}: D2/D3 unchanged content is not redrawn or re-uploaded; one panel's update touches only that panel`, async ({
     page,
   }) => {

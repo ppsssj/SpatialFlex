@@ -22,6 +22,10 @@ import { drawPanelFace } from "../hosts/shared/panelFace";
  *   pre-P1-07D face; since the P1-07D fix the face already uses RGBA8
  *   (decoded in its shader), so this ablation changes nothing there.
  * - `face-no-mipmap` (A6): no mipmap generation (linear minification).
+ * - `face-realloc` (A7): nothing changes except that the texture is
+ *   released once, at the first draw, so three.js allocates and uploads it
+ *   again from the drawn canvas. (Every variant above that sets
+ *   `reallocate` does this too: A7 isolates that side effect.)
  */
 export const TEXTURE_ABLATIONS = [
   "face-no-redraw",
@@ -29,6 +33,7 @@ export const TEXTURE_ABLATIONS = [
   "face-half-res",
   "face-linear",
   "face-no-mipmap",
+  "face-realloc",
 ] as const;
 
 type Face = {
@@ -69,7 +74,7 @@ export async function applyTextureAblations(
   ) {
     if (!drawn.has(this)) {
       drawn.add(this);
-      let reallocate = false;
+      let reallocate = has("face-realloc");
       if (has("face-half-res")) {
         this.canvas.width = Math.round(this.canvas.width / 2);
         this.canvas.height = Math.round(this.canvas.height / 2);

@@ -12,7 +12,7 @@ import {
   type PanelPart,
 } from "../../contracts/xrHost";
 import { describeBody } from "../shared/panelFace";
-import { CanvasFace, decodeFaceColor } from "./panelTexture";
+import { CanvasFace } from "./panelTexture";
 import type { HandleDown } from "./ThreeHost";
 
 /**
@@ -55,6 +55,7 @@ export function Panel3D({
       scale={panel.scale ?? 1}
     >
       <mesh
+        material={face.material}
         userData={{ hostPanelId: panel.id, hostPart: background!.part }}
         onClick={(event: ThreeEvent<MouseEvent>) => {
           event.stopPropagation();
@@ -62,11 +63,6 @@ export function Panel3D({
         }}
       >
         <planeGeometry args={[background!.width, background!.height]} />
-        <meshBasicMaterial
-          map={face.texture}
-          toneMapped={false}
-          onBeforeCompile={decodeFaceColor}
-        />
       </mesh>
       {controls.map((part) => (
         <PanelControl
@@ -127,6 +123,7 @@ function PanelControl({
 
   return (
     <mesh
+      material={face.material}
       position={[...part.center]}
       userData={{ hostPanelId: panelId, hostPart: part.part, hovered }}
       {...(onPointerDown && { onPointerDown })}
@@ -141,11 +138,6 @@ function PanelControl({
       onPointerOut={() => setHovered(false)}
     >
       <planeGeometry args={[part.width, part.height]} />
-      <meshBasicMaterial
-        map={face.texture}
-        toneMapped={false}
-        onBeforeCompile={decodeFaceColor}
-      />
     </mesh>
   );
 }

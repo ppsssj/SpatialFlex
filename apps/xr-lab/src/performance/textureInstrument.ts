@@ -16,7 +16,9 @@ import type { PerfCollector } from "./collector";
  *   both engines on the same WebGL prototypes, so they are comparable.
  * - counters `gl.uploadCalls` (texImage2D/texSubImage2D with a DOM/canvas
  *   source), `gl.uploadPixels` (width × height of those sources),
- *   `gl.createTexture`, `gl.deleteTexture`.
+ *   `gl.createTexture`, `gl.deleteTexture`, and `gl.allocate.<format>` per
+ *   level-0 texStorage2D/texImage2D allocation by internal format
+ *   (`gl.allocate.SRGB8_ALPHA8`, `gl.allocate.RGBA8`, else the GL enum).
  * - `three.panelFaceDraw` / `three.controlFaceDraw`: CanvasFace.drawPanel /
  *   drawButton (2D canvas drawing + marking the texture dirty). Each call
  *   sets `needsUpdate` once (counter `three.textureDirty`); a dirty texture
@@ -72,15 +74,34 @@ export async function installTextureInstrumentation(
       collector.count("gl.uploadPixels", source.width * source.height);
     }
   };
+  const FORMATS: Record<number, string> = {
+    0x8c43: "SRGB8_ALPHA8",
+    0x8058: "RGBA8",
+    0x1908: "RGBA",
+  };
+  const allocation = (args: unknown[]) => {
+    // texStorage2D(target, levels, internalformat, …) allocates every
+    // level; texImage2D(target, level, internalformat, …) one level.
+    const [, level, format] = args as [number, number, number];
+    collector.count(`gl.allocate.${FORMATS[format] ?? format}`);
+    return level;
+  };
   const contexts = [
     globalThis.WebGL2RenderingContext?.prototype,
     globalThis.WebGLRenderingContext?.prototype,
   ].filter(Boolean) as object[];
   for (const proto of contexts) {
-    replace(proto, "texImage2D", timed("gl.texImage2D", uploadSource));
+    replace(
+      proto,
+      "texImage2D",
+      timed("gl.texImage2D", (args) => {
+        if (args[1] === 0) allocation(args);
+        uploadSource(args);
+      }),
+    );
     replace(proto, "texSubImage2D", timed("gl.texSubImage2D", uploadSource));
     if ("texStorage2D" in proto)
-      replace(proto, "texStorage2D", timed("gl.texStorage2D"));
+      replace(proto, "texStorage2D", timed("gl.texStorage2D", allocation));
     replace(proto, "generateMipmap", timed("gl.generateMipmap"));
     for (const name of ["createTexture", "deleteTexture"])
       replace(

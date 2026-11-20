@@ -16,6 +16,11 @@ describe("P1-07D CanvasFace texture format", () => {
     // Full resolution (PIXELS_PER_METER), mipmapped as before.
     expect([face.canvas.width, face.canvas.height]).toEqual([600, 400]);
     expect(face.texture.generateMipmaps).toBe(true);
+    // The face owns its material: the texture never passes through a JSX
+    // \`map\` prop (React Three Fiber would re-tag it as SRGBColorSpace).
+    expect(face.material.map).toBe(face.texture);
+    expect(face.material.toneMapped).toBe(false);
+    expect(face.material.onBeforeCompile).toBe(decodeFaceColor);
     expect(getProbe().liveTextures).toBe(live + 1);
     face.dispose();
     expect(getProbe().liveTextures).toBe(live);
