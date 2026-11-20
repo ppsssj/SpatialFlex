@@ -4,7 +4,7 @@
 
 > 개발자는 공간형 UI와 제약 조건을 정의하고, 사용자는 필요한 웹 요소를 독립시켜 자신만의 작업 공간을 구성합니다.
 
-**Status:** P0 Detach + P1 Cross-Context XR Mirror — P1-07D Three.js Adaptive Texture Performance (Experimental, desktop)
+**Status:** P0 Detach + P1 Cross-Context XR Mirror — P1-08A Multi-Surface Workspace Architecture (design, experimental contracts)
 
 **Type:** Open-source Spatial Layout & Element Detachment SDK  
 **Focus:** Adaptive Layout · Element Detachment · Live Components · User Composition · Layout Persistence
@@ -540,6 +540,8 @@ SpatialFlex는 WebSpatial이나 React Three Fiber와 같은 렌더링 기술을 
 - [x] **P1-07B3 — XR Lab Runtime Migration:** XR Lab의 SpatialFlex 통합이 외부 소비자와 같은 SDK `PresentationRuntime`을 사용합니다(페이지 표면 모드, 프레임 권한, 호스트 범위, `relocate`)
 - [x] **P1-07C — Performance & Scalability Benchmark:** 재현 가능한 벤치마크(`pnpm bench:spatial`, 0/1/5/10/20 패널, Native/Adaptive, Three.js/Babylon.js, Chromium/Firefox)와 측정 기반 병목 분석, 페이지 clip-path 최적화
 - [x] **P1-07D — Three.js Adaptive Dynamic Texture Performance:** 패널 캔버스 재업로드를 SRGB8_ALPHA8 대신 RGBA8로 저장하고 셰이더에서 sRGB 디코드(측정·ablation으로 원인 확인, 렌더링 픽셀 검증)
+- [x] **P1-08A — Multi-Surface Workspace Architecture & Contracts:** Surface별 런타임 + Workspace 조정자 결정(ADR 0001), 합성·가림 전략(ADR 0002), 내부 계약 원시 타입과 A1–A9 테스트, 두 Surface 브라우저 실험
+- [ ] **P1-08B — Multi-Surface MVP:** 같은 문서의 두 Surface(B1–B6 단계)
 - [ ] **Future — Generalized Detach to XR:** 런타임 capability에 따른 더 폭넓은 presentation 재사용; 자동 DOM 변환을 뜻하지 않음
 - [ ] **Future — Adaptive Layout / Persistence:** 자동 배치, 충돌 방지, 레이아웃 저장·복원
 - [ ] **Future — Open-Source Release:** API 안정화, 기기 호환성 검증, 문서 및 npm 배포
@@ -583,7 +585,7 @@ SpatialFlex는 기존 렌더링 생태계를 활용하면서 **Adaptive Layout, 
 
 ## 12. Project Status
 
-**Current stage: P1-07D Three.js Adaptive Texture Performance (Experimental, desktop)**
+**Current stage: P1-08A Multi-Surface Workspace Architecture (design; no Multi-Surface feature yet)**
 
 P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.com/ppsssj/SpatialFlex/issues/5))에서 **같은 브라우저 페이지 안의 2D 개념 증명(PoC)** 을 구현하고 자동화 테스트로 검증했습니다. 이는 위에서 설명한 SpatialFlex 비전의 첫 단계이며, XR 환경에서의 동작이나 SDK 전체의 완성을 뜻하지 않습니다. 실행 방법과 세부 동작은 [13. Local Development](#13-local-development)에 있습니다.
 
@@ -610,6 +612,7 @@ P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.co
 - **P1-07B3 XR Lab 런타임 이전 (실험적, 데스크톱):** XR Lab의 SpatialFlex 통합이 자체 수명주기(인스턴스 맵, 조작기 동기화, 표면 전용 `NativeCompositor`, `useNativeHandles`)를 버리고 외부 소비자와 같은 `PresentationRuntime`을 사용합니다. Spatial Website의 페이지 표면은 런타임의 Native DOM 호스트로 연결되어(`connectHost({ drawsAdaptive: false })`, 프레임마다 `surface` 전달) 하나의 컴포지터가 원본 요소를 소유합니다. 슬롯·이동 오프셋은 Lab 정책으로 남고 `runtime.relocate`로 전달됩니다. Baseline은 런타임 없이 그대로 동작합니다. [설계 / 소유권 / 테스트 / 한계](docs/p1-07b3-xr-lab-runtime-migration.md).
 - **P1-07C 성능·확장성 기준선 (실험적, 데스크톱):** 전용 벤치마크 픽스처(`?fixture=benchmark&panels=N`)와 측정 도구(`pnpm bench:spatial`, 별도 Playwright 설정, 선택적 워크플로)로 프레임 간격, 컴포지터 CPU, 입력 지연, 힙/리소스 수명주기를 측정했습니다. Native DOM의 주된 비용은 SDK JavaScript가 아니라 페이지 표면의 `clip-path`였고(진단 ablation으로 확인), 가리는 패널이 없을 때 클립을 쓰지 않도록 고쳐 20패널 카메라 이동 시 Firefox 프레임 간격이 185ms→16ms로 줄었습니다. [방법 / 결과 / 병목 / P1-08 시사점](docs/p1-07c-performance-benchmark.md).
 - **P1-07D Three.js Adaptive 동적 텍스처 성능 (실험적, 데스크톱):** 10Hz 데이터 갱신 시 Three.js 패널이 느려지던 원인은 캔버스 그리기나 React가 아니라, 2D 캔버스를 SRGB8_ALPHA8 텍스처로 다시 업로드하는 비용이었습니다(Chromium은 GPU 측 지연, Firefox는 CPU 변환; ablation으로 확인). 패널 면을 RGBA8로 저장하고 면 머티리얼 셰이더에서 sRGB를 디코드하도록 바꿔(three.js의 비디오 텍스처 방식) 하드웨어 GPU Chromium 20패널 프레임 P95가 125ms→8.5ms로 줄었습니다. 해상도·밉맵·갱신 빈도·내용은 그대로이며, 텍스트 필터링이 감마 공간(Babylon.js와 동일)으로 바뀌어 픽셀이 완전히 같지는 않습니다(측정값 포함). [원인 / 최적화 / 전후 측정 / 한계](docs/p1-07d-three-adaptive-performance.md).
+- **P1-08A Multi-Surface 아키텍처 (설계, 실험적 계약):** 여러 웹 Surface를 한 공간 Workspace에 배치하기 위한 소유권·식별자·좌표·카메라·입력·가림 규칙을 정했습니다. Surface마다 기존 레지스트리와 `PresentationRuntime`을 그대로 두고, 그 위의 Workspace 조정자가 Surface 수명주기·호스트 프레임 권한·입력 소유권·레이어 순서를 맡습니다(ADR 0001). 실제 브라우저 실험에서 CSS 변환 페이지끼리는 깊이 비교가 되지 않아 조정자의 깊이 정렬과 Surface 간 가림 구멍이 필요하고, 서로 관통하는 Surface는 Firefox에서 그려진 것과 클릭되는 것이 달라 P1-08B에서 지원하지 않습니다(ADR 0002). 공개 API 변경은 없습니다(계약은 패키지 내부). [아키텍처 / 실험 / P1-08B 계획](docs/p1-08a-multi-surface-architecture.md).
 
 ### 아직 구현되지 않은 것
 
