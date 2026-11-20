@@ -1,6 +1,15 @@
-import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { testHooksEnabled } from "../contracts/hostProbe";
 import type { HostModule } from "../contracts/xrHost";
+import { BenchmarkPage } from "../fixtures/BenchmarkPage";
+import { BenchmarkHarness } from "../performance/BenchmarkHarness";
+import { perfCount, perfSpan } from "../performance/collector";
 import {
   Dashboard,
   HardeningPage,
@@ -30,9 +39,12 @@ export interface LabShellProps {
   surface?: boolean;
   /**
    * The website shown: the dashboard, or the P1-07A hardening fixture
-   * (`?fixture=hardening`).
+   * (`?fixture=hardening`), or the P1-07C benchmark fixture
+   * (`?fixture=benchmark&panels=N`, test-hook builds only).
    */
-  fixture?: "dashboard" | "hardening";
+  fixture?: "dashboard" | "hardening" | "benchmark";
+  /** Benchmark panel count (0, 1, 5, 10 or 20). */
+  benchPanels?: number;
 }
 
 /**
@@ -48,6 +60,7 @@ export function LabShell({
   header,
   surface = false,
   fixture = "dashboard",
+  benchPanels = 1,
 }: LabShellProps) {
   const { Provider } = integration;
   return (
@@ -60,6 +73,7 @@ export function LabShell({
           header={header}
           surfaceRequested={surface}
           fixture={fixture}
+          benchPanels={benchPanels}
         />
       </Provider>
     </LabStoreContext>
@@ -73,14 +87,17 @@ function ShellLayout({
   header,
   surfaceRequested,
   fixture,
+  benchPanels,
 }: {
   integration: IntegrationModule;
   host: HostModule;
   emulator: string;
   header: ReactNode;
   surfaceRequested: boolean;
-  fixture: "dashboard" | "hardening";
+  fixture: "dashboard" | "hardening" | "benchmark";
+  benchPanels: number;
 }) {
+  perfCount("react.shell.render");
   const Page = fixture === "hardening" ? HardeningPage : Dashboard;
   const lab: LabIntegration = integration.useIntegration();
   // Unmounting the workspace disposes the host's engine, scene and render
@@ -109,6 +126,13 @@ function ShellLayout({
     lab.panels,
     manipulation?.poseOf,
     lab.connectNativeHost,
+  );
+  // Benchmark mode only: times the whole page-surface frame (page
+  // placement, Native DOM host frame, page clip). Otherwise the same
+  // function.
+  const surfaceFrame = useMemo(
+    () => perfSpan("lab.surfaceFrame", surface.onCameraFrame),
+    [surface.onCameraFrame],
   );
   // Read-only test hook: poses and sessions, never a way to change them.
   useEffect(() => {
@@ -175,9 +199,16 @@ function ShellLayout({
             lab.detach && <StrategyControls lab={lab} />
           )}
           <SpatialWebSurface active={surfaceActive} surface={surface} lab={lab}>
-            <Page
-              {...(lab.renderWidget && { renderWidget: lab.renderWidget })}
-            />
+            {fixture === "benchmark" ? (
+              <BenchmarkPage
+                panels={benchPanels}
+                {...(lab.renderWidget && { renderWidget: lab.renderWidget })}
+              />
+            ) : (
+              <Page
+                {...(lab.renderWidget && { renderWidget: lab.renderWidget })}
+              />
+            )}
           </SpatialWebSurface>
           {!website && <XRControls lab={lab} />}
         </div>
@@ -207,6 +238,9 @@ function ShellLayout({
               Emulator: {emulator}
             </span>
           </div>
+          {fixture === "benchmark" && (
+            <BenchmarkHarness lab={lab} panels={benchPanels} />
+          )}
           {workspaceMounted && (
             <ManipulatedHost
               Host={Host}
@@ -219,7 +253,7 @@ function ShellLayout({
                 onPanelButton: lab.onPanelButton,
                 onPanelSelect: lab.onPanelSelect,
                 onPanelClose: lab.onPanelClose,
-                ...(surfaceActive && { onCameraFrame: surface.onCameraFrame }),
+                ...(surfaceActive && { onCameraFrame: surfaceFrame }),
               }}
             />
           )}

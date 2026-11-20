@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" font-family="sans-serif" font-size="11">
+<rect width="640" height="360" fill="#fff"/>
+<text x="60" y="20" font-size="13" font-weight="bold">Median frame interval vs panels (W2 camera motion, headed-gpu)</text>
+<line x1="60" x2="460" y1="316" y2="316" stroke="#e5e5e5"/><text x="54" y="320" text-anchor="end">0.00</text>
+<line x1="60" x2="460" y1="246" y2="246" stroke="#e5e5e5"/><text x="54" y="250" text-anchor="end">11</text>
+<line x1="60" x2="460" y1="176" y2="176" stroke="#e5e5e5"/><text x="54" y="180" text-anchor="end">23</text>
+<line x1="60" x2="460" y1="106" y2="106" stroke="#e5e5e5"/><text x="54" y="110" text-anchor="end">34</text>
+<line x1="60" x2="460" y1="36" y2="36" stroke="#e5e5e5"/><text x="54" y="40" text-anchor="end">46</text>
+<text x="60" y="332" text-anchor="middle">0</text>
+<text x="160" y="332" text-anchor="middle">1</text>
+<text x="260" y="332" text-anchor="middle">5</text>
+<text x="360" y="332" text-anchor="middle">10</text>
+<text x="460" y="332" text-anchor="middle">20</text>
+<text x="260" y="352" text-anchor="middle">panels</text>
+<text transform="translate(14 176) rotate(-90)" text-anchor="middle">ms</text>
+<polyline fill="none" stroke="#1f77b4" stroke-width="2" points="60,256.1213285034696 160,257.9360188539257 260,258.3209531706891 360,258.7914284467333 460,259.3902151616986"/>
+<circle cx="60" cy="256.1213285034696" r="3" fill="#1f77b4"/>
+<circle cx="160" cy="257.9360188539257" r="3" fill="#1f77b4"/>
+<circle cx="260" cy="258.3209531706891" r="3" fill="#1f77b4"/>
+<circle cx="360" cy="258.7914284467333" r="3" fill="#1f77b4"/>
+<circle cx="460" cy="259.3902151616986" r="3" fill="#1f77b4"/>
+<rect x="472" y="36" width="10" height="10" fill="#1f77b4"/><text x="486" y="45">babylon chromium adaptive</text>
+<polyline fill="none" stroke="#d62728" stroke-width="2" points="60,256.1213285034696 160,257.86269803168506 260,259.3902151616986 360,258.8830794745341 460,257.0989394666783"/>
+<circle cx="60" cy="256.1213285034696" r="3" fill="#d62728"/>
+<circle cx="160" cy="257.86269803168506" r="3" fill="#d62728"/>
+<circle cx="260" cy="259.3902151616986" r="3" fill="#d62728"/>
+<circle cx="360" cy="258.8830794745341" r="3" fill="#d62728"/>
+<circle cx="460" cy="257.0989394666783" r="3" fill="#d62728"/>
+<rect x="472" y="54" width="10" height="10" fill="#d62728"/><text x="486" y="63">babylon chromium native</text>
+<polyline fill="none" stroke="#2ca02c" stroke-width="2" points="60,257.46554357788153 160,257.7099463186837 260,258.1376511150875 360,259.0847117356959 460,254.9298651420591"/>
+<circle cx="60" cy="257.46554357788153" r="3" fill="#2ca02c"/>
+<circle cx="160" cy="257.7099463186837" r="3" fill="#2ca02c"/>
+<circle cx="260" cy="258.1376511150875" r="3" fill="#2ca02c"/>
+<circle cx="360" cy="259.0847117356959" r="3" fill="#2ca02c"/>
+<circle cx="460" cy="254.9298651420591" r="3" fill="#2ca02c"/>
+<rect x="472" y="72" width="10" height="10" fill="#2ca02c"/><text x="486" y="81">three chromium adaptive</text>
+<polyline fill="none" stroke="#9467bd" stroke-width="2" points="60,257.46554357788153 160,258.51647536333087 260,259.2985641338978 360,257.58774494828265 460,257.46554357788153"/>
+<circle cx="60" cy="257.46554357788153" r="3" fill="#9467bd"/>
+<circle cx="160" cy="258.51647536333087" r="3" fill="#9467bd"/>
+<circle cx="260" cy="259.2985641338978" r="3" fill="#9467bd"/>
+<circle cx="360" cy="257.58774494828265" r="3" fill="#9467bd"/>
+<circle cx="460" cy="257.46554357788153" r="3" fill="#9467bd"/>
+<rect x="472" y="90" width="10" height="10" fill="#9467bd"/><text x="486" y="99">three chromium native</text>
+<polyline fill="none" stroke="#ff7f0e" stroke-width="2" points="60,264.43102169074325 160,219.5220180683455 260,219.21651464234276 360,264.43102169074325 460,214.2062584558984"/>
+<circle cx="60" cy="264.43102169074325" r="3" fill="#ff7f0e"/>
+<circle cx="160" cy="219.5220180683455" r="3" fill="#ff7f0e"/>
+<circle cx="260" cy="219.21651464234276" r="3" fill="#ff7f0e"/>
+<circle cx="360" cy="264.43102169074325" r="3" fill="#ff7f0e"/>
+<circle cx="460" cy="214.2062584558984" r="3" fill="#ff7f0e"/>
+<rect x="472" y="108" width="10" height="10" fill="#ff7f0e"/><text x="486" y="117">babylon firefox adaptive</text>
+<polyline fill="none" stroke="#8c564b" stroke-width="2" points="60,264.43102169074325 160,263.3312093571335 260,218.72770916073844 360,219.0943132719417 460,61.45454545454547"/>
+<circle cx="60" cy="264.43102169074325" r="3" fill="#8c564b"/>
+<circle cx="160" cy="263.3312093571335" r="3" fill="#8c564b"/>
+<circle cx="260" cy="218.72770916073844" r="3" fill="#8c564b"/>
+<circle cx="360" cy="219.0943132719417" r="3" fill="#8c564b"/>
+<circle cx="460" cy="61.45454545454547" r="3" fill="#8c564b"/>
+<rect x="472" y="126" width="10" height="10" fill="#8c564b"/><text x="486" y="135">babylon firefox native</text>
+<polyline fill="none" stroke="#e377c2" stroke-width="2" points="60,218.97211190154061 160,219.58311875354605 260,265.530834024353 360,264.30882032034214 460,265.04202854274865"/>
+<circle cx="60" cy="218.97211190154061" r="3" fill="#e377c2"/>
+<circle cx="160" cy="219.58311875354605" r="3" fill="#e377c2"/>
+<circle cx="260" cy="265.530834024353" r="3" fill="#e377c2"/>
+<circle cx="360" cy="264.30882032034214" r="3" fill="#e377c2"/>
+<circle cx="460" cy="265.04202854274865" r="3" fill="#e377c2"/>
+<rect x="472" y="144" width="10" height="10" fill="#e377c2"/><text x="486" y="153">three firefox adaptive</text>
+<polyline fill="none" stroke="#17becf" stroke-width="2" points="60,218.97211190154061 160,219.0943132719417 260,263.69781346833673 360,163.24828699864707 460,159.8877493126173"/>
+<circle cx="60" cy="218.97211190154061" r="3" fill="#17becf"/>
+<circle cx="160" cy="219.0943132719417" r="3" fill="#17becf"/>
+<circle cx="260" cy="263.69781346833673" r="3" fill="#17becf"/>
+<circle cx="360" cy="163.24828699864707" r="3" fill="#17becf"/>
+<circle cx="460" cy="159.8877493126173" r="3" fill="#17becf"/>
+<rect x="472" y="162" width="10" height="10" fill="#17becf"/><text x="486" y="171">three firefox native</text>
+</svg>

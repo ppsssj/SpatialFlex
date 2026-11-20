@@ -25,6 +25,7 @@ import {
   getProbe,
   recordDrawn,
   recordFrame,
+  testHooksEnabled,
   textureCreated,
   textureDisposed,
 } from "../../contracts/hostProbe";
@@ -707,5 +708,13 @@ export class BabylonLabScene {
     };
     probe.hovered = (panelId, part) =>
       this.#findPart(panelId, part)?.hovered === true;
+    if (testHooksEnabled)
+      probe.setCamera = (position, target) => {
+        this.#camera.inertialAlphaOffset = 0;
+        this.#camera.inertialBetaOffset = 0;
+        this.#camera.inertialRadiusOffset = 0;
+        this.#camera.setTarget(new Vector3(...target));
+        this.#camera.setPosition(new Vector3(...position));
+      };
   }
 }

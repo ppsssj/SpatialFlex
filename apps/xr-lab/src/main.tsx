@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { testHooksEnabled } from "./contracts/hostProbe";
 import type { EngineId, HostModule } from "./contracts/xrHost";
 import { setupEmulator } from "./devtools/emulator";
 import { createLabStore } from "./fixtures";
@@ -30,6 +31,14 @@ const mode: IntegrationId =
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing #root element");
 
+// P1-07C benchmark mode: test-hook builds only, explicitly requested.
+const benchmark = testHooksEnabled && params.get("fixture") === "benchmark";
+const benchPanels = Number(params.get("panels") ?? "1");
+if (benchmark) {
+  const { enableBenchmarkMode } = await import("./performance/bootstrap");
+  await enableBenchmarkMode(engine);
+}
+
 // The emulator, if requested, must be the WebXR runtime before a host loads.
 const emulator = await setupEmulator(window.location.search);
 const [host, integration] = await Promise.all([
@@ -55,8 +64,13 @@ createRoot(root).render(
       emulator={emulator.detail}
       surface={params.get("surface") === "website"}
       fixture={
-        params.get("fixture") === "hardening" ? "hardening" : "dashboard"
+        benchmark
+          ? "benchmark"
+          : params.get("fixture") === "hardening"
+            ? "hardening"
+            : "dashboard"
       }
+      benchPanels={[0, 1, 5, 10, 20].includes(benchPanels) ? benchPanels : 1}
       header={
         <>
           <h1>SpatialFlex XR Lab</h1>

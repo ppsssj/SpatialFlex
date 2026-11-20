@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" font-family="sans-serif" font-size="11">
+<rect width="640" height="360" fill="#fff"/>
+<text x="60" y="20" font-size="13" font-weight="bold">Median frame interval vs panels (W0 idle, headed-gpu)</text>
+<line x1="60" x2="460" y1="316" y2="316" stroke="#e5e5e5"/><text x="54" y="320" text-anchor="end">0.00</text>
+<line x1="60" x2="460" y1="246" y2="246" stroke="#e5e5e5"/><text x="54" y="250" text-anchor="end">4.37</text>
+<line x1="60" x2="460" y1="176" y2="176" stroke="#e5e5e5"/><text x="54" y="180" text-anchor="end">8.75</text>
+<line x1="60" x2="460" y1="106" y2="106" stroke="#e5e5e5"/><text x="54" y="110" text-anchor="end">13</text>
+<line x1="60" x2="460" y1="36" y2="36" stroke="#e5e5e5"/><text x="54" y="40" text-anchor="end">17</text>
+<text x="60" y="332" text-anchor="middle">0</text>
+<text x="160" y="332" text-anchor="middle">1</text>
+<text x="260" y="332" text-anchor="middle">5</text>
+<text x="360" y="332" text-anchor="middle">10</text>
+<text x="460" y="332" text-anchor="middle">20</text>
+<text x="260" y="352" text-anchor="middle">panels</text>
+<text transform="translate(14 176) rotate(-90)" text-anchor="middle">ms</text>
+<polyline fill="none" stroke="#1f77b4" stroke-width="2" points="60,156.94911377930248 160,162.95254431103487 260,163.91309319611207 360,163.2727272727273 460,166.15437392795886"/>
+<circle cx="60" cy="156.94911377930248" r="3" fill="#1f77b4"/>
+<circle cx="160" cy="162.95254431103487" r="3" fill="#1f77b4"/>
+<circle cx="260" cy="163.91309319611207" r="3" fill="#1f77b4"/>
+<circle cx="360" cy="163.2727272727273" r="3" fill="#1f77b4"/>
+<circle cx="460" cy="166.15437392795886" r="3" fill="#1f77b4"/>
+<rect x="472" y="36" width="10" height="10" fill="#1f77b4"/><text x="486" y="45">babylon chromium adaptive</text>
+<polyline fill="none" stroke="#d62728" stroke-width="2" points="60,156.94911377930248 160,161.38364779874217 260,163.91309319611207 360,164.0251572327044 460,162.34419668381935"/>
+<circle cx="60" cy="156.94911377930248" r="3" fill="#d62728"/>
+<circle cx="160" cy="161.38364779874217" r="3" fill="#d62728"/>
+<circle cx="260" cy="163.91309319611207" r="3" fill="#d62728"/>
+<circle cx="360" cy="164.0251572327044" r="3" fill="#d62728"/>
+<circle cx="460" cy="162.34419668381935" r="3" fill="#d62728"/>
+<rect x="472" y="54" width="10" height="10" fill="#d62728"/><text x="486" y="63">babylon chromium native</text>
+<polyline fill="none" stroke="#2ca02c" stroke-width="2" points="60,162.34419668381935 160,163.43281875357349 260,164.55345911949686 360,164.26529445397372 460,155.9085191538022"/>
+<circle cx="60" cy="162.34419668381935" r="3" fill="#2ca02c"/>
+<circle cx="160" cy="163.43281875357349" r="3" fill="#2ca02c"/>
+<circle cx="260" cy="164.55345911949686" r="3" fill="#2ca02c"/>
+<circle cx="360" cy="164.26529445397372" r="3" fill="#2ca02c"/>
+<circle cx="460" cy="155.9085191538022" r="3" fill="#2ca02c"/>
+<rect x="472" y="72" width="10" height="10" fill="#2ca02c"/><text x="486" y="81">three chromium adaptive</text>
+<polyline fill="none" stroke="#9467bd" stroke-width="2" points="60,162.34419668381935 160,162.50428816466555 260,164.95368782161233 360,160.5511720983419 460,162.5523156089194"/>
+<circle cx="60" cy="162.34419668381935" r="3" fill="#9467bd"/>
+<circle cx="160" cy="162.50428816466555" r="3" fill="#9467bd"/>
+<circle cx="260" cy="164.95368782161233" r="3" fill="#9467bd"/>
+<circle cx="360" cy="160.5511720983419" r="3" fill="#9467bd"/>
+<circle cx="460" cy="162.5523156089194" r="3" fill="#9467bd"/>
+<rect x="472" y="90" width="10" height="10" fill="#9467bd"/><text x="486" y="99">three chromium native</text>
+<polyline fill="none" stroke="#ff7f0e" stroke-width="2" points="60,62.73527730131508 160,62.41509433962267 260,179.60205831903946 360,63.05546026300743 460,182.48370497427103"/>
+<circle cx="60" cy="62.73527730131508" r="3" fill="#ff7f0e"/>
+<circle cx="160" cy="62.41509433962267" r="3" fill="#ff7f0e"/>
+<circle cx="260" cy="179.60205831903946" r="3" fill="#ff7f0e"/>
+<circle cx="360" cy="63.05546026300743" r="3" fill="#ff7f0e"/>
+<circle cx="460" cy="182.48370497427103" r="3" fill="#ff7f0e"/>
+<rect x="472" y="108" width="10" height="10" fill="#ff7f0e"/><text x="486" y="117">babylon firefox adaptive</text>
+<polyline fill="none" stroke="#8c564b" stroke-width="2" points="60,62.73527730131508 160,63.37564322469987 260,181.20297312750145 360,62.41509433962267 460,182.48370497427103"/>
+<circle cx="60" cy="62.73527730131508" r="3" fill="#8c564b"/>
+<circle cx="160" cy="63.37564322469987" r="3" fill="#8c564b"/>
+<circle cx="260" cy="181.20297312750145" r="3" fill="#8c564b"/>
+<circle cx="360" cy="62.41509433962267" r="3" fill="#8c564b"/>
+<circle cx="460" cy="182.48370497427103" r="3" fill="#8c564b"/>
+<rect x="472" y="126" width="10" height="10" fill="#8c564b"/><text x="486" y="135">babylon firefox native</text>
+<polyline fill="none" stroke="#e377c2" stroke-width="2" points="60,182.80388793596342 160,184.084619782733 260,63.69582618639228 360,61.45454545454547 460,182.48370497427103"/>
+<circle cx="60" cy="182.80388793596342" r="3" fill="#e377c2"/>
+<circle cx="160" cy="184.084619782733" r="3" fill="#e377c2"/>
+<circle cx="260" cy="63.69582618639228" r="3" fill="#e377c2"/>
+<circle cx="360" cy="61.45454545454547" r="3" fill="#e377c2"/>
+<circle cx="460" cy="182.48370497427103" r="3" fill="#e377c2"/>
+<rect x="472" y="144" width="10" height="10" fill="#e377c2"/><text x="486" y="153">three firefox adaptive</text>
+<polyline fill="none" stroke="#17becf" stroke-width="2" points="60,182.80388793596342 160,62.41509433962267 260,64.97655803316184 360,182.48370497427103 460,61.93481989708408"/>
+<circle cx="60" cy="182.80388793596342" r="3" fill="#17becf"/>
+<circle cx="160" cy="62.41509433962267" r="3" fill="#17becf"/>
+<circle cx="260" cy="64.97655803316184" r="3" fill="#17becf"/>
+<circle cx="360" cy="182.48370497427103" r="3" fill="#17becf"/>
+<circle cx="460" cy="61.93481989708408" r="3" fill="#17becf"/>
+<rect x="472" y="162" width="10" height="10" fill="#17becf"/><text x="486" y="171">three firefox native</text>
+</svg>

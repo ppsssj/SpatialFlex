@@ -1,0 +1,42 @@
+name: Benchmark (opt-in)
+
+# P1-07C performance benchmark. Manual only: never runs on pushes or pull
+# requests and never gates a merge. Results are CI-host measurements
+# (shared virtual hardware, software WebGL); they do not represent
+# consumer GPUs or headsets and are uploaded as an artifact only.
+on:
+  workflow_dispatch:
+    inputs:
+      args:
+        description: "Arguments for pnpm bench:spatial"
+        default: "--quick --label ci-host"
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @spatialflex/playground exec playwright install --with-deps chromium firefox
+      # Firefox has no headless WebGL on this runner (as in the e2e job).
+      # The input reaches the shell through an environment variable only.
+      - run: xvfb-run --auto-servernum pnpm bench:spatial $BENCH_ARGS --out bench-results
+        env:
+          BENCH_ARGS: ${{ inputs.args }}
+          XR_LAB_FIREFOX_HEADED: "1"
+          CI: "1"
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: spatialflex-benchmark
+          path: bench-results/
+          retention-days: 30

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" font-family="sans-serif" font-size="11">
+<rect width="640" height="360" fill="#fff"/>
+<text x="60" y="20" font-size="13" font-weight="bold">Median frame interval vs panels (W0 idle, ablation-control-headed-firefox)</text>
+<line x1="60" x2="460" y1="316" y2="316" stroke="#e5e5e5"/><text x="54" y="320" text-anchor="end">0.00</text>
+<line x1="60" x2="460" y1="246" y2="246" stroke="#e5e5e5"/><text x="54" y="250" text-anchor="end">4.37</text>
+<line x1="60" x2="460" y1="176" y2="176" stroke="#e5e5e5"/><text x="54" y="180" text-anchor="end">8.74</text>
+<line x1="60" x2="460" y1="106" y2="106" stroke="#e5e5e5"/><text x="54" y="110" text-anchor="end">13</text>
+<line x1="60" x2="460" y1="36" y2="36" stroke="#e5e5e5"/><text x="54" y="40" text-anchor="end">17</text>
+<text x="60" y="332" text-anchor="middle">0</text>
+<text x="160" y="332" text-anchor="middle">1</text>
+<text x="260" y="332" text-anchor="middle">5</text>
+<text x="360" y="332" text-anchor="middle">10</text>
+<text x="460" y="332" text-anchor="middle">20</text>
+<text x="260" y="352" text-anchor="middle">panels</text>
+<text transform="translate(14 176) rotate(-90)" text-anchor="middle">ms</text>
+<polyline fill="none" stroke="#1f77b4" stroke-width="2" points="60,62.415698838606374 160,121.84701641970366 260,62.25550660792956 360,179.99679615538648 460,62.17541049259111"/>
+<circle cx="60" cy="62.415698838606374" r="3" fill="#1f77b4"/>
+<circle cx="160" cy="121.84701641970366" r="3" fill="#1f77b4"/>
+<circle cx="260" cy="62.25550660792956" r="3" fill="#1f77b4"/>
+<circle cx="360" cy="179.99679615538648" r="3" fill="#1f77b4"/>
+<circle cx="460" cy="62.17541049259111" r="3" fill="#1f77b4"/>
+<rect x="472" y="36" width="10" height="10" fill="#1f77b4"/><text x="486" y="45">babylon firefox native</text>
+<polyline fill="none" stroke="#d62728" stroke-width="2" points="60,182.72006407689227 160,61.454545454545496 260,61.935122146575935 360,121.60672807368846 460,120.56547857428919"/>
+<circle cx="60" cy="182.72006407689227" r="3" fill="#d62728"/>
+<circle cx="160" cy="61.454545454545496" r="3" fill="#d62728"/>
+<circle cx="260" cy="61.935122146575935" r="3" fill="#d62728"/>
+<circle cx="360" cy="121.60672807368846" r="3" fill="#d62728"/>
+<circle cx="460" cy="120.56547857428919" r="3" fill="#d62728"/>
+<rect x="472" y="54" width="10" height="10" fill="#d62728"/><text x="486" y="63">three firefox native</text>
+</svg>

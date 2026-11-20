@@ -16,7 +16,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "smoke:pack": "node scripts/pack-smoke.mjs"
+    "smoke:pack": "node scripts/pack-smoke.mjs",
+    "bench:spatial": "node --experimental-strip-types scripts/bench-spatialflex.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -303,3 +303,39 @@ describe("M7 Baseline isolation", () => {
     expect(connectHost).toHaveBeenCalledWith({ drawsAdaptive: false });
   });
 });
+
+describe("P1-07C page clip (benchmark-justified)", () => {
+  const pageClip = () =>
+    container.querySelector<HTMLElement>('[data-testid="web-surface"]')!.style
+      .clipPath;
+
+  it("Native presentations without occluders leave the page unclipped", () => {
+    renderShell();
+    expect(extract(COUNTER, "native")).toBe(true);
+    expect(panelOf(COUNTER).style.transform).toMatch(/^matrix3d/);
+    expect(panelOf(COUNTER).dataset.spatialVisibility).toBe("visible");
+    expect(pageClip()).toBe("none");
+  });
+
+  it("an occluder in front of the page still cuts its hole and keeps the native footprint", () => {
+    renderShell();
+    expect(extract(COUNTER, "native")).toBe(true);
+    // An XR Adaptive panel between the camera and the page's center.
+    act(() => {
+      lab.extract!("live-chart", {
+        presentation: "adaptive",
+        source: "visible",
+        position: [-0.42, 1.42, -0.6],
+      });
+    });
+    frame();
+    const clip = pageClip();
+    // jsdom omits the default `nonzero` when serializing.
+    expect(clip).toMatch(/^path\((nonzero, )?"M /);
+    // Outer page, the occluder's hole and the native element's footprint.
+    expect(clip.match(/M /g)).toHaveLength(3);
+    act(() => void lab.restore!("live-chart"));
+    frame();
+    expect(pageClip()).toBe("none");
+  });
+});

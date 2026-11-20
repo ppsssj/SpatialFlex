@@ -1,0 +1,23 @@
+{
+  "commit": "3fd6eb57ffd1b9a647a0b53a3c80a7238412b684",
+  "workingTreeDirty": true,
+  "label": "ablation-control-headless",
+  "headed": false,
+  "config": {
+    "repeats": "2",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium,firefox",
+    "engines": "three,babylon",
+    "counts": "1,5,10,20",
+    "subsetCounts": "1,10,20",
+    "cycles": "10",
+    "presentations": "none,native",
+    "workloads": "W0,W2",
+    "ablate": ""
+  },
+  "exitCode": 0,
+  "wallClockMs": 381862,
+  "finishedAt": "2026-11-19T15:41:41.590Z"
+}
