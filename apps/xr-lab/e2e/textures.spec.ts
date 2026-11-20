@@ -79,8 +79,16 @@ async function open(page: Page, engine: Engine) {
       [0, 1.42, -0.4],
     ),
   );
-  // The pointer rests outside the canvas: no hover feedback anywhere.
-  await page.mouse.move(2, 2);
+  await rest(page);
+}
+
+/**
+ * Rests the pointer on empty canvas (bottom-left floor), away from every
+ * panel: hosts clear hover feedback on pointer moves inside the canvas.
+ */
+async function rest(page: Page) {
+  const box = (await page.getByTestId("xr-canvas").boundingBox())!;
+  await page.mouse.move(box.x + 12, box.y + box.height - 12);
 }
 
 async function present(page: Page) {
@@ -141,7 +149,8 @@ async function faceClip(page: Page, id: string): Promise<Clip> {
   }, id);
   const xs = corners.map((c) => c.x);
   const ys = corners.map((c) => c.y);
-  const inset = 3;
+  // 1 px inset: the panel's own pixels only, its border band included.
+  const inset = 1;
   const x = Math.ceil(Math.min(...xs)) + inset;
   const y = Math.ceil(Math.min(...ys)) + inset;
   return {
@@ -170,9 +179,10 @@ async function difference(page: Page, a: string, b: string) {
       };
       const [x, y] = await Promise.all([decode(first), decode(second)]);
       if (x.width !== y.width || x.height !== y.height)
-        return { meanAbs: Infinity, differing: 1, pixels: 0 };
+        return { meanAbs: Infinity, differing: 1, changed: 1, pixels: 0 };
       let sum = 0;
       let differing = 0;
+      let changed = 0;
       for (let i = 0; i < x.data.length; i += 4) {
         let max = 0;
         for (let c = 0; c < 3; c++) {
@@ -181,11 +191,13 @@ async function difference(page: Page, a: string, b: string) {
           if (d > max) max = d;
         }
         if (max > 48) differing++;
+        if (max > 16) changed++;
       }
       const pixels = x.data.length / 4;
       return {
         meanAbs: sum / (pixels * 3),
         differing: differing / pixels,
+        changed: changed / pixels,
         pixels,
       };
     },
@@ -229,12 +241,16 @@ async function expectLatest(
   for (let i = 0; i < shots.length; i++) {
     const same = await difference(page, shots[i]!, refs.final[i]!);
     const stale = await difference(page, shots[i]!, refs.stale[i]!);
+    test.info().annotations.push({
+      type: `panel ${i + 1} pixel difference`,
+      description: `vs reference ${JSON.stringify(same)}; vs stale ${JSON.stringify(stale)}`,
+    });
     expect(same.pixels, `panel ${i + 1} size`).toBeGreaterThan(1000);
-    expect(same.differing, `panel ${i + 1} vs reference`).toBeLessThan(0.002);
-    expect(same.meanAbs, `panel ${i + 1} vs reference`).toBeLessThan(1);
-    // The stale state is distinguishable at this resolution: the check
-    // above can fail.
-    expect(stale.differing, `panel ${i + 1} vs stale`).toBeGreaterThan(0.01);
+    expect(same.changed, `panel ${i + 1} vs reference`).toBeLessThan(0.001);
+    expect(same.meanAbs, `panel ${i + 1} vs reference`).toBeLessThan(0.5);
+    // The stale state is distinguishable at this resolution (a single
+    // changed digit), so the check above can fail.
+    expect(stale.changed, `panel ${i + 1} vs stale`).toBeGreaterThan(0.004);
   }
 }
 
@@ -266,8 +282,10 @@ for (const engine of ENGINES) {
     await settled(page, (i) => String(valueOf(tick, i)));
     const shots = await capture(page);
     expect(errors).toEqual([]);
+    const viewport = page.viewportSize()!;
+    await page.close();
 
-    const fresh = await browser.newPage({ viewport: page.viewportSize()! });
+    const fresh = await browser.newPage({ viewport });
     const refs = await references(fresh, engine, tick);
     await expectLatest(fresh, shots, refs);
     await fresh.close();
@@ -344,11 +362,11 @@ for (const engine of ENGINES) {
       .toBe(true);
     await frames(page, 6);
     const hovered = await shoot(page, clip);
-    expect(
-      (await difference(page, hovered, initial)).differing,
-    ).toBeGreaterThan(0.002);
+    const changed = async (shot: string) =>
+      (await difference(page, shot, initial)).changed;
+    expect(await changed(hovered)).toBeGreaterThan(0.002);
     // ...and clears.
-    await page.mouse.move(2, 2);
+    await rest(page);
     await expect
       .poll(() =>
         page.evaluate(() =>
@@ -360,41 +378,36 @@ for (const engine of ENGINES) {
       )
       .toBe(false);
     await frames(page, 6);
-    expect(
-      (await difference(page, await shoot(page, clip), initial)).differing,
-    ).toBeLessThan(0.002);
+    expect(await changed(await shoot(page, clip))).toBeLessThan(0.001);
 
     // The action runs exactly once per click.
     await page.mouse.click(button.x, button.y);
     await expect(page.getByTestId("bench-bumps-1")).toHaveText("1");
     await page.waitForTimeout(150);
     await expect(page.getByTestId("bench-bumps-1")).toHaveText("1");
-    await page.mouse.move(2, 2);
+    await rest(page);
+    await frames(page, 6);
+    expect(await changed(await shoot(page, clip))).toBeLessThan(0.001);
 
     // Selecting panel 2 (a click on its face) draws the selection border.
-    const face = (await page.evaluate(() =>
-      (window as unknown as W).__xrHostProbe.locate("bench-2", "background"),
-    ))!;
-    await page.mouse.click(face.x, face.y - 40);
-    await page.mouse.move(2, 2);
+    const select = async (id: string) => {
+      const face = (await page.evaluate(
+        (panel) =>
+          (window as unknown as W).__xrHostProbe.locate(panel, "background"),
+        id,
+      ))!;
+      await page.mouse.click(face.x, face.y);
+      await rest(page);
+    };
+    await select("bench-2");
     await expect
-      .poll(
-        async () =>
-          (await difference(page, await shoot(page, clip), initial)).differing,
-      )
+      .poll(async () => changed(await shoot(page, clip)))
       .toBeGreaterThan(0.01);
     // Selecting another panel clears panel 2's border again.
-    const other = (await page.evaluate(() =>
-      (window as unknown as W).__xrHostProbe.locate("bench-4", "background"),
-    ))!;
-    await page.mouse.click(other.x, other.y - 40);
-    await page.mouse.move(2, 2);
+    await select("bench-4");
     await expect
-      .poll(
-        async () =>
-          (await difference(page, await shoot(page, clip), initial)).differing,
-      )
-      .toBeLessThan(0.002);
+      .poll(async () => changed(await shoot(page, clip)))
+      .toBeLessThan(0.001);
     expect(errors).toEqual([]);
   });
 
@@ -427,7 +440,7 @@ for (const engine of ENGINES) {
         await page.mouse.move(from.x + 20, from.y + 10, { steps: 4 });
         await page.mouse.up();
       }
-      await page.mouse.move(2, 2);
+      await rest(page);
       await page.evaluate(() =>
         (window as unknown as W).__spatialBench!.restoreAll(),
       );
@@ -472,13 +485,16 @@ for (const engine of ENGINES) {
     // showing the same data (panel 1's pose was reset by the remount too,
     // so it is compared as well).
     const shots = await capture(page);
-    const fresh = await browser.newPage({ viewport: page.viewportSize()! });
-    await expectLatest(fresh, shots, await references(fresh, engine, tick));
-    await fresh.close();
     await page.evaluate(() =>
       (window as unknown as W).__spatialBench!.restoreAll(),
     );
     await expect.poll(() => probe(page, "liveTextures")).toBe(textures);
-    expect(errors).toEqual([]);
+    // Unmounting the workspace releases the WebGL context on purpose.
+    expect(errors.filter((e) => !/WebGL context was lost/.test(e))).toEqual([]);
+    const viewport = page.viewportSize()!;
+    await page.close();
+    const fresh = await browser.newPage({ viewport });
+    await expectLatest(fresh, shots, await references(fresh, engine, tick));
+    await fresh.close();
   });
 }

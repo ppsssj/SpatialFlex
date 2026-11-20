@@ -12,7 +12,7 @@ import {
   type PanelPart,
 } from "../../contracts/xrHost";
 import { describeBody } from "../shared/panelFace";
-import { CanvasFace } from "./panelTexture";
+import { CanvasFace, decodeFaceColor } from "./panelTexture";
 import type { HandleDown } from "./ThreeHost";
 
 /**
@@ -62,7 +62,11 @@ export function Panel3D({
         }}
       >
         <planeGeometry args={[background!.width, background!.height]} />
-        <meshBasicMaterial map={face.texture} toneMapped={false} />
+        <meshBasicMaterial
+          map={face.texture}
+          toneMapped={false}
+          onBeforeCompile={decodeFaceColor}
+        />
       </mesh>
       {controls.map((part) => (
         <PanelControl
@@ -137,7 +141,11 @@ function PanelControl({
       onPointerOut={() => setHovered(false)}
     >
       <planeGeometry args={[part.width, part.height]} />
-      <meshBasicMaterial map={face.texture} toneMapped={false} />
+      <meshBasicMaterial
+        map={face.texture}
+        toneMapped={false}
+        onBeforeCompile={decodeFaceColor}
+      />
     </mesh>
   );
 }
