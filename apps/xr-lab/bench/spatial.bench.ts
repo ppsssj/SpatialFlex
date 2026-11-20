@@ -20,7 +20,7 @@ const CONFIG = {
   warmupMs: Number(env("BENCH_WARMUP_MS", "1000")),
   sampleMs: Number(env("BENCH_SAMPLE_MS", "3000")),
   seed: Number(env("BENCH_SEED", "7")),
-  out: env("BENCH_OUT", "../../docs/evidence/p1-07c/raw"),
+  out: env("BENCH_OUT", "../../bench-results/raw/local"),
   commit: env("BENCH_COMMIT", "unknown"),
   engines: env("BENCH_ENGINES", "three,babylon").split(","),
   counts: env("BENCH_COUNTS", "1,5,10,20").split(",").map(Number),

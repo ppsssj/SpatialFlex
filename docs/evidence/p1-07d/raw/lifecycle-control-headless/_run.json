@@ -1,0 +1,23 @@
+{
+  "commit": "dce9314c0d5cd4b6e626f7be8cd49f9844ca3ce1",
+  "workingTreeDirty": false,
+  "label": "lifecycle-control-headless",
+  "headed": false,
+  "config": {
+    "repeats": "1",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium,firefox",
+    "engines": "three,babylon",
+    "counts": "1,5,10,20",
+    "subsetCounts": "1,10,20",
+    "cycles": "10",
+    "presentations": "adaptive",
+    "workloads": "W4",
+    "ablate": ""
+  },
+  "exitCode": 0,
+  "wallClockMs": 91004,
+  "finishedAt": "2026-11-20T09:37:37.854Z"
+}

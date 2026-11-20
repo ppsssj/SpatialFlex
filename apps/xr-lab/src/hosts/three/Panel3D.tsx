@@ -1,6 +1,7 @@
 import type { ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
 import { recordDrawn } from "../../contracts/hostProbe";
+import { perfCount } from "../../performance/collector";
 import {
   handleLayout,
   PANEL_SIZE,
@@ -31,6 +32,9 @@ export function Panel3D({
     onDown: HandleDown;
   } | null;
 }) {
+  // Benchmark counters (no-ops unless a P1-07C/D collector is measuring).
+  perfCount("three.panelRender");
+  useEffect(() => perfCount("three.panelCommit"));
   const face = useMemo(
     () => new CanvasFace(PANEL_SIZE.width, PANEL_SIZE.height),
     [],
@@ -51,6 +55,7 @@ export function Panel3D({
       scale={panel.scale ?? 1}
     >
       <mesh
+        material={face.material}
         userData={{ hostPanelId: panel.id, hostPart: background!.part }}
         onClick={(event: ThreeEvent<MouseEvent>) => {
           event.stopPropagation();
@@ -58,7 +63,6 @@ export function Panel3D({
         }}
       >
         <planeGeometry args={[background!.width, background!.height]} />
-        <meshBasicMaterial map={face.texture} toneMapped={false} />
       </mesh>
       {controls.map((part) => (
         <PanelControl
@@ -119,6 +123,7 @@ function PanelControl({
 
   return (
     <mesh
+      material={face.material}
       position={[...part.center]}
       userData={{ hostPanelId: panelId, hostPart: part.part, hovered }}
       {...(onPointerDown && { onPointerDown })}
@@ -133,7 +138,6 @@ function PanelControl({
       onPointerOut={() => setHovered(false)}
     >
       <planeGeometry args={[part.width, part.height]} />
-      <meshBasicMaterial map={face.texture} toneMapped={false} />
     </mesh>
   );
 }

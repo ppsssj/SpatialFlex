@@ -1,18 +1,26 @@
 import { PerfCollector, setActiveCollector } from "./collector";
 import { installInstrumentation, instrumentRenderer } from "./instrument";
+import { applyTextureAblations } from "./textureAblations";
+import { installTextureInstrumentation } from "./textureInstrument";
 
 /**
- * Enables P1-07C benchmark mode before the lab renders: one collector,
+ * Enables P1-07C/P1-07D benchmark mode before the lab renders: one collector,
  * the SDK and renderer instrumentation, the frame loop, and the read-only
  * `window.__spatialPerf` handle. Loaded only for `?fixture=benchmark` in
  * test-hook builds; ordinary pages never import it.
  */
 export async function enableBenchmarkMode(engine: string) {
-  applyAblations(new URLSearchParams(window.location.search).get("ablate"));
+  const ablate = new URLSearchParams(window.location.search).get("ablate");
+  applyAblations(ablate);
+  // P1-07D face ablations patch first, so the instrumentation below times
+  // the ablated function.
+  if (engine === "three")
+    await applyTextureAblations((ablate ?? "").split(","));
   const collector = new PerfCollector();
   setActiveCollector(collector);
   installInstrumentation(collector);
   await instrumentRenderer(collector, engine);
+  await installTextureInstrumentation(collector, engine);
   collector.run();
   (window as unknown as { __spatialPerf?: PerfCollector }).__spatialPerf =
     collector;

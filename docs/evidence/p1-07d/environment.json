@@ -1,0 +1,1907 @@
+{
+  "commit": "0310f021d033ecc93b1f3dc6583cac92722f0e7e",
+  "host": {
+    "os": "win32 10.0.26100 (x64)",
+    "cpu": "Intel(R) Core(TM) i5-9400F CPU @ 2.90GHz",
+    "logicalCpus": 6,
+    "ramGB": 7.9,
+    "node": "v24.12.0",
+    "ci": false,
+    "note": "Local workstation measurement."
+  },
+  "labels": {
+    "ablation-control-headed": {
+      "run": {
+        "commit": "50609e21d48c2280603cf7c35d40f807913b22f5",
+        "workingTreeDirty": false,
+        "label": "ablation-control-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three,babylon",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 87430,
+        "finishedAt": "2026-11-20T07:39:37.980Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "ablation-control-headless": {
+      "run": {
+        "commit": "dce9314c0d5cd4b6e626f7be8cd49f9844ca3ce1",
+        "workingTreeDirty": false,
+        "label": "ablation-control-headless",
+        "headed": false,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 66193,
+        "finishedAt": "2026-11-20T07:32:10.972Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "ablation-face-half-res-headless": {
+      "run": {
+        "commit": "dce9314c0d5cd4b6e626f7be8cd49f9844ca3ce1",
+        "workingTreeDirty": false,
+        "label": "ablation-face-half-res-headless",
+        "headed": false,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-half-res"
+        },
+        "exitCode": 0,
+        "wallClockMs": 58722,
+        "finishedAt": "2026-11-20T07:36:08.278Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "ablation-face-linear-headed": {
+      "run": {
+        "commit": "50609e21d48c2280603cf7c35d40f807913b22f5",
+        "workingTreeDirty": false,
+        "label": "ablation-face-linear-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-linear"
+        },
+        "exitCode": 0,
+        "wallClockMs": 59970,
+        "finishedAt": "2026-11-20T07:40:39.426Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "ablation-face-linear-headless": {
+      "run": {
+        "commit": "dce9314c0d5cd4b6e626f7be8cd49f9844ca3ce1",
+        "workingTreeDirty": false,
+        "label": "ablation-face-linear-headless",
+        "headed": false,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-linear"
+        },
+        "exitCode": 0,
+        "wallClockMs": 57060,
+        "finishedAt": "2026-11-20T07:33:08.933Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "ablation-face-no-mipmap-headed": {
+      "run": {
+        "commit": "50609e21d48c2280603cf7c35d40f807913b22f5",
+        "workingTreeDirty": false,
+        "label": "ablation-face-no-mipmap-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-no-mipmap"
+        },
+        "exitCode": 0,
+        "wallClockMs": 58264,
+        "finishedAt": "2026-11-20T07:41:39.037Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "ablation-face-no-mipmap-headless": {
+      "run": {
+        "commit": "dce9314c0d5cd4b6e626f7be8cd49f9844ca3ce1",
+        "workingTreeDirty": false,
+        "label": "ablation-face-no-mipmap-headless",
+        "headed": false,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-no-mipmap"
+        },
+        "exitCode": 0,
+        "wallClockMs": 53901,
+        "finishedAt": "2026-11-20T07:37:03.005Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "ablation-face-no-redraw-headed": {
+      "run": {
+        "commit": "50609e21d48c2280603cf7c35d40f807913b22f5",
+        "workingTreeDirty": false,
+        "label": "ablation-face-no-redraw-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-no-redraw"
+        },
+        "exitCode": 0,
+        "wallClockMs": 54679,
+        "finishedAt": "2026-11-20T07:43:31.107Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "ablation-face-no-redraw-headless": {
+      "run": {
+        "commit": "dce9314c0d5cd4b6e626f7be8cd49f9844ca3ce1",
+        "workingTreeDirty": false,
+        "label": "ablation-face-no-redraw-headless",
+        "headed": false,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-no-redraw"
+        },
+        "exitCode": 0,
+        "wallClockMs": 62632,
+        "finishedAt": "2026-11-20T07:35:08.555Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "ablation-face-no-upload-headed": {
+      "run": {
+        "commit": "50609e21d48c2280603cf7c35d40f807913b22f5",
+        "workingTreeDirty": false,
+        "label": "ablation-face-no-upload-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-no-upload"
+        },
+        "exitCode": 0,
+        "wallClockMs": 55596,
+        "finishedAt": "2026-11-20T07:42:35.511Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "ablation-face-no-upload-headless": {
+      "run": {
+        "commit": "dce9314c0d5cd4b6e626f7be8cd49f9844ca3ce1",
+        "workingTreeDirty": false,
+        "label": "ablation-face-no-upload-headless",
+        "headed": false,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-no-upload"
+        },
+        "exitCode": 0,
+        "wallClockMs": 55171,
+        "finishedAt": "2026-11-20T07:34:04.914Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "attempt1-optimized-headed": {
+      "run": {
+        "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+        "workingTreeDirty": false,
+        "label": "attempt1-optimized-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three,babylon",
+          "counts": "1,10,20",
+          "subsetCounts": "1,10,20",
+          "cycles": "10",
+          "presentations": "none,adaptive",
+          "workloads": "W0,W1,W2,W3",
+          "ablate": ""
+        },
+        "exitCode": null,
+        "wallClockMs": null,
+        "finishedAt": null,
+        "note": "First optimization attempt (RGBA8 storage plus sRGB decode in the face shader). Run stopped manually after the headed Chromium W1 result showed the attempt did not fix the stall; incomplete (firefox babylon 20 panels missing). Superseded; see docs/p1-07d-three-adaptive-performance.md section 6. _run.json written by hand afterwards."
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "attempt1-optimized-headless": {
+      "run": {
+        "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+        "workingTreeDirty": false,
+        "label": "attempt1-optimized-headless",
+        "headed": false,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three,babylon",
+          "counts": "1,5,10,20",
+          "subsetCounts": "1,10,20",
+          "cycles": "10",
+          "presentations": "none,adaptive",
+          "workloads": "W0,W1,W2,W3",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 966806,
+        "finishedAt": "2026-11-20T08:24:26.417Z",
+        "note": "First optimization attempt (3c8e0b9..39498c5): RGBA8 storage plus sRGB decode in the face shader. Superseded; see docs/p1-07d-three-adaptive-performance.md section 6."
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "control-headed": {
+      "run": {
+        "commit": "dce9314c0d5cd4b6e626f7be8cd49f9844ca3ce1",
+        "workingTreeDirty": false,
+        "label": "control-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three,babylon",
+          "counts": "1,10,20",
+          "subsetCounts": "1,10,20",
+          "cycles": "10",
+          "presentations": "none,adaptive",
+          "workloads": "W0,W1,W2,W3",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 724328,
+        "finishedAt": "2026-11-20T09:36:04.780Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "control-headless": {
+      "run": {
+        "commit": "88ecfe500585e6b7b49769fb754cbf8323eecc1b",
+        "workingTreeDirty": false,
+        "label": "control-headless",
+        "headed": false,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three,babylon",
+          "counts": "1,5,10,20",
+          "subsetCounts": "1,10,20",
+          "cycles": "10",
+          "presentations": "none,adaptive",
+          "workloads": "W0,W1,W2,W3",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 1036217,
+        "finishedAt": "2026-11-20T07:31:01.296Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "diag-attempt1-realloc-headed": {
+      "run": {
+        "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+        "workingTreeDirty": false,
+        "label": "diag-attempt1-realloc-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-linear"
+        },
+        "exitCode": 0,
+        "wallClockMs": 32492,
+        "finishedAt": "2026-11-20T08:39:41.439Z",
+        "note": "Diagnostic E3: attempt-1 build with --ablate face-linear (sets color space none after React Three Fiber applied the map prop, then re-allocates): first configuration actually storing RGBA8."
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        }
+      }
+    },
+    "diag-attempt1-w1only-headed": {
+      "run": {
+        "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+        "workingTreeDirty": false,
+        "label": "diag-attempt1-w1only-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 37576,
+        "finishedAt": "2026-11-20T08:38:08.103Z",
+        "note": "Diagnostic E1: attempt-1 build (39498c5) as committed, W1 alone (same configuration as the ablations)."
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        }
+      }
+    },
+    "diag-control-headed": {
+      "run": {
+        "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+        "workingTreeDirty": true,
+        "label": "diag-control-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 34856,
+        "finishedAt": "2026-11-20T08:41:10.594Z",
+        "note": "Diagnostic E0: unoptimized control faces (panelTexture.ts/Panel3D.tsx checked out from dce9314 locally; workingTreeDirty) with the face-realloc ablation code present."
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        }
+      }
+    },
+    "diag-control-realloc-headed": {
+      "run": {
+        "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+        "workingTreeDirty": true,
+        "label": "diag-control-realloc-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": "face-realloc"
+        },
+        "exitCode": 0,
+        "wallClockMs": 34282,
+        "finishedAt": "2026-11-20T08:41:45.985Z",
+        "note": "Diagnostic E4: as E0 with --ablate face-realloc (re-allocation only, still SRGB8_ALPHA8)."
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        }
+      }
+    },
+    "diag-fix-quick-headed": {
+      "run": {
+        "commit": "0310f021d033ecc93b1f3dc6583cac92722f0e7e",
+        "workingTreeDirty": false,
+        "label": "diag-fix-quick-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 54999,
+        "finishedAt": "2026-11-20T08:52:59.896Z",
+        "note": "Quick check of the corrected fix (0310f02) before the full series."
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "diag-rgba8-eagercontext-headed": {
+      "run": {
+        "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+        "workingTreeDirty": true,
+        "label": "diag-rgba8-eagercontext-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 34763,
+        "finishedAt": "2026-11-20T08:42:36.761Z",
+        "note": "Diagnostic G1: attempt-1 build plus canvas.getContext('2d') in the CanvasFace constructor (uncommitted). Still SRGB8_ALPHA8 in effect."
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        }
+      }
+    },
+    "diag-rgba8-nodecode-headed": {
+      "run": {
+        "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+        "workingTreeDirty": true,
+        "label": "diag-rgba8-nodecode-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 33845,
+        "finishedAt": "2026-11-20T08:38:54.480Z",
+        "note": "Diagnostic E2: attempt-1 build with the onBeforeCompile decode removed locally (uncommitted; workingTreeDirty). Faces turned out to be SRGB8_ALPHA8 anyway (React Three Fiber map-prop re-tagging)."
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        }
+      }
+    },
+    "diag-rgba8-predrawn-headed": {
+      "run": {
+        "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+        "workingTreeDirty": true,
+        "label": "diag-rgba8-predrawn-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium",
+          "engines": "three",
+          "counts": "20",
+          "subsetCounts": "20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W1",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 32822,
+        "finishedAt": "2026-11-20T08:43:25.511Z",
+        "note": "Diagnostic G2: attempt-1 build plus a background fill in the CanvasFace constructor (uncommitted). Still SRGB8_ALPHA8 in effect."
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        }
+      }
+    },
+    "lifecycle-control-headless": {
+      "run": {
+        "commit": "dce9314c0d5cd4b6e626f7be8cd49f9844ca3ce1",
+        "workingTreeDirty": false,
+        "label": "lifecycle-control-headless",
+        "headed": false,
+        "config": {
+          "repeats": "1",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three,babylon",
+          "counts": "1,5,10,20",
+          "subsetCounts": "1,10,20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W4",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 91004,
+        "finishedAt": "2026-11-20T09:37:37.854Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.005,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.02,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "lifecycle-optimized-headless": {
+      "run": {
+        "commit": "0310f021d033ecc93b1f3dc6583cac92722f0e7e",
+        "workingTreeDirty": false,
+        "label": "lifecycle-optimized-headless",
+        "headed": false,
+        "config": {
+          "repeats": "1",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three,babylon",
+          "counts": "1,5,10,20",
+          "subsetCounts": "1,10,20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W4",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 85306,
+        "finishedAt": "2026-11-20T09:23:59.003Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.005,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.02,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "main-repro-headless": {
+      "run": {
+        "commit": "52ac8e5dc57c35b4ae179c0267807228936368f1",
+        "workingTreeDirty": false,
+        "label": "main-repro-headless",
+        "headed": false,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three,babylon",
+          "counts": "1,10,20",
+          "subsetCounts": "1,10,20",
+          "cycles": "10",
+          "presentations": "adaptive",
+          "workloads": "W0,W1",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 389655,
+        "finishedAt": "2026-11-20T07:12:44.104Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "optimized-headed": {
+      "run": {
+        "commit": "0310f021d033ecc93b1f3dc6583cac92722f0e7e",
+        "workingTreeDirty": false,
+        "label": "optimized-headed",
+        "headed": true,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three,babylon",
+          "counts": "1,10,20",
+          "subsetCounts": "1,10,20",
+          "cycles": "10",
+          "presentations": "none,adaptive",
+          "workloads": "W0,W1,W2,W3",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 728111,
+        "finishedAt": "2026-11-20T09:21:31.052Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GT 710 (0x0000128B) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": false,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    },
+    "optimized-headless": {
+      "run": {
+        "commit": "0310f021d033ecc93b1f3dc6583cac92722f0e7e",
+        "workingTreeDirty": false,
+        "label": "optimized-headless",
+        "headed": false,
+        "config": {
+          "repeats": "3",
+          "warmupMs": "1000",
+          "sampleMs": "3000",
+          "seed": "7",
+          "browsers": "chromium,firefox",
+          "engines": "three,babylon",
+          "counts": "1,5,10,20",
+          "subsetCounts": "1,10,20",
+          "cycles": "10",
+          "presentations": "none,adaptive",
+          "workloads": "W0,W1,W2,W3",
+          "ablate": ""
+        },
+        "exitCode": 0,
+        "wallClockMs": 965629,
+        "finishedAt": "2026-11-20T09:09:20.786Z"
+      },
+      "browsers": {
+        "chromium": {
+          "browser": "chromium",
+          "browserVersion": "159.0.8154.6",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.8154.6 Safari/537.36",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 753
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.004999995231628418,
+          "webgl": {
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "vendor": "Google Inc. (Google)"
+          },
+          "longTasksSupported": true
+        },
+        "firefox": {
+          "browser": "firefox",
+          "browserVersion": "159.0",
+          "headless": true,
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+          "devicePixelRatio": 1,
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "canvas": {
+            "width": 927,
+            "height": 752
+          },
+          "hardwareConcurrency": 6,
+          "crossOriginIsolated": true,
+          "timerResolutionMs": 0.01999999999998181,
+          "webgl": {
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 480 Direct3D11 vs_5_0 ps_5_0), or similar",
+            "vendor": "Google Inc. (NVIDIA)"
+          },
+          "longTasksSupported": false
+        }
+      }
+    }
+  }
+}

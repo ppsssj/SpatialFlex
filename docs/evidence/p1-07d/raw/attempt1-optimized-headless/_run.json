@@ -1,0 +1,24 @@
+{
+  "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+  "workingTreeDirty": false,
+  "label": "attempt1-optimized-headless",
+  "headed": false,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium,firefox",
+    "engines": "three,babylon",
+    "counts": "1,5,10,20",
+    "subsetCounts": "1,10,20",
+    "cycles": "10",
+    "presentations": "none,adaptive",
+    "workloads": "W0,W1,W2,W3",
+    "ablate": ""
+  },
+  "exitCode": 0,
+  "wallClockMs": 966806,
+  "finishedAt": "2026-11-20T08:24:26.417Z",
+  "note": "First optimization attempt (3c8e0b9..39498c5): RGBA8 storage plus sRGB decode in the face shader. Superseded; see docs/p1-07d-three-adaptive-performance.md section 6."
+}

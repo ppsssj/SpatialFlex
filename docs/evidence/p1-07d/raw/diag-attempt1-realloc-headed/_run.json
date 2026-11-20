@@ -1,0 +1,24 @@
+{
+  "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+  "workingTreeDirty": false,
+  "label": "diag-attempt1-realloc-headed",
+  "headed": true,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium",
+    "engines": "three",
+    "counts": "20",
+    "subsetCounts": "20",
+    "cycles": "10",
+    "presentations": "adaptive",
+    "workloads": "W1",
+    "ablate": "face-linear"
+  },
+  "exitCode": 0,
+  "wallClockMs": 32492,
+  "finishedAt": "2026-11-20T08:39:41.439Z",
+  "note": "Diagnostic E3: attempt-1 build with --ablate face-linear (sets color space none after React Three Fiber applied the map prop, then re-allocates): first configuration actually storing RGBA8."
+}

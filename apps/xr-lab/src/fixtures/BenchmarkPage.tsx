@@ -31,6 +31,10 @@ export const benchItemId = (index: number) => `bench-${index + 1}`;
 function createBenchData() {
   let tick = 0;
   let bumps: number[] = [];
+  // P1-07D: per-panel value overrides. Setting one replaces the whole
+  // object, so every item re-renders and re-declares its view while only
+  // one panel's content changes (redundant-update and isolation checks).
+  let overrides: Readonly<Record<number, string>> = {};
   let timer: ReturnType<typeof setInterval> | null = null;
   const listeners = new Set<() => void>();
   const emit = () => {
@@ -39,6 +43,7 @@ function createBenchData() {
   return {
     getTick: () => tick,
     getBumps: () => bumps,
+    getOverrides: () => overrides,
     subscribe(listener: () => void) {
       listeners.add(listener);
       return () => {
@@ -50,6 +55,11 @@ function createBenchData() {
     },
     step() {
       tick++;
+      emit();
+    },
+    /** Shows `text` as panel `index`'s value (others keep theirs). */
+    setValue(index: number, text: string) {
+      overrides = { ...overrides, [index]: text };
       emit();
     },
     bump(index: number) {
@@ -73,6 +83,7 @@ function createBenchData() {
       this.stop();
       tick = 0;
       bumps = [];
+      overrides = {};
       emit();
     },
   };
@@ -82,6 +93,12 @@ export const benchData = createBenchData();
 export const valueOf = (tick: number, index: number) =>
   (tick * (index + 3) + index * 17) % 1000;
 
+const shownValue = (
+  tick: number,
+  index: number,
+  overrides: Readonly<Record<number, string>>,
+) => overrides[index] ?? String(valueOf(tick, index));
+
 /** Live component instances and mounts (correctness checks). */
 export const benchComponents = { live: 0, mounts: 0 };
 
@@ -89,6 +106,10 @@ function BenchPanel({ index }: { index: number }) {
   perfCount("react.panel.render");
   const tick = useSyncExternalStore(benchData.subscribe, benchData.getTick);
   const bumps = useSyncExternalStore(benchData.subscribe, benchData.getBumps);
+  const overrides = useSyncExternalStore(
+    benchData.subscribe,
+    benchData.getOverrides,
+  );
   const [clicks, setClicks] = useState(0);
   useLayoutEffect(() => {
     perfCount("react.panel.commit");
@@ -100,7 +121,7 @@ function BenchPanel({ index }: { index: number }) {
       benchComponents.live--;
     };
   }, []);
-  const value = valueOf(tick, index);
+  const value = shownValue(tick, index, overrides);
   return (
     <article
       className="bench-panel"
@@ -139,6 +160,10 @@ function BenchPanel({ index }: { index: number }) {
 
 function BenchItem({ index }: { index: number }) {
   const tick = useSyncExternalStore(benchData.subscribe, benchData.getTick);
+  const overrides = useSyncExternalStore(
+    benchData.subscribe,
+    benchData.getOverrides,
+  );
   return (
     <WidgetRendererContext.Consumer>
       {(renderWidget) =>
@@ -147,7 +172,7 @@ function BenchItem({ index }: { index: number }) {
           body: {
             kind: "value",
             label: "Value",
-            value: String(valueOf(tick, index)),
+            value: shownValue(tick, index, overrides),
           },
           actions: [
             { id: "bump", label: "+1", invoke: () => benchData.bump(index) },
