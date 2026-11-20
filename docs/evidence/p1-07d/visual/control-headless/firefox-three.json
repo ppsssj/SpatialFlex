@@ -1,0 +1,49 @@
+{
+  "engine": "three",
+  "browserName": "firefox",
+  "clip": {
+    "x": 561,
+    "y": 353,
+    "width": 511,
+    "height": 66
+  },
+  "values": {
+    "sameSize": true,
+    "pixels": 33726,
+    "meanAbsChannel": 2.124315562671727,
+    "maxChannel": 67,
+    "share": {
+      "identical": 0.8261282096898536,
+      "upTo2": 0.03498784320702129,
+      "upTo8": 0.05523928126667853,
+      "upTo32": 0.05402360196880745,
+      "over32": 0.02962106386763921
+    }
+  },
+  "hovered": {
+    "sameSize": true,
+    "pixels": 33726,
+    "meanAbsChannel": 2.1281602719958883,
+    "maxChannel": 69,
+    "share": {
+      "identical": 0.8260392575461069,
+      "upTo2": 0.03504714463618573,
+      "upTo8": 0.05526893198126075,
+      "upTo32": 0.053964300539643004,
+      "over32": 0.02968036529680365
+    }
+  },
+  "selected": {
+    "sameSize": true,
+    "pixels": 33726,
+    "meanAbsChannel": 2.124315562671727,
+    "maxChannel": 67,
+    "share": {
+      "identical": 0.8261282096898536,
+      "upTo2": 0.03498784320702129,
+      "upTo8": 0.05523928126667853,
+      "upTo32": 0.05402360196880745,
+      "over32": 0.02962106386763921
+    }
+  }
+}

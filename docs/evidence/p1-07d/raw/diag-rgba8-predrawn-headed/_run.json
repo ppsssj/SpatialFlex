@@ -1,0 +1,24 @@
+{
+  "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+  "workingTreeDirty": true,
+  "label": "diag-rgba8-predrawn-headed",
+  "headed": true,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium",
+    "engines": "three",
+    "counts": "20",
+    "subsetCounts": "20",
+    "cycles": "10",
+    "presentations": "adaptive",
+    "workloads": "W1",
+    "ablate": ""
+  },
+  "exitCode": 0,
+  "wallClockMs": 32822,
+  "finishedAt": "2026-11-20T08:43:25.511Z",
+  "note": "Diagnostic G2: attempt-1 build plus a background fill in the CanvasFace constructor (uncommitted). Still SRGB8_ALPHA8 in effect."
+}

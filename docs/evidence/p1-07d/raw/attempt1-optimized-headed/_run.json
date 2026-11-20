@@ -1,0 +1,24 @@
+{
+  "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+  "workingTreeDirty": false,
+  "label": "attempt1-optimized-headed",
+  "headed": true,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium,firefox",
+    "engines": "three,babylon",
+    "counts": "1,10,20",
+    "subsetCounts": "1,10,20",
+    "cycles": "10",
+    "presentations": "none,adaptive",
+    "workloads": "W0,W1,W2,W3",
+    "ablate": ""
+  },
+  "exitCode": null,
+  "wallClockMs": null,
+  "finishedAt": null,
+  "note": "First optimization attempt (RGBA8 storage plus sRGB decode in the face shader). Run stopped manually after the headed Chromium W1 result showed the attempt did not fix the stall; incomplete (firefox babylon 20 panels missing). Superseded; see docs/p1-07d-three-adaptive-performance.md section 6. _run.json written by hand afterwards."
+}

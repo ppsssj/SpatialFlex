@@ -1,0 +1,49 @@
+{
+  "engine": "babylon",
+  "browserName": "chromium",
+  "clip": {
+    "x": 561,
+    "y": 353,
+    "width": 511,
+    "height": 66
+  },
+  "values": {
+    "sameSize": true,
+    "pixels": 33726,
+    "meanAbsChannel": 0,
+    "maxChannel": 0,
+    "share": {
+      "identical": 1,
+      "upTo2": 0,
+      "upTo8": 0,
+      "upTo32": 0,
+      "over32": 0
+    }
+  },
+  "hovered": {
+    "sameSize": true,
+    "pixels": 33726,
+    "meanAbsChannel": 0,
+    "maxChannel": 0,
+    "share": {
+      "identical": 1,
+      "upTo2": 0,
+      "upTo8": 0,
+      "upTo32": 0,
+      "over32": 0
+    }
+  },
+  "selected": {
+    "sameSize": true,
+    "pixels": 33726,
+    "meanAbsChannel": 0,
+    "maxChannel": 0,
+    "share": {
+      "identical": 1,
+      "upTo2": 0,
+      "upTo8": 0,
+      "upTo32": 0,
+      "over32": 0
+    }
+  }
+}

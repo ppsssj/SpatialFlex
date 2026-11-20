@@ -1,0 +1,23 @@
+{
+  "commit": "88ecfe500585e6b7b49769fb754cbf8323eecc1b",
+  "workingTreeDirty": false,
+  "label": "control-headless",
+  "headed": false,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium,firefox",
+    "engines": "three,babylon",
+    "counts": "1,5,10,20",
+    "subsetCounts": "1,10,20",
+    "cycles": "10",
+    "presentations": "none,adaptive",
+    "workloads": "W0,W1,W2,W3",
+    "ablate": ""
+  },
+  "exitCode": 0,
+  "wallClockMs": 1036217,
+  "finishedAt": "2026-11-20T07:31:01.296Z"
+}

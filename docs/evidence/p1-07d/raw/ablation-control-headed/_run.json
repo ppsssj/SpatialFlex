@@ -1,0 +1,23 @@
+{
+  "commit": "50609e21d48c2280603cf7c35d40f807913b22f5",
+  "workingTreeDirty": false,
+  "label": "ablation-control-headed",
+  "headed": true,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium,firefox",
+    "engines": "three,babylon",
+    "counts": "20",
+    "subsetCounts": "20",
+    "cycles": "10",
+    "presentations": "adaptive",
+    "workloads": "W1",
+    "ablate": ""
+  },
+  "exitCode": 0,
+  "wallClockMs": 87430,
+  "finishedAt": "2026-11-20T07:39:37.980Z"
+}

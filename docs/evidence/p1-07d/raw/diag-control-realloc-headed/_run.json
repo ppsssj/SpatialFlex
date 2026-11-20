@@ -1,0 +1,24 @@
+{
+  "commit": "39498c56c105348d2d1f674d5aa9f340e432d84d",
+  "workingTreeDirty": true,
+  "label": "diag-control-realloc-headed",
+  "headed": true,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium",
+    "engines": "three",
+    "counts": "20",
+    "subsetCounts": "20",
+    "cycles": "10",
+    "presentations": "adaptive",
+    "workloads": "W1",
+    "ablate": "face-realloc"
+  },
+  "exitCode": 0,
+  "wallClockMs": 34282,
+  "finishedAt": "2026-11-20T08:41:45.985Z",
+  "note": "Diagnostic E4: as E0 with --ablate face-realloc (re-allocation only, still SRGB8_ALPHA8)."
+}

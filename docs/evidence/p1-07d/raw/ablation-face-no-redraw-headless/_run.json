@@ -1,0 +1,23 @@
+{
+  "commit": "dce9314c0d5cd4b6e626f7be8cd49f9844ca3ce1",
+  "workingTreeDirty": false,
+  "label": "ablation-face-no-redraw-headless",
+  "headed": false,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium,firefox",
+    "engines": "three",
+    "counts": "20",
+    "subsetCounts": "20",
+    "cycles": "10",
+    "presentations": "adaptive",
+    "workloads": "W1",
+    "ablate": "face-no-redraw"
+  },
+  "exitCode": 0,
+  "wallClockMs": 62632,
+  "finishedAt": "2026-11-20T07:35:08.555Z"
+}

@@ -1,0 +1,49 @@
+{
+  "engine": "three",
+  "browserName": "chromium",
+  "clip": {
+    "x": 561,
+    "y": 353,
+    "width": 511,
+    "height": 66
+  },
+  "values": {
+    "sameSize": true,
+    "pixels": 33726,
+    "meanAbsChannel": 2.2798632113700608,
+    "maxChannel": 64,
+    "share": {
+      "identical": 0.8212654924983692,
+      "upTo2": 0.029146652434323666,
+      "upTo8": 0.05601019984581628,
+      "upTo32": 0.05986479274150507,
+      "over32": 0.03371286247998577
+    }
+  },
+  "hovered": {
+    "sameSize": true,
+    "pixels": 33726,
+    "meanAbsChannel": 2.2838364071240784,
+    "maxChannel": 65,
+    "share": {
+      "identical": 0.821235841783787,
+      "upTo2": 0.02917630314890589,
+      "upTo8": 0.05601019984581628,
+      "upTo32": 0.05983514202692285,
+      "over32": 0.03374251319456799
+    }
+  },
+  "selected": {
+    "sameSize": true,
+    "pixels": 33726,
+    "meanAbsChannel": 2.2798632113700608,
+    "maxChannel": 64,
+    "share": {
+      "identical": 0.8212654924983692,
+      "upTo2": 0.029146652434323666,
+      "upTo8": 0.05601019984581628,
+      "upTo32": 0.05986479274150507,
+      "over32": 0.03371286247998577
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "engine": "three",
+  "browserName": "chromium",
+  "clip": {
+    "x": 561,
+    "y": 353,
+    "width": 511,
+    "height": 66
+  }
+}

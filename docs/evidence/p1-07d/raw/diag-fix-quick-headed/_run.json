@@ -1,0 +1,24 @@
+{
+  "commit": "0310f021d033ecc93b1f3dc6583cac92722f0e7e",
+  "workingTreeDirty": false,
+  "label": "diag-fix-quick-headed",
+  "headed": true,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium,firefox",
+    "engines": "three",
+    "counts": "20",
+    "subsetCounts": "20",
+    "cycles": "10",
+    "presentations": "adaptive",
+    "workloads": "W1",
+    "ablate": ""
+  },
+  "exitCode": 0,
+  "wallClockMs": 54999,
+  "finishedAt": "2026-11-20T08:52:59.896Z",
+  "note": "Quick check of the corrected fix (0310f02) before the full series."
+}

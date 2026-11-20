@@ -1,0 +1,23 @@
+{
+  "commit": "50609e21d48c2280603cf7c35d40f807913b22f5",
+  "workingTreeDirty": false,
+  "label": "ablation-face-linear-headed",
+  "headed": true,
+  "config": {
+    "repeats": "3",
+    "warmupMs": "1000",
+    "sampleMs": "3000",
+    "seed": "7",
+    "browsers": "chromium,firefox",
+    "engines": "three",
+    "counts": "20",
+    "subsetCounts": "20",
+    "cycles": "10",
+    "presentations": "adaptive",
+    "workloads": "W1",
+    "ablate": "face-linear"
+  },
+  "exitCode": 0,
+  "wallClockMs": 59970,
+  "finishedAt": "2026-11-20T07:40:39.426Z"
+}
