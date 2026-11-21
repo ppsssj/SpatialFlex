@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>P1-08A2 unified depth research</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #c8c8c8;
+      }
+      #stage-root {
+        position: relative;
+        width: 1000px;
+        height: 700px;
+      }
+      #staging {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 10;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage-root"></div>
+    <div id="staging"></div>
+    <script type="module" src="/src/research/unified-depth/main.tsx"></script>
+  </body>
+</html>

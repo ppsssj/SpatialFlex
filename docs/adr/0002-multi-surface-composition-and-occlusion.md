@@ -1,6 +1,10 @@
 # ADR 0002 — Multi-Surface DOM composition and occlusion
 
 - **Status:** Accepted for P1-08B, with one open blocker (interpenetrating Surfaces)
+- **Amendment proposed:** [ADR 0003](0003-unified-depth-ownership.md) (P1-08A2)
+  would replace rule 4 and the centroid occluder test with
+  geometry-authoritative split regions. This ADR stays in force until 0003
+  is accepted.
 - **Date:** 2026-11-20
 - **Context documents:** [`docs/p1-08a-multi-surface-architecture.md`](../p1-08a-multi-surface-architecture.md) §10, §14; evidence `docs/evidence/p1-08a/`
 

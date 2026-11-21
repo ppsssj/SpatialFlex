@@ -1,0 +1,2132 @@
+{
+  "milestone": "P1-08A2",
+  "browser": "firefox",
+  "evidenceMode": true,
+  "grid": 40,
+  "records": [
+    {
+      "browser": "firefox",
+      "test": "capability",
+      "browserVersion": "159.0",
+      "track": null,
+      "unsupported": {
+        "contentAttributeReflects": false,
+        "requestPaint": false,
+        "onpaint": false,
+        "captureElementImage": false,
+        "getElementImageDefaultSize": false,
+        "updateElementGeometry": false,
+        "clearElementGeometry": false,
+        "texElementSubImage2D": false,
+        "texElementImage2D": false,
+        "layoutSubtreeProperty": false,
+        "drawElementImage2D": false,
+        "supported": false
+      },
+      "capability": {
+        "contentAttributeReflects": false,
+        "requestPaint": false,
+        "onpaint": false,
+        "captureElementImage": false,
+        "getElementImageDefaultSize": false,
+        "updateElementGeometry": false,
+        "clearElementGeometry": false,
+        "texElementSubImage2D": false,
+        "texElementImage2D": false,
+        "layoutSubtreeProperty": false,
+        "drawElementImage2D": false,
+        "supported": false
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "B/S3/order",
+      "query": "track=dom&scenario=S3&compose=order",
+      "track": "dom-compositor",
+      "probes": 377,
+      "depthVsVisual": 20,
+      "visualVsClick": 0,
+      "clickMismatch": 20,
+      "efpVsDown": 0,
+      "mismatches": [
+        {
+          "x": 340,
+          "y": 260,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "B",
+          "efp": "surface-B",
+          "down": "surface-B",
+          "click": "surface-B"
+        },
+        {
+          "x": 380,
+          "y": 260,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "B",
+          "efp": "surface-B",
+          "down": "surface-B",
+          "click": "surface-B"
+        },
+        {
+          "x": 420,
+          "y": 260,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "B",
+          "efp": "surface-B",
+          "down": "surface-B",
+          "click": "surface-B"
+        },
+        {
+          "x": 460,
+          "y": 260,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "B",
+          "efp": "surface-B",
+          "down": "surface-B",
+          "click": "surface-B"
+        },
+        {
+          "x": 340,
+          "y": 340,
+          "expectedOwner": "A",
+          "expectedTarget": "A-input",
+          "painted": "B",
+          "efp": "B-left",
+          "down": "B-left",
+          "click": "B-left"
+        },
+        {
+          "x": 380,
+          "y": 340,
+          "expectedOwner": "A",
+          "expectedTarget": "A-input",
+          "painted": "B",
+          "efp": "B-left",
+          "down": "B-left",
+          "click": "B-left"
+        },
+        {
+          "x": 420,
+          "y": 340,
+          "expectedOwner": "A",
+          "expectedTarget": "A-input",
+          "painted": "B",
+          "efp": "B-left",
+          "down": "B-left",
+          "click": "B-left"
+        },
+        {
+          "x": 460,
+          "y": 340,
+          "expectedOwner": "A",
+          "expectedTarget": "A-input",
+          "painted": "B",
+          "efp": "B-left",
+          "down": "B-left",
+          "click": "B-left"
+        },
+        {
+          "x": 340,
+          "y": 380,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "B-left",
+          "down": "B-left",
+          "click": "B-left"
+        },
+        {
+          "x": 380,
+          "y": 380,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "B-left",
+          "down": "B-left",
+          "click": "B-left"
+        },
+        {
+          "x": 420,
+          "y": 380,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "B-left",
+          "down": "B-left",
+          "click": "B-left"
+        },
+        {
+          "x": 460,
+          "y": 380,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "B-left",
+          "down": "B-left",
+          "click": "B-left"
+        },
+        {
+          "x": 340,
+          "y": 420,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "surface-B",
+          "down": "surface-B",
+          "click": "surface-B"
+        },
+        {
+          "x": 380,
+          "y": 420,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "B-input",
+          "down": "B-input",
+          "click": "B-input"
+        },
+        {
+          "x": 420,
+          "y": 420,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "B-input",
+          "down": "B-input",
+          "click": "B-input"
+        },
+        {
+          "x": 460,
+          "y": 420,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "B-input",
+          "down": "B-input",
+          "click": "B-input"
+        },
+        {
+          "x": 340,
+          "y": 460,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "surface-B",
+          "down": "surface-B",
+          "click": "surface-B"
+        },
+        {
+          "x": 380,
+          "y": 460,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "surface-B",
+          "down": "surface-B",
+          "click": "surface-B"
+        },
+        {
+          "x": 420,
+          "y": 460,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "surface-B",
+          "down": "surface-B",
+          "click": "surface-B"
+        },
+        {
+          "x": 460,
+          "y": 460,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "B",
+          "efp": "surface-B",
+          "down": "surface-B",
+          "click": "surface-B"
+        }
+      ],
+      "stats": {
+        "frames": 2910,
+        "paints": 2910,
+        "uploads": 0,
+        "uploadedPixels": 0,
+        "texturesLive": 0,
+        "texturesAllocated": 0,
+        "texturesDeleted": 0,
+        "textureBytes": 0,
+        "clipWrites": 2,
+        "clipVertices": 0,
+        "geometryCalls": 0,
+        "composeMs": {
+          "n": 2910,
+          "median": 0,
+          "p95": 1,
+          "p99": 1,
+          "max": 3
+        },
+        "intervals": {
+          "n": 2906,
+          "median": 12.119999999998981,
+          "p95": 18.55999999999767,
+          "p99": 24.340000000000146,
+          "max": 60.08000000000004
+        },
+        "errors": []
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "B/S3/split",
+      "query": "track=dom&scenario=S3&compose=split",
+      "track": "dom-compositor",
+      "probes": 377,
+      "depthVsVisual": 0,
+      "visualVsClick": 0,
+      "clickMismatch": 0,
+      "efpVsDown": 0,
+      "mismatches": [],
+      "stats": {
+        "frames": 3238,
+        "paints": 3238,
+        "uploads": 0,
+        "uploadedPixels": 0,
+        "texturesLive": 0,
+        "texturesAllocated": 0,
+        "texturesDeleted": 0,
+        "textureBytes": 0,
+        "clipWrites": 3,
+        "clipVertices": 16,
+        "geometryCalls": 0,
+        "composeMs": {
+          "n": 3238,
+          "median": 0,
+          "p95": 1,
+          "p99": 2,
+          "max": 5
+        },
+        "intervals": {
+          "n": 3234,
+          "median": 13.159999999996217,
+          "p95": 19.42000000000189,
+          "p99": 25.020000000000437,
+          "max": 77.63999999999999
+        },
+        "errors": []
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "B/S1",
+      "order": {
+        "query": "track=dom&scenario=S1&compose=order",
+        "track": "dom-compositor",
+        "probes": 353,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 2979,
+          "paints": 2979,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 2,
+          "clipVertices": 0,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 2979,
+            "median": 0,
+            "p95": 1,
+            "p99": 1,
+            "max": 7
+          },
+          "intervals": {
+            "n": 2975,
+            "median": 11.7400000000016,
+            "p95": 18.679999999996653,
+            "p99": 24.31999999999971,
+            "max": 85.01999999999998
+          },
+          "errors": []
+        }
+      },
+      "split": {
+        "query": "track=dom&scenario=S1&compose=split",
+        "track": "dom-compositor",
+        "probes": 353,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3042,
+          "paints": 3042,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 2,
+          "clipVertices": 0,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3042,
+            "median": 0,
+            "p95": 1,
+            "p99": 1,
+            "max": 3
+          },
+          "intervals": {
+            "n": 3038,
+            "median": 12.080000000001746,
+            "p95": 18.5,
+            "p99": 24.44000000000233,
+            "max": 51.299999999999955
+          },
+          "errors": []
+        }
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "B/S2",
+      "order": {
+        "query": "track=dom&scenario=S2&compose=order",
+        "track": "dom-compositor",
+        "probes": 374,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3170,
+          "paints": 3170,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 2,
+          "clipVertices": 0,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3170,
+            "median": 0,
+            "p95": 1,
+            "p99": 1,
+            "max": 2
+          },
+          "intervals": {
+            "n": 3166,
+            "median": 11.280000000002474,
+            "p95": 18.88000000000102,
+            "p99": 24.520000000000437,
+            "max": 68.16000000000008
+          },
+          "errors": []
+        }
+      },
+      "split": {
+        "query": "track=dom&scenario=S2&compose=split",
+        "track": "dom-compositor",
+        "probes": 374,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3181,
+          "paints": 3181,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 3,
+          "clipVertices": 8,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3181,
+            "median": 0,
+            "p95": 1,
+            "p99": 2,
+            "max": 5
+          },
+          "intervals": {
+            "n": 3177,
+            "median": 11.520000000004075,
+            "p95": 18.55999999999949,
+            "p99": 24.139999999999418,
+            "max": 67.53999999999996
+          },
+          "errors": []
+        }
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "B/S4",
+      "order": {
+        "query": "track=dom&scenario=S4&compose=order",
+        "track": "dom-compositor",
+        "probes": 374,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3068,
+          "paints": 3068,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 2,
+          "clipVertices": 0,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3068,
+            "median": 0,
+            "p95": 1,
+            "p99": 1,
+            "max": 4
+          },
+          "intervals": {
+            "n": 3064,
+            "median": 12.080000000001746,
+            "p95": 18.840000000000146,
+            "p99": 24.459999999999127,
+            "max": 76.67999999999995
+          },
+          "errors": []
+        }
+      },
+      "split": {
+        "query": "track=dom&scenario=S4&compose=split",
+        "track": "dom-compositor",
+        "probes": 374,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3155,
+          "paints": 3155,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 3,
+          "clipVertices": 8,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3155,
+            "median": 0,
+            "p95": 1,
+            "p99": 2,
+            "max": 4
+          },
+          "intervals": {
+            "n": 3151,
+            "median": 11.960000000002765,
+            "p95": 18.739999999997963,
+            "p99": 24.360000000000582,
+            "max": 58.71999999999997
+          },
+          "errors": []
+        }
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "B/S5-front",
+      "order": {
+        "query": "track=dom&scenario=S5-front&compose=order",
+        "track": "dom-compositor",
+        "probes": 370,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3145,
+          "paints": 3145,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 3,
+          "clipVertices": 0,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3145,
+            "median": 0,
+            "p95": 1,
+            "p99": 2,
+            "max": 12
+          },
+          "intervals": {
+            "n": 3141,
+            "median": 11.680000000000291,
+            "p95": 19.140000000003056,
+            "p99": 24.959999999999127,
+            "max": 75.17999999999995
+          },
+          "errors": []
+        }
+      },
+      "split": {
+        "query": "track=dom&scenario=S5-front&compose=split",
+        "track": "dom-compositor",
+        "probes": 370,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3225,
+          "paints": 3225,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 5,
+          "clipVertices": 24,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3225,
+            "median": 0,
+            "p95": 1,
+            "p99": 2,
+            "max": 5
+          },
+          "intervals": {
+            "n": 3221,
+            "median": 11.860000000000582,
+            "p95": 18.479999999999563,
+            "p99": 24.159999999996217,
+            "max": 67.74000000000001
+          },
+          "errors": []
+        }
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "B/S5-behind",
+      "order": {
+        "query": "track=dom&scenario=S5-behind&compose=order",
+        "track": "dom-compositor",
+        "probes": 380,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3172,
+          "paints": 3172,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 3,
+          "clipVertices": 0,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3172,
+            "median": 0,
+            "p95": 1,
+            "p99": 2,
+            "max": 5
+          },
+          "intervals": {
+            "n": 3168,
+            "median": 11.679999999996653,
+            "p95": 18.799999999999272,
+            "p99": 24.659999999999854,
+            "max": 75.7600000000001
+          },
+          "errors": []
+        }
+      },
+      "split": {
+        "query": "track=dom&scenario=S5-behind&compose=split",
+        "track": "dom-compositor",
+        "probes": 380,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3258,
+          "paints": 3258,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 4,
+          "clipVertices": 4,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3258,
+            "median": 0,
+            "p95": 1,
+            "p99": 2,
+            "max": 7
+          },
+          "intervals": {
+            "n": 3254,
+            "median": 12.040000000000873,
+            "p95": 19.159999999999854,
+            "p99": 24.5,
+            "max": 83.22000000000003
+          },
+          "errors": []
+        }
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "B/S5-cross",
+      "order": {
+        "query": "track=dom&scenario=S5-cross&compose=order",
+        "track": "dom-compositor",
+        "probes": 379,
+        "depthVsVisual": 2,
+        "visualVsClick": 0,
+        "clickMismatch": 2,
+        "efpVsDown": 0,
+        "mismatches": [
+          {
+            "x": 620,
+            "y": 380,
+            "expectedOwner": "A/native",
+            "expectedTarget": "A-native-btn",
+            "painted": "B",
+            "efp": "B-input",
+            "down": "B-input",
+            "click": "B-input"
+          },
+          {
+            "x": 620,
+            "y": 420,
+            "expectedOwner": "A/native",
+            "expectedTarget": "A-native-btn",
+            "painted": "B",
+            "efp": "surface-B",
+            "down": "surface-B",
+            "click": "surface-B"
+          }
+        ],
+        "stats": {
+          "frames": 3599,
+          "paints": 3599,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 3,
+          "clipVertices": 0,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3599,
+            "median": 0,
+            "p95": 1,
+            "p99": 2,
+            "max": 8
+          },
+          "intervals": {
+            "n": 3595,
+            "median": 8.840000000000146,
+            "p95": 18.659999999999854,
+            "p99": 24.200000000000728,
+            "max": 67.96000000000004
+          },
+          "errors": []
+        }
+      },
+      "split": {
+        "query": "track=dom&scenario=S5-cross&compose=split",
+        "track": "dom-compositor",
+        "probes": 379,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3742,
+          "paints": 3742,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 5,
+          "clipVertices": 28,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3742,
+            "median": 0,
+            "p95": 1,
+            "p99": 2,
+            "max": 8
+          },
+          "intervals": {
+            "n": 3738,
+            "median": 8.979999999999563,
+            "p95": 19.239999999997963,
+            "p99": 25.100000000000364,
+            "max": 67
+          },
+          "errors": []
+        }
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "B/S6",
+      "order": {
+        "query": "track=dom&scenario=S6&compose=order",
+        "track": "dom-compositor",
+        "probes": 380,
+        "depthVsVisual": 6,
+        "visualVsClick": 0,
+        "clickMismatch": 6,
+        "efpVsDown": 0,
+        "mismatches": [
+          {
+            "x": 660,
+            "y": 380,
+            "expectedOwner": "canvas",
+            "expectedTarget": "gl",
+            "painted": "B",
+            "efp": "B-input",
+            "down": "B-input",
+            "click": "B-input"
+          },
+          {
+            "x": 700,
+            "y": 380,
+            "expectedOwner": "canvas",
+            "expectedTarget": "gl",
+            "painted": "B",
+            "efp": "B-input",
+            "down": "B-input",
+            "click": "B-input"
+          },
+          {
+            "x": 660,
+            "y": 420,
+            "expectedOwner": "canvas",
+            "expectedTarget": "gl",
+            "painted": "B",
+            "efp": "surface-B",
+            "down": "surface-B",
+            "click": "surface-B"
+          },
+          {
+            "x": 700,
+            "y": 420,
+            "expectedOwner": "canvas",
+            "expectedTarget": "gl",
+            "painted": "B",
+            "efp": "surface-B",
+            "down": "surface-B",
+            "click": "surface-B"
+          },
+          {
+            "x": 660,
+            "y": 460,
+            "expectedOwner": "canvas",
+            "expectedTarget": "gl",
+            "painted": "B",
+            "efp": "surface-B",
+            "down": "surface-B",
+            "click": "surface-B"
+          },
+          {
+            "x": 700,
+            "y": 460,
+            "expectedOwner": "canvas",
+            "expectedTarget": "gl",
+            "painted": "B",
+            "efp": "surface-B",
+            "down": "surface-B",
+            "click": "surface-B"
+          }
+        ],
+        "stats": {
+          "frames": 3241,
+          "paints": 3241,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 2,
+          "clipVertices": 0,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3241,
+            "median": 0,
+            "p95": 1,
+            "p99": 1,
+            "max": 6
+          },
+          "intervals": {
+            "n": 3237,
+            "median": 12.020000000000437,
+            "p95": 19.459999999999127,
+            "p99": 24.599999999998545,
+            "max": 75.10000000000002
+          },
+          "errors": []
+        }
+      },
+      "split": {
+        "query": "track=dom&scenario=S6&compose=split",
+        "track": "dom-compositor",
+        "probes": 380,
+        "depthVsVisual": 0,
+        "visualVsClick": 0,
+        "clickMismatch": 0,
+        "efpVsDown": 0,
+        "mismatches": [],
+        "stats": {
+          "frames": 3173,
+          "paints": 3173,
+          "uploads": 0,
+          "uploadedPixels": 0,
+          "texturesLive": 0,
+          "texturesAllocated": 0,
+          "texturesDeleted": 0,
+          "textureBytes": 0,
+          "clipWrites": 3,
+          "clipVertices": 20,
+          "geometryCalls": 0,
+          "composeMs": {
+            "n": 3173,
+            "median": 0,
+            "p95": 1,
+            "p99": 2,
+            "max": 3
+          },
+          "intervals": {
+            "n": 3169,
+            "median": 11.56000000000131,
+            "p95": 18.280000000000655,
+            "p99": 24.040000000000873,
+            "max": 67.43999999999994
+          },
+          "errors": []
+        }
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "B/keyboard",
+      "selections": {
+        "order": {
+          "values": {
+            "a": "alpha beta",
+            "b": "gamma"
+          },
+          "dblclick": {
+            "focused": "A-input",
+            "length": 0
+          },
+          "drag": {
+            "focused": "A-input",
+            "length": 3
+          }
+        },
+        "split": {
+          "values": {
+            "a": "alpha beta",
+            "b": "gamma"
+          },
+          "dblclick": {
+            "focused": "A-input",
+            "length": 0
+          },
+          "drag": {
+            "focused": "A-input",
+            "length": 3
+          }
+        }
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "three/stock",
+      "cap": {
+        "contentAttributeReflects": false,
+        "requestPaint": false,
+        "onpaint": false,
+        "captureElementImage": false,
+        "getElementImageDefaultSize": false,
+        "updateElementGeometry": false,
+        "clearElementGeometry": false,
+        "texElementSubImage2D": false,
+        "texElementImage2D": false,
+        "layoutSubtreeProperty": false,
+        "drawElementImage2D": false,
+        "supported": false,
+        "threeRevision": "187",
+        "rendererHasTexElementImage2D": false,
+        "rendererHasTexElementSubImage2D": false,
+        "mode": "stock"
+      },
+      "inspect": {
+        "canvasLayoutSubtree": null,
+        "canvasContent": null,
+        "hosts": [
+          {
+            "key": "A",
+            "parentIsCanvas": false,
+            "drawable": false,
+            "transform": "",
+            "textureVersion": 1
+          },
+          {
+            "key": "B",
+            "parentIsCanvas": false,
+            "drawable": false,
+            "transform": "",
+            "textureVersion": 1
+          }
+        ],
+        "glError": 0,
+        "renderInfo": {
+          "geometries": 2,
+          "textures": 2,
+          "calls": 2
+        }
+      },
+      "painted": "?",
+      "pixel": [0, 0, 0, 255]
+    },
+    {
+      "browser": "firefox",
+      "test": "three/stock/browser",
+      "browserName": "firefox"
+    },
+    {
+      "browser": "firefox",
+      "test": "babylon",
+      "inspect": [
+        {
+          "id": "A",
+          "parentIsCanvas": true,
+          "drawable": false,
+          "inert": false,
+          "isReady": true
+        },
+        {
+          "id": "B",
+          "parentIsCanvas": true,
+          "drawable": false,
+          "inert": false,
+          "isReady": true
+        }
+      ],
+      "query": "track=babylon&scenario=S3",
+      "track": "babylon-9.36",
+      "probes": 377,
+      "depthVsVisual": 0,
+      "visualVsClick": 98,
+      "clickMismatch": 98,
+      "efpVsDown": 0,
+      "mismatches": [
+        {
+          "x": 300,
+          "y": 100,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 300,
+          "y": 140,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 340,
+          "y": 140,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 380,
+          "y": 140,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 420,
+          "y": 140,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 460,
+          "y": 140,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 500,
+          "y": 140,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 300,
+          "y": 180,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 340,
+          "y": 180,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 380,
+          "y": 180,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 420,
+          "y": 180,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 500,
+          "y": 180,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 540,
+          "y": 180,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 180,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 620,
+          "y": 180,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 300,
+          "y": 220,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 340,
+          "y": 220,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 380,
+          "y": 220,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 420,
+          "y": 220,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 460,
+          "y": 220,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 220,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 620,
+          "y": 220,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 660,
+          "y": 220,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 700,
+          "y": 220,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 300,
+          "y": 260,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 340,
+          "y": 260,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 380,
+          "y": 260,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 420,
+          "y": 260,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 460,
+          "y": 260,
+          "expectedOwner": "A",
+          "expectedTarget": "A-left",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 540,
+          "y": 260,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 260,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 620,
+          "y": 260,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 660,
+          "y": 260,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 700,
+          "y": 260,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 540,
+          "y": 300,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 300,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 620,
+          "y": 300,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 660,
+          "y": 300,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 700,
+          "y": 300,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 300,
+          "y": 340,
+          "expectedOwner": "A",
+          "expectedTarget": "A-input",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 340,
+          "y": 340,
+          "expectedOwner": "A",
+          "expectedTarget": "A-input",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 380,
+          "y": 340,
+          "expectedOwner": "A",
+          "expectedTarget": "A-input",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 420,
+          "y": 340,
+          "expectedOwner": "A",
+          "expectedTarget": "A-input",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 460,
+          "y": 340,
+          "expectedOwner": "A",
+          "expectedTarget": "A-input",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 540,
+          "y": 340,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 340,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 620,
+          "y": 340,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 660,
+          "y": 340,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 700,
+          "y": 340,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 300,
+          "y": 380,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 340,
+          "y": 380,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 380,
+          "y": 380,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 420,
+          "y": 380,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 460,
+          "y": 380,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 540,
+          "y": 380,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 380,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 620,
+          "y": 380,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 660,
+          "y": 380,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 700,
+          "y": 380,
+          "expectedOwner": "B",
+          "expectedTarget": "B-right",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 300,
+          "y": 420,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 340,
+          "y": 420,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 380,
+          "y": 420,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 420,
+          "y": 420,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 460,
+          "y": 420,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 540,
+          "y": 420,
+          "expectedOwner": "B",
+          "expectedTarget": "B-input",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 420,
+          "expectedOwner": "B",
+          "expectedTarget": "B-input",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 620,
+          "y": 420,
+          "expectedOwner": "B",
+          "expectedTarget": "B-input",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 660,
+          "y": 420,
+          "expectedOwner": "B",
+          "expectedTarget": "B-input",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 700,
+          "y": 420,
+          "expectedOwner": "B",
+          "expectedTarget": "B-input",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 300,
+          "y": 460,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 340,
+          "y": 460,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 380,
+          "y": 460,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 420,
+          "y": 460,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 460,
+          "y": 460,
+          "expectedOwner": "A",
+          "expectedTarget": "surface-A",
+          "painted": "A",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 540,
+          "y": 460,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 460,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 380,
+          "y": 500,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 420,
+          "y": 500,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 460,
+          "y": 500,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 500,
+          "y": 500,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 540,
+          "y": 500,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 500,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 620,
+          "y": 500,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 660,
+          "y": 500,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 700,
+          "y": 500,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 380,
+          "y": 540,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 420,
+          "y": 540,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 460,
+          "y": 540,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 500,
+          "y": 540,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 540,
+          "y": 540,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 540,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 620,
+          "y": 540,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 660,
+          "y": 540,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 700,
+          "y": 540,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 580,
+          "y": 580,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 620,
+          "y": 580,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 660,
+          "y": 580,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        },
+        {
+          "x": 700,
+          "y": 580,
+          "expectedOwner": "B",
+          "expectedTarget": "surface-B",
+          "painted": "B",
+          "efp": "stage",
+          "down": "stage",
+          "click": "stage"
+        }
+      ],
+      "stats": {
+        "frames": 3260,
+        "paints": 3260,
+        "uploads": 0,
+        "uploadedPixels": 0,
+        "texturesLive": 2,
+        "texturesAllocated": 2,
+        "texturesDeleted": 0,
+        "textureBytes": 960000,
+        "clipWrites": 0,
+        "clipVertices": 0,
+        "geometryCalls": 0,
+        "composeMs": {
+          "n": 3260,
+          "median": 1,
+          "p95": 2,
+          "p99": 3,
+          "max": 26
+        },
+        "intervals": {
+          "n": 3258,
+          "median": 12.340000000003783,
+          "p95": 17.76000000000022,
+          "p99": 23.979999999999563,
+          "max": 68.93999999999994
+        },
+        "errors": []
+      }
+    },
+    {
+      "browser": "firefox",
+      "test": "S7-S9 track=dom&compose=split",
+      "s7": {
+        "a": "L 3",
+        "b": "R 2",
+        "same": true,
+        "mounts": 2,
+        "unmounts": 0,
+        "handlers": [
+          "A1:A-left",
+          "A1:A-left",
+          "A1:A-left",
+          "B2:B-right",
+          "B2:B-right"
+        ]
+      },
+      "s9": {
+        "handlers": [],
+        "clicks": [],
+        "oldCurrent": false,
+        "freshCurrent": true,
+        "lifecycle": ["A1:mount", "B2:mount", "A1:unmount", "A3:mount"],
+        "freshLabel": "L 0"
+      },
+      "after": ["A3:A-left"]
+    },
+    {
+      "browser": "firefox",
+      "test": "S8",
+      "results": [
+        {
+          "query": "track=dom&compose=split",
+          "ticks": 15,
+          "uploads": 0,
+          "clipWrites": 433,
+          "delivered": 8,
+          "attempts": 8
+        }
+      ]
+    }
+  ]
+}
