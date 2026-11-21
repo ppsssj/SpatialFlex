@@ -1,7 +1,9 @@
 ﻿import { describe, expect, it } from "vitest";
-import { cssToWorld } from "./coordinates.js";
+import { cssToWorld, intersectSurface } from "./coordinates.js";
 import {
   boundaryDistance,
+  IndeterminateDepthError,
+  resolveDepthSnapshot,
   depthOwner,
   resolveVisibility,
   type DepthPlane,
@@ -187,52 +189,94 @@ it("near-parallel crossing must not become a coplanar tie", () => {
   ).toBe("z");
 });
 
-it("agrees with ray ownership away from boundaries for three crossing planes", () => {
-  const planes = [-0.45, 0, 0.45].map((angle, i) => {
-    const p = plane(String(i), -2);
-    return {
-      ...p,
-      geometry: {
-        ...p.geometry,
-        pose: {
-          ...p.geometry.pose,
-          rotation: [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)] as const,
+it.each([[[-0.45, 0.45]], [[-0.45, 0, 0.45]], [[-0.5, -0.25, 0, 0.25, 0.5]]])(
+  "agrees with ray ownership away from boundaries for crossing planes %s",
+  (angles) => {
+    const planes = angles.map((angle, i) => {
+      const p = plane(String(i), -2);
+      return {
+        ...p,
+        geometry: {
+          ...p.geometry,
+          pose: {
+            ...p.geometry.pose,
+            rotation: [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)] as const,
+          },
         },
-      },
-    };
-  });
-  let tested = 0;
-  const contains = (
-    poly: readonly (readonly [number, number])[],
-    u: number,
-    v: number,
-  ) => {
-    const twiceArea = Math.abs(
-      poly.reduce((sum, p, i) => {
-        const q = poly[(i + 1) % poly.length]!;
-        return sum + p[0] * q[1] - q[0] * p[1];
-      }, 0),
-    );
-    if (twiceArea < 1e-9) return false;
-    const signs = poly.map((p, i) => {
-      const q = poly[(i + 1) % poly.length]!;
-      return (q[0] - p[0]) * (v - p[1]) - (q[1] - p[1]) * (u - p[0]);
+      };
     });
-    return signs.every((x) => x >= -1e-8) || signs.every((x) => x <= 1e-8);
+    let tested = 0;
+    const contains = (
+      poly: readonly (readonly [number, number])[],
+      u: number,
+      v: number,
+    ) => {
+      const twiceArea = Math.abs(
+        poly.reduce((sum, p, i) => {
+          const q = poly[(i + 1) % poly.length]!;
+          return sum + p[0] * q[1] - q[0] * p[1];
+        }, 0),
+      );
+      if (twiceArea < 1e-9) return false;
+      const signs = poly.map((p, i) => {
+        const q = poly[(i + 1) % poly.length]!;
+        return (q[0] - p[0]) * (v - p[1]) - (q[1] - p[1]) * (u - p[0]);
+      });
+      return signs.every((x) => x >= -1e-8) || signs.every((x) => x <= 1e-8);
+    };
+    for (const p of planes) {
+      const visibility = resolveVisibility(p, planes, eye);
+      for (let u = 3.13; u < 98; u += 6.71)
+        for (let v = 4.31; v < 98; v += 8.23) {
+          if (boundaryDistance(visibility, u, v) < 0.05) continue;
+          const direction = cssToWorld(p.geometry, u, v);
+          const ray = { origin: eye, direction };
+          const hits = planes
+            .flatMap((candidate) => {
+              const hit = intersectSurface(candidate.geometry, ray);
+              return hit?.inside && hit.front
+                ? [{ key: candidate.key, distance: hit.distance }]
+                : [];
+            })
+            .sort(
+              (a, b) => a.distance - b.distance || a.key.localeCompare(b.key),
+            );
+          const owner = depthOwner(planes, ray);
+          expect(owner?.key).toBe(hits[0]?.key);
+          expect(
+            visibility.pieces.some((poly) => contains(poly, u, v)),
+            `${p.key} ${u},${v} owner=${JSON.stringify(owner)} visible=${JSON.stringify(visibility)}`,
+          ).toBe(hits[0]?.key === p.key);
+          tested++;
+        }
+    }
+    expect(tested).toBeGreaterThan(100);
+  },
+);
+
+it("snapshot rejects numerically ambiguous near-coplanar crossings", () => {
+  const a = plane("a", -2);
+  const b = plane("b", -2);
+  const tilted = {
+    ...b,
+    geometry: {
+      ...b.geometry,
+      pose: { ...b.geometry.pose, rotation: [0, -1e-15, 0, 1] as const },
+    },
   };
-  for (const p of planes) {
-    const visibility = resolveVisibility(p, planes, eye);
-    for (let u = 3.13; u < 98; u += 6.71)
-      for (let v = 4.31; v < 98; v += 8.23) {
-        if (boundaryDistance(visibility, u, v) < 0.05) continue;
-        const direction = cssToWorld(p.geometry, u, v);
-        const owner = depthOwner(planes, { origin: eye, direction });
-        expect(
-          visibility.pieces.some((poly) => contains(poly, u, v)),
-          `${p.key} ${u},${v} owner=${JSON.stringify(owner)} visible=${JSON.stringify(visibility)}`,
-        ).toBe(owner?.key === p.key);
-        tested++;
-      }
-  }
-  expect(tested).toBeGreaterThan(100);
+  expect(() => resolveDepthSnapshot([a, tilted], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});
+it("snapshot rejects an eye on a plane", () => {
+  expect(() => resolveDepthSnapshot([plane("a", 0)], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});
+it("snapshot accepts normal intersections and supplies ownership", () => {
+  const a = plane("a", -1);
+  const b = plane("b", -2);
+  const snapshot = resolveDepthSnapshot([a, b], eye);
+  expect(snapshot.depthOwner(ray.direction)?.key).toBe("a");
+  expect(snapshot.visibility).toHaveLength(2);
 });

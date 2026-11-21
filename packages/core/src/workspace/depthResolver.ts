@@ -365,3 +365,65 @@ function validatePlanes(planes: readonly DepthPlane[]): void {
     validateGeometry(p.geometry);
   }
 }
+
+/** A scene must be discarded as a whole when depth cannot be safely resolved. */
+export class IndeterminateDepthError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "IndeterminateDepthError";
+  }
+}
+
+/**
+ * Resolve a single geometry/eye snapshot atomically. This conservative preflight
+ * rejects numerically ambiguous, nearly coplanar plane pairs; a caller must
+ * discard the whole snapshot when an error is thrown.
+ */
+export function resolveDepthSnapshot(planes: readonly DepthPlane[], eye: Vec3) {
+  validatePlanes(planes);
+  validateVec(eye);
+  for (let i = 0; i < planes.length; i++) {
+    const a = planes[i]!.geometry;
+    const pa = planeOf(a);
+    const scale = Math.max(
+      1,
+      ...a.pose.position.map(Math.abs),
+      ...eye.map(Math.abs),
+      a.metersPerPixel *
+        a.pose.scale *
+        Math.max(a.resolution.width, a.resolution.height),
+    );
+    const tolerance = 128 * Number.EPSILON * scale;
+    if (Math.abs(dot(pa.normal, sub(eye, pa.point))) <= tolerance)
+      throw new IndeterminateDepthError(
+        "Eye is on or numerically near a plane",
+      );
+    for (let j = 0; j < i; j++) {
+      const b = planes[j]!.geometry;
+      if (coplanar(a, b)) continue;
+      const pb = planeOf(b);
+      const distance = Math.abs(dot(pa.normal, sub(pb.point, pa.point)));
+      if (
+        Math.hypot(...cross(pa.normal, pb.normal)) < 128 * Number.EPSILON &&
+        distance < tolerance
+      )
+        throw new IndeterminateDepthError(
+          "Nearly coplanar planes are numerically ambiguous",
+        );
+    }
+  }
+  const visibility = planes.map((p) => resolveVisibility(p, planes, eye));
+  for (const result of visibility) {
+    for (const polygon of [
+      ...result.pieces,
+      ...result.hidden.map((h) => h.region),
+    ])
+      if (polygon.some((point) => !point.every(Number.isFinite)))
+        throw new IndeterminateDepthError("Nonfinite visibility geometry");
+  }
+  return {
+    visibility,
+    depthOwner: (direction: Vec3) =>
+      depthOwner(planes, { origin: eye, direction }),
+  };
+}
