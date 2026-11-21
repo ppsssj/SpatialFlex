@@ -475,8 +475,22 @@ export function resolveDepthSnapshot(planes: readonly DepthPlane[], eye: Vec3) {
           "Degenerate or nonfinite visibility geometry",
         );
   }
-  return {
-    visibility,
+  for (const result of visibility) {
+    for (const polygon of [
+      ...result.pieces,
+      ...result.hidden.map((h) => h.region),
+    ]) {
+      for (const point of polygon) Object.freeze(point);
+      Object.freeze(polygon);
+    }
+    for (const hidden of result.hidden) Object.freeze(hidden);
+    Object.freeze(result.hidden);
+    Object.freeze(result.pieces);
+    Object.freeze(result);
+  }
+  Object.freeze(visibility);
+  return Object.freeze({
+    visibility: visibility as readonly VisibilityResult[],
     depthOwner: (direction: Vec3) => {
       if (direction.length !== 3 || !direction.every(Number.isFinite))
         throw new IndeterminateDepthError("Invalid ray direction");
@@ -527,5 +541,5 @@ export function resolveDepthSnapshot(planes: readonly DepthPlane[], eye: Vec3) {
         throw new IndeterminateDepthError("Nonfinite ray intersection");
       return hit;
     },
-  };
+  });
 }

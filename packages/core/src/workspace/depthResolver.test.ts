@@ -388,3 +388,48 @@ it("snapshot leaves programmer identity errors distinct", () => {
     IndeterminateDepthError,
   );
 });
+
+it("snapshot reports eye-plane projection failure as indeterminate", () => {
+  const target = plane("target", -2);
+  const base = plane("cross", -0.1);
+  const angle = 0.8;
+  const crossing = {
+    ...base,
+    geometry: {
+      ...base.geometry,
+      pose: {
+        ...base.geometry.pose,
+        rotation: [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)] as const,
+      },
+    },
+  };
+  expect(() => resolveDepthSnapshot([target, crossing], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});
+
+it("deeply freezes snapshot output while retaining ray ownership", () => {
+  const near = plane("near", -1);
+  const far = plane("far", -2);
+  const snapshot = resolveDepthSnapshot([near, far], eye);
+  const result = snapshot.visibility[1]!;
+  const hidden = result.hidden[0]!;
+  const region = hidden.region;
+  const piece = snapshot.visibility[0]!.pieces[0]!;
+  const before = JSON.stringify(snapshot.visibility);
+  expect(Object.isFrozen(snapshot)).toBe(true);
+  expect(Object.isFrozen(snapshot.visibility)).toBe(true);
+  expect(Object.isFrozen(result)).toBe(true);
+  expect(Object.isFrozen(result.hidden)).toBe(true);
+  expect(Object.isFrozen(hidden)).toBe(true);
+  expect(Object.isFrozen(region)).toBe(true);
+  expect(Object.isFrozen(region[0])).toBe(true);
+  expect(Object.isFrozen(snapshot.visibility[0]!.pieces)).toBe(true);
+  expect(Object.isFrozen(piece)).toBe(true);
+  expect(Object.isFrozen(piece[0])).toBe(true);
+  expect(Reflect.set(region[0]!, 0, 999)).toBe(false);
+  expect(Reflect.set(piece, 0, [999, 999])).toBe(false);
+  expect(Reflect.set(snapshot.visibility, 0, result)).toBe(false);
+  expect(JSON.stringify(snapshot.visibility)).toBe(before);
+  expect(snapshot.depthOwner([0, 0, -1])?.key).toBe("near");
+});
