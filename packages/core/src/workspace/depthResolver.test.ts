@@ -1,0 +1,438 @@
+﻿import { describe, expect, it } from "vitest";
+import { cssToWorld, intersectSurface } from "./coordinates.js";
+import {
+  boundaryDistance,
+  IndeterminateDepthError,
+  resolveDepthSnapshot,
+  depthOwner,
+  resolveVisibility,
+  type DepthPlane,
+} from "./depthResolver.js";
+
+const plane = (key: string, z: number, back = false): DepthPlane => ({
+  key,
+  geometry: {
+    resolution: { width: 100, height: 100 },
+    metersPerPixel: 0.01,
+    pose: {
+      position: [0, 0, z],
+      rotation: back ? [0, 1, 0, 0] : [0, 0, 0, 1],
+      scale: 1,
+    },
+  },
+});
+const eye = [0, 0, 0] as const;
+const ray = { origin: eye, direction: [0, 0, -1] as const };
+
+describe("SDK ownership counterexamples", () => {
+  it("back-facing foreground must not hide a front-facing background", () => {
+    const planes = [plane("front", -2), plane("back", -1, true)];
+    expect(depthOwner(planes, ray)?.key).toBe("front");
+    expect(resolveVisibility(planes[0]!, planes, eye).hidden).toHaveLength(0);
+  });
+  it("coplanar planes have one owner", () => {
+    const planes = [plane("a", -1), plane("b", -1)];
+    expect(depthOwner(planes, ray)?.key).toBe("a");
+    expect(
+      resolveVisibility(planes[0]!, planes, eye).pieces.length,
+    ).toBeGreaterThan(0);
+    expect(resolveVisibility(planes[1]!, planes, eye).pieces).toHaveLength(0);
+  });
+  it("very close depths retain the nearer owner", () => {
+    const planes = [plane("near", -1), plane("far", -1 - 1e-10)];
+    expect(depthOwner(planes, ray)?.key).toBe("near");
+    expect(
+      resolveVisibility(planes[0]!, planes, eye).pieces.length,
+    ).toBeGreaterThan(0);
+    expect(resolveVisibility(planes[1]!, planes, eye).pieces).toHaveLength(0);
+  });
+  it("a surface very close to the eye remains the owner", () => {
+    const planes = [plane("near", -1e-10), plane("far", -1)];
+    expect(depthOwner(planes, ray)?.key).toBe("near");
+    expect(
+      resolveVisibility(planes[0]!, planes, eye).pieces.length,
+    ).toBeGreaterThan(0);
+    expect(resolveVisibility(planes[1]!, planes, eye).pieces).toHaveLength(0);
+  });
+});
+
+it("is invariant to input order for coplanar planes", () => {
+  const planes = [plane("z", -1), plane("a", -1), plane("b", -2)];
+  for (const list of [planes, [...planes].reverse()]) {
+    expect(depthOwner(list, ray)?.key).toBe("a");
+    expect(resolveVisibility(planes[0]!, list, eye).pieces).toHaveLength(0);
+    expect(
+      resolveVisibility(planes[1]!, list, eye).pieces.length,
+    ).toBeGreaterThan(0);
+  }
+});
+it("rejects invalid geometry, duplicate identities and zero rays", () => {
+  const a = plane("a", -1);
+  expect(() => depthOwner([a, a], ray)).toThrow();
+  expect(() =>
+    depthOwner([a], { origin: eye, direction: [0, 0, 0] }),
+  ).toThrow();
+  expect(() =>
+    depthOwner([{ ...a, geometry: { ...a.geometry, metersPerPixel: 0 } }], ray),
+  ).toThrow();
+});
+it("excludes a back-facing target", () => {
+  const back = plane("back", -1, true);
+  expect(resolveVisibility(back, [back], eye).pieces).toHaveLength(0);
+});
+it("overlapping occluders never restore a hidden area", () => {
+  const planes = [plane("target", -3), plane("a", -1), plane("b", -2)];
+  expect(depthOwner(planes, ray)?.key).toBe("a");
+  expect(resolveVisibility(planes[0]!, planes, eye).pieces).toHaveLength(0);
+});
+
+it("small real occlusions retain ray/visibility agreement", () => {
+  const target = plane("target", -2);
+  const base = plane("near", -1);
+  const near = {
+    ...base,
+    geometry: {
+      ...base.geometry,
+      resolution: { width: 0.0001, height: 0.0001 },
+    },
+  };
+  const planes = [target, near];
+  expect(depthOwner(planes, ray)?.key).toBe("near");
+  expect(resolveVisibility(target, planes, eye).hidden).toHaveLength(1);
+});
+
+it("agrees with independent ray probes for five partially overlapping planes", () => {
+  const planes = Array.from({ length: 5 }, (_, i) => {
+    const p = plane(String(i), -1 - i * 0.5);
+    return {
+      ...p,
+      geometry: {
+        ...p.geometry,
+        pose: {
+          ...p.geometry.pose,
+          position: [i * 0.15 - 0.3, 0, -1 - i * 0.5] as const,
+        },
+      },
+    };
+  });
+  const inside = (
+    poly: readonly (readonly [number, number])[],
+    x: number,
+    y: number,
+  ) => {
+    const signs = poly.map((a, i) => {
+      const b = poly[(i + 1) % poly.length]!;
+      return (b[0] - a[0]) * (y - a[1]) - (b[1] - a[1]) * (x - a[0]);
+    });
+    return signs.every((v) => v >= -1e-8) || signs.every((v) => v <= 1e-8);
+  };
+  for (const target of planes) {
+    const visible = resolveVisibility(target, planes, eye);
+    for (let u = 2.37; u < 100; u += 7.11)
+      for (let v = 3.23; v < 100; v += 9.07) {
+        const [x, y, z] = cssToWorld(target.geometry, u, v);
+        const owner = depthOwner(planes, { origin: eye, direction: [x, y, z] });
+        expect(visible.pieces.some((poly) => inside(poly, u, v))).toBe(
+          owner?.key === target.key,
+        );
+      }
+  }
+});
+
+it("resolves rotated coplanar surfaces by key in either order", () => {
+  const q = Math.sin(Math.PI / 8),
+    w = Math.cos(Math.PI / 8);
+  const first = plane("a", -2);
+  const a = {
+    ...first,
+    geometry: {
+      ...first.geometry,
+      pose: { ...first.geometry.pose, rotation: [0, q, 0, w] as const },
+    },
+  };
+  const b = {
+    ...a,
+    key: "z",
+    geometry: {
+      ...a.geometry,
+      pose: { ...a.geometry.pose, rotation: [0, -q, 0, -w] as const },
+    },
+  };
+  for (const planes of [
+    [a, b],
+    [b, a],
+  ]) {
+    expect(depthOwner(planes, ray)?.key).toBe("a");
+    expect(resolveVisibility(a, planes, eye).pieces.length).toBeGreaterThan(0);
+    expect(resolveVisibility(b, planes, eye).pieces).toHaveLength(0);
+  }
+});
+it("keeps distinct parallel planes separated at 1e-10 metres", () => {
+  const z = plane("z", -1);
+  const a = plane("a", -1 - 1e-10);
+  expect(depthOwner([a, z], ray)?.key).toBe("z");
+  expect(resolveVisibility(a, [a, z], eye).pieces).toHaveLength(0);
+});
+
+it("near-parallel crossing must not become a coplanar tie", () => {
+  const a = plane("a", -2);
+  const base = plane("z", -2);
+  const z = {
+    ...base,
+    geometry: {
+      ...base.geometry,
+      pose: { ...base.geometry.pose, rotation: [0, -1e-15, 0, 1] as const },
+    },
+  };
+  expect(
+    depthOwner([a, z], { origin: eye, direction: [0.4, 0, -2] })?.key,
+  ).toBe("z");
+});
+
+it.each([[[-0.45, 0.45]], [[-0.45, 0, 0.45]], [[-0.5, -0.25, 0, 0.25, 0.5]]])(
+  "agrees with ray ownership away from boundaries for crossing planes %s",
+  (angles) => {
+    const planes = angles.map((angle, i) => {
+      const p = plane(String(i), -2);
+      return {
+        ...p,
+        geometry: {
+          ...p.geometry,
+          pose: {
+            ...p.geometry.pose,
+            rotation: [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)] as const,
+          },
+        },
+      };
+    });
+    let tested = 0;
+    const contains = (
+      poly: readonly (readonly [number, number])[],
+      u: number,
+      v: number,
+    ) => {
+      const twiceArea = Math.abs(
+        poly.reduce((sum, p, i) => {
+          const q = poly[(i + 1) % poly.length]!;
+          return sum + p[0] * q[1] - q[0] * p[1];
+        }, 0),
+      );
+      if (twiceArea < 1e-9) return false;
+      const signs = poly.map((p, i) => {
+        const q = poly[(i + 1) % poly.length]!;
+        return (q[0] - p[0]) * (v - p[1]) - (q[1] - p[1]) * (u - p[0]);
+      });
+      return signs.every((x) => x >= -1e-8) || signs.every((x) => x <= 1e-8);
+    };
+    for (const p of planes) {
+      const visibility = resolveVisibility(p, planes, eye);
+      for (let u = 3.13; u < 98; u += 6.71)
+        for (let v = 4.31; v < 98; v += 8.23) {
+          if (boundaryDistance(visibility, u, v) < 0.05) continue;
+          const direction = cssToWorld(p.geometry, u, v);
+          const ray = { origin: eye, direction };
+          const hits = planes
+            .flatMap((candidate) => {
+              const hit = intersectSurface(candidate.geometry, ray);
+              return hit?.inside && hit.front
+                ? [{ key: candidate.key, distance: hit.distance }]
+                : [];
+            })
+            .sort(
+              (a, b) => a.distance - b.distance || a.key.localeCompare(b.key),
+            );
+          const owner = depthOwner(planes, ray);
+          expect(owner?.key).toBe(hits[0]?.key);
+          expect(
+            visibility.pieces.some((poly) => contains(poly, u, v)),
+            `${p.key} ${u},${v} owner=${JSON.stringify(owner)} visible=${JSON.stringify(visibility)}`,
+          ).toBe(hits[0]?.key === p.key);
+          tested++;
+        }
+    }
+    expect(tested).toBeGreaterThan(100);
+  },
+);
+
+it("snapshot rejects numerically ambiguous near-coplanar crossings", () => {
+  const a = plane("a", -2);
+  const b = plane("b", -2);
+  const tilted = {
+    ...b,
+    geometry: {
+      ...b.geometry,
+      pose: { ...b.geometry.pose, rotation: [0, -1e-15, 0, 1] as const },
+    },
+  };
+  expect(() => resolveDepthSnapshot([a, tilted], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});
+it("snapshot rejects an eye on a plane", () => {
+  expect(() => resolveDepthSnapshot([plane("a", 0)], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});
+it("snapshot accepts normal intersections and supplies ownership", () => {
+  const a = plane("a", -1);
+  const b = plane("b", -2);
+  const snapshot = resolveDepthSnapshot([a, b], eye);
+  expect(snapshot.depthOwner(ray.direction)?.key).toBe("a");
+  expect(snapshot.visibility).toHaveLength(2);
+});
+
+it("snapshot copies geometry, array and camera before returning", () => {
+  const a = plane("a", -1);
+  const b = plane("b", -2);
+  const planes = [a, b];
+  const camera: [number, number, number] = [0, 0, 0];
+  const snapshot = resolveDepthSnapshot(planes, camera);
+  const before = JSON.stringify(snapshot.visibility);
+  (a.geometry.pose.position as unknown as number[])[2] = -9;
+  (a.geometry.pose.rotation as unknown as number[])[1] = 1;
+  (b.geometry.resolution as { width: number }).width = 1;
+  camera[2] = -100;
+  planes.splice(0);
+  expect(snapshot.depthOwner([0, 0, -1])?.key).toBe("a");
+  expect(JSON.stringify(snapshot.visibility)).toBe(before);
+});
+it("snapshot handles ordinary X crossing", () => {
+  const planes = [-0.4, 0.4].map((angle, i) => {
+    const p = plane(String(i), -2);
+    return {
+      ...p,
+      geometry: {
+        ...p.geometry,
+        pose: {
+          ...p.geometry.pose,
+          rotation: [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)] as const,
+        },
+      },
+    };
+  });
+  expect(resolveDepthSnapshot(planes, eye).visibility).toHaveLength(2);
+});
+it("snapshot rejects zero and nonfinite rays with the same error type", () => {
+  const snapshot = resolveDepthSnapshot([plane("a", -1)], eye);
+  expect(() => snapshot.depthOwner([0, 0, 0])).toThrow(IndeterminateDepthError);
+  expect(() => snapshot.depthOwner([NaN, 0, -1])).toThrow(
+    IndeterminateDepthError,
+  );
+});
+
+it("rejects non-transitive represented coplanar classifications", () => {
+  const q = Math.sin(Math.PI / 8),
+    w = Math.cos(Math.PI / 8);
+  const positions = [
+    [-6146023221944199, 0, 6146023221944198],
+    [5047129602709714, 0, -5047129602709716],
+    [7729199008976106, 0, -7729199008976108],
+  ] as const;
+  const planes = positions.map((position, i) => {
+    const p = plane(String(i), -2);
+    return {
+      ...p,
+      geometry: {
+        ...p.geometry,
+        pose: { ...p.geometry.pose, position, rotation: [0, q, 0, w] as const },
+      },
+    };
+  });
+  expect(() => resolveDepthSnapshot(planes, [0, 5, 10])).toThrow(
+    "Non-transitive coplanar classification",
+  );
+});
+it("rejects numerically tied ray ownership at an X crossing", () => {
+  const planes = [-0.4, 0.4].map((angle, i) => {
+    const p = plane(String(i), -2);
+    return {
+      ...p,
+      geometry: {
+        ...p.geometry,
+        pose: {
+          ...p.geometry.pose,
+          rotation: [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)] as const,
+        },
+      },
+    };
+  });
+  const snapshot = resolveDepthSnapshot(planes, eye);
+  expect(() => snapshot.depthOwner([0, 0, -1])).toThrow(
+    IndeterminateDepthError,
+  );
+});
+
+it("snapshot rejects a numerically degenerate surface polygon", () => {
+  const p = plane("a", -1);
+  const tiny = {
+    ...p,
+    geometry: {
+      ...p.geometry,
+      resolution: { width: Number.MIN_VALUE, height: Number.MIN_VALUE },
+    },
+  };
+  expect(() => resolveDepthSnapshot([tiny], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});
+it("snapshot rejects camera within its scale-dependent tolerance", () => {
+  expect(() => resolveDepthSnapshot([plane("a", -1e-15)], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});
+it("snapshot leaves programmer identity errors distinct", () => {
+  const a = plane("a", -1);
+  expect(() => resolveDepthSnapshot([a, a], eye)).toThrow(TypeError);
+  const broken = { ...a, geometry: { ...a.geometry, metersPerPixel: 0 } };
+  expect(() => resolveDepthSnapshot([broken], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});
+
+it("snapshot reports eye-plane projection failure as indeterminate", () => {
+  const target = plane("target", -2);
+  const base = plane("cross", -0.1);
+  const angle = 0.8;
+  const crossing = {
+    ...base,
+    geometry: {
+      ...base.geometry,
+      pose: {
+        ...base.geometry.pose,
+        rotation: [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)] as const,
+      },
+    },
+  };
+  expect(() => resolveDepthSnapshot([target, crossing], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+  expect(() => resolveDepthSnapshot([target, crossing], eye)).toThrow(
+    "Occluder crosses the eye plane or projection is numerically unstable",
+  );
+});
+
+it("deeply freezes snapshot output while retaining ray ownership", () => {
+  const near = plane("near", -1);
+  const far = plane("far", -2);
+  const snapshot = resolveDepthSnapshot([near, far], eye);
+  const result = snapshot.visibility[1]!;
+  const hidden = result.hidden[0]!;
+  const region = hidden.region;
+  const piece = snapshot.visibility[0]!.pieces[0]!;
+  const before = JSON.stringify(snapshot.visibility);
+  expect(Object.isFrozen(snapshot)).toBe(true);
+  expect(Object.isFrozen(snapshot.visibility)).toBe(true);
+  expect(Object.isFrozen(result)).toBe(true);
+  expect(Object.isFrozen(result.hidden)).toBe(true);
+  expect(Object.isFrozen(hidden)).toBe(true);
+  expect(Object.isFrozen(region)).toBe(true);
+  expect(Object.isFrozen(region[0])).toBe(true);
+  expect(Object.isFrozen(snapshot.visibility[0]!.pieces)).toBe(true);
+  expect(Object.isFrozen(piece)).toBe(true);
+  expect(Object.isFrozen(piece[0])).toBe(true);
+  expect(Reflect.set(region[0]!, 0, 999)).toBe(false);
+  expect(Reflect.set(piece, 0, [999, 999])).toBe(false);
+  expect(Reflect.set(snapshot.visibility, 0, result)).toBe(false);
+  expect(JSON.stringify(snapshot.visibility)).toBe(before);
+  expect(snapshot.depthOwner([0, 0, -1])?.key).toBe("near");
+});
