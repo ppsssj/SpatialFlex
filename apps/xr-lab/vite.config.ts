@@ -15,6 +15,7 @@ export default defineConfig({
         multisurface: "multi-surface.html",
         // P1-08B3 Multi-Surface XR fixture (experimental; own page).
         multisurfacexr: "multi-surface-xr.html",
+        cssContextResearch: "research-css-context.html",
       },
     },
     // The bundled WebXR emulator (IWER) and its optional rooms are large,

@@ -1,0 +1,30 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CSS context research</title>
+  </head>
+  <body>
+    <header>
+      <h1>CSS context research</h1>
+      <nav>
+        <button id="original">Restore</button
+        ><button id="direct">Reparent</button
+        ><button id="snapshot">Reparent + snapshot</button
+        ><button id="transform">Transform</button
+        ><button id="theme">Toggle theme</button
+        ><button id="resize">Resize container</button
+        ><button id="unmount">Restore &amp; unmount</button
+        ><button id="unsafe-unmount">Unmount while moved</button>
+      </nav>
+    </header>
+    <main>
+      <div id="root"></div>
+      <section id="destination" aria-label="Destination">
+        <h2>Destination</h2>
+      </section>
+    </main>
+    <script type="module" src="/src/research-css-context/main.tsx"></script>
+  </body>
+</html>
