@@ -1,0 +1,50 @@
+﻿body {
+  font: 16px system-ui;
+  margin: 20px;
+}
+.dashboard {
+  --accent: rgb(0, 60, 220);
+  container-type: inline-size;
+  width: 600px;
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+}
+.dashboard .card {
+  color: var(--accent);
+  background: #eee;
+  padding: 12px;
+}
+.card {
+  width: 250px;
+  animation: pulse 20s linear infinite;
+}
+.card p {
+  font-size: 12px;
+}
+@container (min-width: 400px) {
+  .card p {
+    font-size: 24px;
+  }
+}
+#same,
+#outside,
+#portal-a,
+#portal-b,
+#second-target {
+  border: 1px dashed #555;
+  min-height: 40px;
+  margin: 10px;
+}
+@keyframes pulse {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dashboard.alternate {
+  --accent: rgb(210, 40, 45);
+}

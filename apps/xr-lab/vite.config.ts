@@ -14,6 +14,7 @@ export default defineConfig({
         // shell is unchanged).
         multisurface: "multi-surface.html",
         cssContextResearch: "research-css-context.html",
+        reactOwnershipResearch: "research-react-ownership.html",
       },
     },
     // The bundled WebXR emulator (IWER) and its optional rooms are large,
