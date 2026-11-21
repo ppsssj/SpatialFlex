@@ -1,0 +1,4422 @@
+{
+  "milestone": "P1-08A2",
+  "browser": "chromium",
+  "browserVersion": "159.0.8154.6",
+  "mode": "headless",
+  "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "repeats": 3,
+  "windowMs": 4000,
+  "note": "Measured on the author's workstation; software WebGL (SwiftShader) in headless Chromium is not representative of hardware XR.",
+  "results": [
+    {
+      "track": "dom-order",
+      "scene": "one-surface",
+      "runs": [
+        {
+          "seconds": 4.01,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.08500000834465027,
+            "p95": 0.16999998688697815,
+            "p99": 0.21000000834465027,
+            "max": 0.2250000238418579
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.32500001788139343,
+            "max": 3.1350000202655792
+          },
+          "pressToNextFrameMs": {
+            "median": 4.534999992847588,
+            "max": 11.44500000476819
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 2.1310000000000002,
+            "recalcStyleMs": 0.322,
+            "scriptMs": 38.602,
+            "taskMs": 836.418,
+            "jsHeapUsed": 11091888
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.009,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.06999999284744263,
+            "p95": 0.10499998927116394,
+            "p99": 0.14000001549720764,
+            "max": 0.1550000011920929
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.3199999928474426,
+            "max": 0.7149999737739563
+          },
+          "pressToNextFrameMs": {
+            "median": 5.184999992847224,
+            "max": 13.174999995231701
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.36200000000000004,
+            "recalcStyleMs": 0.253,
+            "scriptMs": 26.952,
+            "taskMs": 711.085,
+            "jsHeapUsed": 12017832
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.007,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.06999999284744263,
+            "p95": 0.09999999403953552,
+            "p99": 0.125,
+            "max": 0.17000001668930054
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.3100000023841858,
+            "max": 2.844999998807907
+          },
+          "pressToNextFrameMs": {
+            "median": 6.784999988079107,
+            "max": 15.159999980926386
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.39399999999999996,
+            "recalcStyleMs": 0.326,
+            "scriptMs": 26.457,
+            "taskMs": 674.467,
+            "jsHeapUsed": 19703392
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "dom-order",
+      "scene": "two-side-by-side",
+      "runs": [
+        {
+          "seconds": 4.007,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.07999998331069946,
+            "p95": 0.10500001907348633,
+            "p99": 0.1300000250339508,
+            "max": 0.1850000023841858
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.38499999046325684,
+            "max": 2.939999997615814
+          },
+          "pressToNextFrameMs": {
+            "median": 7.810000008344559,
+            "max": 16.08999998688705
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.419,
+            "recalcStyleMs": 0.305,
+            "scriptMs": 28.804999999999996,
+            "taskMs": 675.6129999999999,
+            "jsHeapUsed": 18304596
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.004,
+          "frameInterval": {
+            "n": 239,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 240,
+            "median": 0.07499998807907104,
+            "p95": 0.12000000476837158,
+            "p99": 0.16499999165534973,
+            "max": 0.3100000023841858
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.32499998807907104,
+            "max": 3.209999978542328
+          },
+          "pressToNextFrameMs": {
+            "median": 2.9800000143050056,
+            "max": 15.91500000238375
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.421,
+            "recalcStyleMs": 0.29100000000000004,
+            "scriptMs": 28.404,
+            "taskMs": 719.668,
+            "jsHeapUsed": 18960556
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.011,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.0899999737739563,
+            "p95": 0.19500002264976501,
+            "p99": 0.22499999403953552,
+            "max": 0.38499999046325684
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.3700000047683716,
+            "max": 2.9300000071525574
+          },
+          "pressToNextFrameMs": {
+            "median": 10.965000010729,
+            "max": 13.99000002145749
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.41,
+            "recalcStyleMs": 0.416,
+            "scriptMs": 35.724,
+            "taskMs": 909.446,
+            "jsHeapUsed": 20033872
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "dom-order",
+      "scene": "two-overlapping",
+      "runs": [
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 239,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 33.335000000000036
+          },
+          "composeMs": {
+            "n": 240,
+            "median": 0.07500001788139343,
+            "p95": 0.1550000011920929,
+            "p99": 0.2199999988079071,
+            "max": 0.2800000011920929
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.6099999845027924,
+            "max": 0.6699999868869781
+          },
+          "pressToNextFrameMs": {
+            "median": 10.819999999999709,
+            "max": 12.67000000119242
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.491,
+            "recalcStyleMs": 0.345,
+            "scriptMs": 31.189,
+            "taskMs": 786.756,
+            "jsHeapUsed": 33222824
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.002,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.08500000834465027,
+            "p95": 0.16999998688697815,
+            "p99": 0.22499999403953552,
+            "max": 0.26499998569488525
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.4099999964237213,
+            "max": 0.8699999749660492
+          },
+          "pressToNextFrameMs": {
+            "median": 7.914999982118388,
+            "max": 11.999999983310772
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.483,
+            "recalcStyleMs": 0.378,
+            "scriptMs": 34.679,
+            "taskMs": 906.9979999999999,
+            "jsHeapUsed": 29990516
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.015,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.06499999761581421,
+            "p95": 0.0949999988079071,
+            "p99": 0.125,
+            "max": 0.21000000834465027
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.5150000154972076,
+            "max": 1.9849999845027924
+          },
+          "pressToNextFrameMs": {
+            "median": 11.584999994039663,
+            "max": 14.584999986886942
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.424,
+            "recalcStyleMs": 0.386,
+            "scriptMs": 25.62,
+            "taskMs": 640.587,
+            "jsHeapUsed": 10067784
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "dom-order",
+      "scene": "two-interpenetrating",
+      "runs": [
+        {
+          "seconds": 4.013,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.07500001788139343,
+            "p95": 0.0949999988079071,
+            "p99": 0.15000000596046448,
+            "max": 0.16999998688697815
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.3149999976158142,
+            "max": 1.1949999928474426
+          },
+          "pressToNextFrameMs": {
+            "median": 10.669999989271219,
+            "max": 12.654999996423612
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.506,
+            "recalcStyleMs": 0.35,
+            "scriptMs": 28.935,
+            "taskMs": 686.283,
+            "jsHeapUsed": 10554508
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.013,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.07499998807907104,
+            "p95": 0.09500002861022949,
+            "p99": 0.14000001549720764,
+            "max": 0.19499999284744263
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.36500000953674316,
+            "max": 0.6899999976158142
+          },
+          "pressToNextFrameMs": {
+            "median": 2.0650000047680805,
+            "max": 8.765000015497208
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.352,
+            "recalcStyleMs": 0.26699999999999996,
+            "scriptMs": 28.015,
+            "taskMs": 668.306,
+            "jsHeapUsed": 17017636
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.008,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.07499998807907104,
+            "p95": 0.08500000834465027,
+            "p99": 0.12000000476837158,
+            "max": 0.13999998569488525
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.3349999785423279,
+            "max": 0.6800000071525574
+          },
+          "pressToNextFrameMs": {
+            "median": 10.689999979734239,
+            "max": 11.679999977350235
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.439,
+            "recalcStyleMs": 0.268,
+            "scriptMs": 26.769000000000002,
+            "taskMs": 666.838,
+            "jsHeapUsed": 15404112
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "dom-order",
+      "scene": "two-dynamic",
+      "runs": [
+        {
+          "seconds": 4.014,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.0949999988079071,
+            "p95": 0.15000000596046448,
+            "p99": 0.19999998807907104,
+            "max": 0.3100000023841858
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.445000022649765,
+            "max": 2.050000011920929
+          },
+          "pressToNextFrameMs": {
+            "median": 8.25999999880787,
+            "max": 12.975000016689592
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 48,
+            "recalcStyleCount": 249,
+            "layoutMs": 5.625,
+            "recalcStyleMs": 19.7,
+            "scriptMs": 54.239999999999995,
+            "taskMs": 772.007,
+            "jsHeapUsed": 17336932
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.09999999403953552,
+            "p95": 0.13500002026557922,
+            "p99": 0.17500001192092896,
+            "max": 0.17999997735023499
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.38499999046325684,
+            "max": 3.3900000154972076
+          },
+          "pressToNextFrameMs": {
+            "median": 11.064999995231574,
+            "max": 15.285000001192202
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 53,
+            "recalcStyleCount": 248,
+            "layoutMs": 6.492,
+            "recalcStyleMs": 19.319,
+            "scriptMs": 50.715,
+            "taskMs": 754.3729999999999,
+            "jsHeapUsed": 11403336
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.003,
+          "frameInterval": {
+            "n": 239,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 240,
+            "median": 0.0949999988079071,
+            "p95": 0.13999998569488525,
+            "p99": 0.16499999165534973,
+            "max": 0.24000000953674316
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.4449999928474426,
+            "max": 1.895000010728836
+          },
+          "pressToNextFrameMs": {
+            "median": 11.269999995231956,
+            "max": 14.219999997616014
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 75,
+            "recalcStyleCount": 247,
+            "layoutMs": 7.460999999999999,
+            "recalcStyleMs": 18.816,
+            "scriptMs": 52.932,
+            "taskMs": 766.892,
+            "jsHeapUsed": 14734036
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "dom-split",
+      "scene": "one-surface",
+      "runs": [
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.07000002264976501,
+            "p95": 0.125,
+            "p99": 0.1599999964237213,
+            "max": 0.3050000071525574
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.2049999833106995,
+            "max": 1.9599999785423279
+          },
+          "pressToNextFrameMs": {
+            "median": 11.465000015497026,
+            "max": 13.764999990463366
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.509,
+            "recalcStyleMs": 0.358,
+            "scriptMs": 30.587,
+            "taskMs": 746.856,
+            "jsHeapUsed": 13156024
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.005,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.07499998807907104,
+            "p95": 0.11000001430511475,
+            "p99": 0.13500002026557922,
+            "max": 0.17999997735023499
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.3349999785423279,
+            "max": 0.8299999833106995
+          },
+          "pressToNextFrameMs": {
+            "median": 7.659999985694867,
+            "max": 11.589999983310918
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.532,
+            "recalcStyleMs": 0.29,
+            "scriptMs": 28.732,
+            "taskMs": 693.54,
+            "jsHeapUsed": 14551352
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.008,
+          "frameInterval": {
+            "n": 239,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 240,
+            "median": 0.07000002264976501,
+            "p95": 0.11000001430511475,
+            "p99": 0.15000000596046448,
+            "max": 0.1600000262260437
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.375,
+            "max": 2.145000010728836
+          },
+          "pressToNextFrameMs": {
+            "median": 11.310000011921147,
+            "max": 13.07500000953678
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.503,
+            "recalcStyleMs": 0.34400000000000003,
+            "scriptMs": 29.357999999999997,
+            "taskMs": 719.187,
+            "jsHeapUsed": 19022484
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "dom-split",
+      "scene": "two-side-by-side",
+      "runs": [
+        {
+          "seconds": 4.015,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.0949999988079071,
+            "p95": 0.12999999523162842,
+            "p99": 0.1550000011920929,
+            "max": 0.20000001788139343
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.6450000107288361,
+            "max": 1.6299999952316284
+          },
+          "pressToNextFrameMs": {
+            "median": 11.864999984502901,
+            "max": 12.634999995231738
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.555,
+            "recalcStyleMs": 0.34400000000000003,
+            "scriptMs": 33.842999999999996,
+            "taskMs": 690.77,
+            "jsHeapUsed": 19479696
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.001,
+          "frameInterval": {
+            "n": 239,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 240,
+            "median": 0.08500000834465027,
+            "p95": 0.125,
+            "p99": 0.14000001549720764,
+            "max": 0.22999998927116394
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.375,
+            "max": 2.7750000059604645
+          },
+          "pressToNextFrameMs": {
+            "median": 6.354999973773829,
+            "max": 15.609999984502792
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.516,
+            "recalcStyleMs": 0.388,
+            "scriptMs": 32.279999999999994,
+            "taskMs": 669.717,
+            "jsHeapUsed": 25265300
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.004,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.08500000834465027,
+            "p95": 0.12000000476837158,
+            "p99": 0.13500002026557922,
+            "max": 0.1550000011920929
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.35499998927116394,
+            "max": 0.8100000023841858
+          },
+          "pressToNextFrameMs": {
+            "median": 7.259999997615978,
+            "max": 11.529999994039372
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.438,
+            "recalcStyleMs": 0.32,
+            "scriptMs": 31.913999999999998,
+            "taskMs": 676.18,
+            "jsHeapUsed": 19544544
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "dom-split",
+      "scene": "two-overlapping",
+      "runs": [
+        {
+          "seconds": 4.009,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.12000000476837158,
+            "p95": 0.16500002145767212,
+            "p99": 0.20500001311302185,
+            "max": 0.3199999928474426
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 8,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.3699999749660492,
+            "max": 5.645000010728836
+          },
+          "pressToNextFrameMs": {
+            "median": 1.4450000047681897,
+            "max": 9.904999984502865
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.414,
+            "recalcStyleMs": 0.312,
+            "scriptMs": 40.338,
+            "taskMs": 724.5899999999999,
+            "jsHeapUsed": 26311976
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.011,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.12000000476837158,
+            "p95": 0.23499998450279236,
+            "p99": 0.3150000274181366,
+            "max": 0.3499999940395355
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 8,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.33500000834465027,
+            "max": 0.7899999916553497
+          },
+          "pressToNextFrameMs": {
+            "median": 10.479999997615778,
+            "max": 12.01500000953638
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.415,
+            "recalcStyleMs": 0.301,
+            "scriptMs": 43.431,
+            "taskMs": 779.4219999999999,
+            "jsHeapUsed": 32846784
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.01,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.125,
+            "p95": 0.25,
+            "p99": 0.35500001907348633,
+            "max": 0.4350000023841858
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 8,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.39500001072883606,
+            "max": 0.7150000035762787
+          },
+          "pressToNextFrameMs": {
+            "median": 7.2499999940396265,
+            "max": 9.304999988078634
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.503,
+            "recalcStyleMs": 0.285,
+            "scriptMs": 45.434000000000005,
+            "taskMs": 869.957,
+            "jsHeapUsed": 22306356
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "dom-split",
+      "scene": "two-interpenetrating",
+      "runs": [
+        {
+          "seconds": 4.006,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.125,
+            "p95": 0.18000000715255737,
+            "p99": 0.27000001072883606,
+            "max": 0.3700000047683716
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 16,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.4699999988079071,
+            "max": 3.4249999821186066
+          },
+          "pressToNextFrameMs": {
+            "median": 10.270000010728836,
+            "max": 14.625000007152721
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.46599999999999997,
+            "recalcStyleMs": 0.357,
+            "scriptMs": 43.361999999999995,
+            "taskMs": 729.874,
+            "jsHeapUsed": 32131152
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.007,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.12999999523162842,
+            "p95": 0.19499999284744263,
+            "p99": 0.36500000953674316,
+            "max": 0.3700000047683716
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 16,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.8150000274181366,
+            "max": 1.7100000083446503
+          },
+          "pressToNextFrameMs": {
+            "median": 11.420000015497408,
+            "max": 13.475000008344523
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.6759999999999999,
+            "recalcStyleMs": 0.372,
+            "scriptMs": 44.638999999999996,
+            "taskMs": 733.3779999999999,
+            "jsHeapUsed": 31997576
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.008,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.12000000476837158,
+            "p95": 0.16999998688697815,
+            "p99": 0.3700000047683716,
+            "max": 0.375
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 16,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.33500000834465027,
+            "max": 0.7299999892711639
+          },
+          "pressToNextFrameMs": {
+            "median": 7.35000000715263,
+            "max": 10.21000000119193
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.43600000000000005,
+            "recalcStyleMs": 0.29100000000000004,
+            "scriptMs": 41.466,
+            "taskMs": 731.2379999999999,
+            "jsHeapUsed": 27627404
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "dom-split",
+      "scene": "two-dynamic",
+      "runs": [
+        {
+          "seconds": 4.007,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.1599999964237213,
+            "p95": 0.2600000202655792,
+            "p99": 0.3050000071525574,
+            "max": 0.42500001192092896
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 119.54080359371102,
+          "clipVertices": 16,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.3799999952316284,
+            "max": 3.2899999916553497
+          },
+          "pressToNextFrameMs": {
+            "median": 6.554999978542128,
+            "max": 15.059999986887306
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 42,
+            "recalcStyleCount": 248,
+            "layoutMs": 5.2909999999999995,
+            "recalcStyleMs": 20.677999999999997,
+            "scriptMs": 76.229,
+            "taskMs": 826.886,
+            "jsHeapUsed": 28138164
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.1599999964237213,
+            "p95": 0.26999998092651367,
+            "p99": 0.3400000035762787,
+            "max": 0.46000000834465027
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 119.64107676969094,
+          "clipVertices": 16,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.42499998211860657,
+            "max": 0.8650000095367432
+          },
+          "pressToNextFrameMs": {
+            "median": 9.969999998807907,
+            "max": 11.259999997615978
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 46,
+            "recalcStyleCount": 248,
+            "layoutMs": 5.279,
+            "recalcStyleMs": 21.287,
+            "scriptMs": 75.45100000000001,
+            "taskMs": 841.448,
+            "jsHeapUsed": 46846084
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.011,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.1599999964237213,
+            "p95": 0.25,
+            "p99": 0.4449999928474426,
+            "max": 0.4950000047683716
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 119.67090501121915,
+          "clipVertices": 16,
+          "textureBytes": 0,
+          "texturesLive": 0,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.4099999964237213,
+            "max": 0.8449999988079071
+          },
+          "pressToNextFrameMs": {
+            "median": 6.064999991655441,
+            "max": 10.084999979734675
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 73,
+            "recalcStyleCount": 248,
+            "layoutMs": 8.220999999999998,
+            "recalcStyleMs": 20.61,
+            "scriptMs": 75.55000000000001,
+            "taskMs": 847.697,
+            "jsHeapUsed": 35341028
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "hic-order",
+      "scene": "one-surface",
+      "runs": [
+        {
+          "seconds": 4.015,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.22999998927116394,
+            "p95": 0.29500001668930054,
+            "p99": 1.774999976158142,
+            "max": 2.2349999845027924
+          },
+          "uploadsPerSec": 1.2453300124533002,
+          "uploadedMpxPerSec": 0.14943960149439603,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 60.02490660024907,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.125,
+            "max": 8.574999988079071
+          },
+          "pressToNextFrameMs": {
+            "median": 4.099999992847188,
+            "max": 12.799999988079435
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.939,
+            "recalcStyleMs": 0.642,
+            "scriptMs": 79.459,
+            "taskMs": 2636.811,
+            "jsHeapUsed": 37805776
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.011,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.20999997854232788,
+            "p95": 0.26500001549720764,
+            "p99": 1.6599999964237213,
+            "max": 2.939999997615814
+          },
+          "uploadsPerSec": 1.2465719272001994,
+          "uploadedMpxPerSec": 0.1495886312640239,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 60.33408127648965,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.7249999940395355,
+            "max": 3.2849999964237213
+          },
+          "pressToNextFrameMs": {
+            "median": 3.874999980926532,
+            "max": 6.069999999999709
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.907,
+            "recalcStyleMs": 0.789,
+            "scriptMs": 80.733,
+            "taskMs": 2845.177,
+            "jsHeapUsed": 20711744
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.017,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.2150000035762787,
+            "p95": 0.29499998688697815,
+            "p99": 2.1399999856948853,
+            "max": 3.594999998807907
+          },
+          "uploadsPerSec": 1.2447099825740602,
+          "uploadedMpxPerSec": 0.1493651979088872,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 60.24396315658451,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.4300000071525574,
+            "max": 6.75
+          },
+          "pressToNextFrameMs": {
+            "median": 3.32499998092635,
+            "max": 10.214999979734785
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 1.259,
+            "recalcStyleMs": 0.7010000000000001,
+            "scriptMs": 87.56899999999999,
+            "taskMs": 2841.1890000000003,
+            "jsHeapUsed": 19872664
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "hic-order",
+      "scene": "two-side-by-side",
+      "runs": [
+        {
+          "seconds": 4.008,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.1499999761581421,
+            "p95": 0.3100000023841858,
+            "p99": 1.5999999940395355,
+            "max": 2.675000011920929
+          },
+          "uploadsPerSec": 1.2475049900199602,
+          "uploadedMpxPerSec": 0.14970059880239522,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.75848303393214,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.4650000035762787,
+            "max": 4.865000009536743
+          },
+          "pressToNextFrameMs": {
+            "median": 1.7800000274182821,
+            "max": 7.485000017881248
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.891,
+            "recalcStyleMs": 0.6589999999999999,
+            "scriptMs": 72.817,
+            "taskMs": 2863.8050000000003,
+            "jsHeapUsed": 21400720
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.013,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.16999998688697815,
+            "p95": 0.29999998211860657,
+            "p99": 1.3799999952316284,
+            "max": 3.530000001192093
+          },
+          "uploadsPerSec": 1.24595066035385,
+          "uploadedMpxPerSec": 0.149514079242462,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.10964365811114,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.770000010728836,
+            "max": 8.490000009536743
+          },
+          "pressToNextFrameMs": {
+            "median": 4.445000002384404,
+            "max": 8.715000010729
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.775,
+            "recalcStyleMs": 0.703,
+            "scriptMs": 74.484,
+            "taskMs": 3026.154,
+            "jsHeapUsed": 25885612
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.006,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.16499999165534973,
+            "p95": 0.29500001668930054,
+            "p99": 1.6299999952316284,
+            "max": 1.854999989271164
+          },
+          "uploadsPerSec": 1.2481278082875686,
+          "uploadedMpxPerSec": 0.14977533699450823,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.81877184223664,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.8649999797344208,
+            "max": 14.174999982118607
+          },
+          "pressToNextFrameMs": {
+            "median": 6.340000009537107,
+            "max": 13.269999986886887
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.749,
+            "recalcStyleMs": 0.636,
+            "scriptMs": 70.42099999999999,
+            "taskMs": 2989.0629999999996,
+            "jsHeapUsed": 35758548
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "hic-order",
+      "scene": "two-overlapping",
+      "runs": [
+        {
+          "seconds": 4.005,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.14499998092651367,
+            "p95": 0.29999998211860657,
+            "p99": 1.4350000023841858,
+            "max": 2.270000010728836
+          },
+          "uploadsPerSec": 1.2484394506866416,
+          "uploadedMpxPerSec": 0.149812734082397,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.84893882646692,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.2049999833106995,
+            "max": 4.490000009536743
+          },
+          "pressToNextFrameMs": {
+            "median": 5.019999996423849,
+            "max": 10.434999988078744
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.733,
+            "recalcStyleMs": 0.5770000000000001,
+            "scriptMs": 67.125,
+            "taskMs": 2947.788,
+            "jsHeapUsed": 46141840
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.005,
+          "frameInterval": {
+            "n": 242,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.6700000000003
+          },
+          "composeMs": {
+            "n": 243,
+            "median": 0.15000000596046448,
+            "p95": 0.3100000023841858,
+            "p99": 1.6199999749660492,
+            "max": 2.7150000035762787
+          },
+          "uploadsPerSec": 1.2484394506866416,
+          "uploadedMpxPerSec": 0.149812734082397,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 121.34831460674158,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 4.560000002384186,
+            "max": 5.399999976158142
+          },
+          "pressToNextFrameMs": {
+            "median": 0.890000002384113,
+            "max": 7.735000010728982
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.906,
+            "recalcStyleMs": 0.796,
+            "scriptMs": 73.655,
+            "taskMs": 3030.8509999999997,
+            "jsHeapUsed": 30445156
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.003,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.16499999165534973,
+            "p95": 0.2900000214576721,
+            "p99": 1.0900000035762787,
+            "max": 1.4650000035762787
+          },
+          "uploadsPerSec": 1.2490632025980515,
+          "uploadedMpxPerSec": 0.14988758431176616,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.40969273045216,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.2349999845027924,
+            "max": 14.349999994039536
+          },
+          "pressToNextFrameMs": {
+            "median": 8.885000002384004,
+            "max": 10.449999990463311
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.9349999999999999,
+            "recalcStyleMs": 0.603,
+            "scriptMs": 67.455,
+            "taskMs": 3097.437,
+            "jsHeapUsed": 40934700
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "hic-order",
+      "scene": "two-interpenetrating",
+      "runs": [
+        {
+          "seconds": 4.016,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.16999998688697815,
+            "p95": 0.3050000071525574,
+            "p99": 1.445000022649765,
+            "max": 3.7899999916553497
+          },
+          "uploadsPerSec": 1.245019920318725,
+          "uploadedMpxPerSec": 0.14940239043824702,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.0199203187251,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 4.435000002384186,
+            "max": 6.620000004768372
+          },
+          "pressToNextFrameMs": {
+            "median": 2.2749999868869963,
+            "max": 9.990000014305224
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.9700000000000001,
+            "recalcStyleMs": 0.766,
+            "scriptMs": 74.03599999999999,
+            "taskMs": 3014.25,
+            "jsHeapUsed": 32077364
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.011,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.16999998688697815,
+            "p95": 0.3100000023841858,
+            "p99": 1.429999977350235,
+            "max": 3.290000021457672
+          },
+          "uploadsPerSec": 1.2465719272001994,
+          "uploadedMpxPerSec": 0.1495886312640239,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.16953378209922,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.2899999916553497,
+            "max": 6.25
+          },
+          "pressToNextFrameMs": {
+            "median": 1.4599999845027014,
+            "max": 16.049999978542473
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.8270000000000001,
+            "recalcStyleMs": 0.5680000000000001,
+            "scriptMs": 73,
+            "taskMs": 3001.9559999999997,
+            "jsHeapUsed": 26462488
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.015,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.16999998688697815,
+            "p95": 0.3050000071525574,
+            "p99": 1.1300000250339508,
+            "max": 2.6399999856948853
+          },
+          "uploadsPerSec": 1.2453300124533002,
+          "uploadedMpxPerSec": 0.14943960149439603,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.54794520547946,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.550000011920929,
+            "max": 14.719999998807907
+          },
+          "pressToNextFrameMs": {
+            "median": 6.8250000023840585,
+            "max": 13.82000000953667
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.603,
+            "recalcStyleMs": 0.6489999999999999,
+            "scriptMs": 70.604,
+            "taskMs": 3011.505,
+            "jsHeapUsed": 31188764
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "hic-order",
+      "scene": "two-dynamic",
+      "runs": [
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.1850000023841858,
+            "p95": 1.4199999868869781,
+            "p99": 3.134999990463257,
+            "max": 3.655000001192093
+          },
+          "uploadsPerSec": 20.438683948155536,
+          "uploadedMpxPerSec": 2.452642073778664,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.6380857427717,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.4899999797344208,
+            "max": 6.885000020265579
+          },
+          "pressToNextFrameMs": {
+            "median": 3.040000001192311,
+            "max": 4.495000001192238
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 62,
+            "recalcStyleCount": 7,
+            "layoutMs": 9.321,
+            "recalcStyleMs": 0.259,
+            "scriptMs": 151.694,
+            "taskMs": 2914.88,
+            "jsHeapUsed": 20596620
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.1850000023841858,
+            "p95": 1.594999998807907,
+            "p99": 2.4500000178813934,
+            "max": 3.219999998807907
+          },
+          "uploadsPerSec": 20.189431704885347,
+          "uploadedMpxPerSec": 2.4227318045862414,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.13958125623132,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 4.930000007152557,
+            "max": 16.71500000357628
+          },
+          "pressToNextFrameMs": {
+            "median": 3.7849999833106267,
+            "max": 11.714999976157742
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 57,
+            "recalcStyleCount": 7,
+            "layoutMs": 9.672,
+            "recalcStyleMs": 0.528,
+            "scriptMs": 146.814,
+            "taskMs": 2878.7990000000004,
+            "jsHeapUsed": 21000620
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.011,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.22999998927116394,
+            "p95": 1.729999989271164,
+            "p99": 2.7150000035762787,
+            "max": 3.3949999809265137
+          },
+          "uploadsPerSec": 20.69309399152331,
+          "uploadedMpxPerSec": 2.4831712789827973,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.6681625529793,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.2350000143051147,
+            "max": 4.66499999165535
+          },
+          "pressToNextFrameMs": {
+            "median": 9.355000008345087,
+            "max": 9.614999999999782
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 69,
+            "recalcStyleCount": 7,
+            "layoutMs": 10.958,
+            "recalcStyleMs": 0.211,
+            "scriptMs": 161.18699999999998,
+            "taskMs": 3065.8340000000003,
+            "jsHeapUsed": 25172496
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "hic-clip",
+      "scene": "one-surface",
+      "runs": [
+        {
+          "seconds": 4.01,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.2199999988079071,
+            "p95": 0.2750000059604645,
+            "p99": 1.4350000023841858,
+            "max": 1.9950000047683716
+          },
+          "uploadsPerSec": 1.2468827930174564,
+          "uploadedMpxPerSec": 0.14962593516209477,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 60.0997506234414,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.3499999940395355,
+            "max": 9.41499999165535
+          },
+          "pressToNextFrameMs": {
+            "median": 4.624999996423867,
+            "max": 12.615000013112876
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.905,
+            "recalcStyleMs": 0.721,
+            "scriptMs": 79.771,
+            "taskMs": 2862.8520000000003,
+            "jsHeapUsed": 24022164
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.006,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.09000000357627869,
+            "p95": 0.23499998450279236,
+            "p99": 0.9500000178813934,
+            "max": 1.2100000083446503
+          },
+          "uploadsPerSec": 1.2481278082875686,
+          "uploadedMpxPerSec": 0.14977533699450823,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 60.40938592111832,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.8149999976158142,
+            "max": 1.9949999749660492
+          },
+          "pressToNextFrameMs": {
+            "median": 10.69999998331059,
+            "max": 11.529999996423612
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.434,
+            "recalcStyleMs": 0.345,
+            "scriptMs": 46.069,
+            "taskMs": 1549.171,
+            "jsHeapUsed": 23775688
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.016,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.1550000011920929,
+            "p95": 0.2549999952316284,
+            "p99": 1.2099999785423279,
+            "max": 1.3899999856948853
+          },
+          "uploadsPerSec": 1.245019920318725,
+          "uploadedMpxPerSec": 0.14940239043824702,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 60.00996015936255,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.5150000154972076,
+            "max": 2.2249999940395355
+          },
+          "pressToNextFrameMs": {
+            "median": 7.315000017881175,
+            "max": 10.330000026226116
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.501,
+            "recalcStyleMs": 0.477,
+            "scriptMs": 64.259,
+            "taskMs": 2383.0170000000003,
+            "jsHeapUsed": 28495236
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "hic-clip",
+      "scene": "two-side-by-side",
+      "runs": [
+        {
+          "seconds": 4.003,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.15000000596046448,
+            "p95": 0.3499999940395355,
+            "p99": 1.2750000059604645,
+            "max": 1.7950000166893005
+          },
+          "uploadsPerSec": 1.2490632025980515,
+          "uploadedMpxPerSec": 0.14988758431176616,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.40969273045216,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.3250000178813934,
+            "max": 3.5450000166893005
+          },
+          "pressToNextFrameMs": {
+            "median": 7.725000026226098,
+            "max": 8.465000026226335
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.55,
+            "recalcStyleMs": 0.443,
+            "scriptMs": 65.94200000000001,
+            "taskMs": 2393.864,
+            "jsHeapUsed": 22246420
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.19499999284744263,
+            "p95": 0.35999998450279236,
+            "p99": 1.9550000131130219,
+            "max": 2.7150000035762787
+          },
+          "uploadsPerSec": 1.2462612163509472,
+          "uploadedMpxPerSec": 0.14955134596211367,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.6380857427717,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.3250000178813934,
+            "max": 7
+          },
+          "pressToNextFrameMs": {
+            "median": 1.8399999916555316,
+            "max": 4.624999990463039
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.8,
+            "recalcStyleMs": 0.745,
+            "scriptMs": 84.297,
+            "taskMs": 2955.333,
+            "jsHeapUsed": 21412804
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.007,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.1850000023841858,
+            "p95": 0.35999998450279236,
+            "p99": 1.7900000214576721,
+            "max": 2.435000002384186
+          },
+          "uploadsPerSec": 1.2478163214374844,
+          "uploadedMpxPerSec": 0.14973795857249814,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.7886199151485,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.8600000143051147,
+            "max": 16.40999999642372
+          },
+          "pressToNextFrameMs": {
+            "median": 7.119999994039972,
+            "max": 11.60999999642354
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.815,
+            "recalcStyleMs": 0.679,
+            "scriptMs": 80.824,
+            "taskMs": 2893.112,
+            "jsHeapUsed": 30740076
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "hic-clip",
+      "scene": "two-overlapping",
+      "runs": [
+        {
+          "seconds": 4.011,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.23999997973442078,
+            "p95": 0.4300000071525574,
+            "p99": 1.0850000083446503,
+            "max": 1.7249999940395355
+          },
+          "uploadsPerSec": 1.2465719272001994,
+          "uploadedMpxPerSec": 0.1495886312640239,
+          "clipWritesPerSec": 0,
+          "clipVertices": 8,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.6681625529793,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.699999988079071,
+            "max": 17.430000007152557
+          },
+          "pressToNextFrameMs": {
+            "median": 5.795000005960901,
+            "max": 9.645000004768463
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.49799999999999994,
+            "recalcStyleMs": 0.528,
+            "scriptMs": 88.48,
+            "taskMs": 3024.458,
+            "jsHeapUsed": 27686596
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.022,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.25,
+            "p95": 0.44999998807907104,
+            "p99": 1.520000010728836,
+            "max": 3.0450000166893005
+          },
+          "uploadsPerSec": 1.2431626056688214,
+          "uploadedMpxPerSec": 0.14917951268025859,
+          "clipWritesPerSec": 0,
+          "clipVertices": 8,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.3381402287419,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.0450000166893005,
+            "max": 3.9950000047683716
+          },
+          "pressToNextFrameMs": {
+            "median": -0.9999999821184247,
+            "max": 9.59000002861012
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.794,
+            "recalcStyleMs": 0.644,
+            "scriptMs": 95.99899999999998,
+            "taskMs": 3097.4579999999996,
+            "jsHeapUsed": 31764864
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.015,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.22999998927116394,
+            "p95": 0.46000000834465027,
+            "p99": 1.9600000083446503,
+            "max": 2.149999976158142
+          },
+          "uploadsPerSec": 1.2453300124533002,
+          "uploadedMpxPerSec": 0.14943960149439603,
+          "clipWritesPerSec": 0,
+          "clipVertices": 8,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.04981320049814,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.0699999928474426,
+            "max": 6.389999985694885
+          },
+          "pressToNextFrameMs": {
+            "median": 4.0749999976160325,
+            "max": 8.59999997615796
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.874,
+            "recalcStyleMs": 0.703,
+            "scriptMs": 94.586,
+            "taskMs": 2965.835,
+            "jsHeapUsed": 32921660
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "hic-clip",
+      "scene": "two-interpenetrating",
+      "runs": [
+        {
+          "seconds": 4.014,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.20500001311302185,
+            "p95": 0.35499998927116394,
+            "p99": 1.5250000059604645,
+            "max": 3.155000001192093
+          },
+          "uploadsPerSec": 1.2456402590931739,
+          "uploadedMpxPerSec": 0.14947683109118085,
+          "clipWritesPerSec": 0,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.07972097658195,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.38999998569488525,
+            "max": 7.645000010728836
+          },
+          "pressToNextFrameMs": {
+            "median": 7.455000004768408,
+            "max": 16.4000000214578
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.45399999999999996,
+            "recalcStyleMs": 0.40499999999999997,
+            "scriptMs": 78.78699999999999,
+            "taskMs": 1906.083,
+            "jsHeapUsed": 31350324
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.008,
+          "frameInterval": {
+            "n": 238,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000528,
+            "max": 33.330000000000155
+          },
+          "composeMs": {
+            "n": 239,
+            "median": 0.20499998331069946,
+            "p95": 0.45499998331069946,
+            "p99": 1.7050000131130219,
+            "max": 2.189999997615814
+          },
+          "uploadsPerSec": 1.2475049900199602,
+          "uploadedMpxPerSec": 0.14970059880239522,
+          "clipWritesPerSec": 0,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 119.26147704590818,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 5.465000003576279,
+            "max": 12.990000009536743
+          },
+          "pressToNextFrameMs": {
+            "median": 4.344999995231774,
+            "max": 15.125000017881575
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.727,
+            "recalcStyleMs": 0.5820000000000001,
+            "scriptMs": 81.569,
+            "taskMs": 2187.951,
+            "jsHeapUsed": 21457828
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.007,
+          "frameInterval": {
+            "n": 236,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 33.32999999999993,
+            "max": 33.335000000000036
+          },
+          "composeMs": {
+            "n": 237,
+            "median": 0.2150000035762787,
+            "p95": 0.47999998927116394,
+            "p99": 1.6500000059604645,
+            "max": 3.759999990463257
+          },
+          "uploadsPerSec": 1.2478163214374844,
+          "uploadedMpxPerSec": 0.14973795857249814,
+          "clipWritesPerSec": 0,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 118.29298727227354,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.8649999797344208,
+            "max": 4.25
+          },
+          "pressToNextFrameMs": {
+            "median": 0.29000000238374923,
+            "max": 5.459999988079289
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.833,
+            "recalcStyleMs": 0.716,
+            "scriptMs": 88.328,
+            "taskMs": 2323.689,
+            "jsHeapUsed": 22258588
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "hic-clip",
+      "scene": "two-dynamic",
+      "runs": [
+        {
+          "seconds": 4.006,
+          "frameInterval": {
+            "n": 231,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 33.33499999999913,
+            "max": 33.335000000000036
+          },
+          "composeMs": {
+            "n": 232,
+            "median": 1.4650000035762787,
+            "p95": 4.235000014305115,
+            "p99": 4.604999989271164,
+            "max": 5.380000025033951
+          },
+          "uploadsPerSec": 115.57663504742885,
+          "uploadedMpxPerSec": 13.869196205691463,
+          "clipWritesPerSec": 115.57663504742885,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 115.82626060908636,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 4.324999988079071,
+            "max": 8.099999994039536
+          },
+          "pressToNextFrameMs": {
+            "median": 9.13499999880787,
+            "max": 10.774999990463584
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 65,
+            "recalcStyleCount": 239,
+            "layoutMs": 9.292,
+            "recalcStyleMs": 27.665,
+            "scriptMs": 466.041,
+            "taskMs": 2758.498,
+            "jsHeapUsed": 27108172
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.005,
+          "frameInterval": {
+            "n": 231,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 33.335000000000036,
+            "max": 33.335000000000036
+          },
+          "composeMs": {
+            "n": 232,
+            "median": 1.449999988079071,
+            "p95": 4.205000013113022,
+            "p99": 4.314999997615814,
+            "max": 4.615000009536743
+          },
+          "uploadsPerSec": 115.60549313358302,
+          "uploadedMpxPerSec": 13.872659176029963,
+          "clipWritesPerSec": 115.60549313358302,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 115.85518102372035,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.925000011920929,
+            "max": 7.320000022649765
+          },
+          "pressToNextFrameMs": {
+            "median": 4.725000000000364,
+            "max": 6.82499998092635
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 72,
+            "recalcStyleCount": 240,
+            "layoutMs": 9.635,
+            "recalcStyleMs": 28.871000000000002,
+            "scriptMs": 468.33000000000004,
+            "taskMs": 2790.3179999999998,
+            "jsHeapUsed": 30566120
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.001,
+          "frameInterval": {
+            "n": 236,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 33.32999999999993,
+            "max": 33.335000000000036
+          },
+          "composeMs": {
+            "n": 237,
+            "median": 1.4300000071525574,
+            "p95": 4.21000000834465,
+            "p99": 4.2950000166893005,
+            "max": 5.365000009536743
+          },
+          "uploadsPerSec": 117.9705073731567,
+          "uploadedMpxPerSec": 14.156460884778804,
+          "clipWritesPerSec": 117.9705073731567,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 118.47038240439889,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 4.269999980926514,
+            "max": 6.0999999940395355
+          },
+          "pressToNextFrameMs": {
+            "median": 5.330000013113022,
+            "max": 7.324999995231792
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 82,
+            "recalcStyleCount": 244,
+            "layoutMs": 11.136999999999999,
+            "recalcStyleMs": 29.343999999999998,
+            "scriptMs": 470.202,
+            "taskMs": 2750.382,
+            "jsHeapUsed": 35474772
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "three-adapter-clip",
+      "scene": "one-surface",
+      "runs": [
+        {
+          "seconds": 4.003,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.33500000834465027,
+            "p95": 0.5750000178813934,
+            "p99": 1.8149999976158142,
+            "max": 3.3700000047683716
+          },
+          "uploadsPerSec": 1.2490632025980515,
+          "uploadedMpxPerSec": 0.14988758431176616,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 60.45465900574569,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.094999998807907,
+            "max": 2.125
+          },
+          "pressToNextFrameMs": {
+            "median": 5.365000001192129,
+            "max": 9.50500002503395
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.601,
+            "recalcStyleMs": 0.488,
+            "scriptMs": 130.011,
+            "taskMs": 2329.5860000000002,
+            "jsHeapUsed": 31470316
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.013,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.21000000834465027,
+            "p95": 0.3050000071525574,
+            "p99": 1.0900000035762787,
+            "max": 1.3350000083446503
+          },
+          "uploadsPerSec": 1.24595066035385,
+          "uploadedMpxPerSec": 0.149514079242462,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 60.05482182905557,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 0.7199999988079071,
+            "max": 1.6850000023841858
+          },
+          "pressToNextFrameMs": {
+            "median": 9.709999996423903,
+            "max": 10.424999992847006
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.37,
+            "recalcStyleMs": 0.307,
+            "scriptMs": 76.66300000000001,
+            "taskMs": 1311.692,
+            "jsHeapUsed": 37190784
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.009,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.3799999952316284,
+            "p95": 0.5649999976158142,
+            "p99": 1.155000001192093,
+            "max": 4.875
+          },
+          "uploadsPerSec": 1.247193813918683,
+          "uploadedMpxPerSec": 0.14966325767024194,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 60.11474183088051,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.25,
+            "max": 3.844999998807907
+          },
+          "pressToNextFrameMs": {
+            "median": 3.334999989271182,
+            "max": 8.17999997973402
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.847,
+            "recalcStyleMs": 0.7020000000000001,
+            "scriptMs": 136.671,
+            "taskMs": 2517.1420000000003,
+            "jsHeapUsed": 27320956
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "three-adapter-clip",
+      "scene": "two-side-by-side",
+      "runs": [
+        {
+          "seconds": 4.01,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.4050000011920929,
+            "p95": 0.7349999845027924,
+            "p99": 2.280000001192093,
+            "max": 2.645000010728836
+          },
+          "uploadsPerSec": 1.2468827930174564,
+          "uploadedMpxPerSec": 0.14962593516209477,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.1995012468828,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.4800000190734863,
+            "max": 6.169999986886978
+          },
+          "pressToNextFrameMs": {
+            "median": 4.030000017881321,
+            "max": 7.8950000202657975
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.757,
+            "recalcStyleMs": 0.712,
+            "scriptMs": 152.612,
+            "taskMs": 2875.214,
+            "jsHeapUsed": 24102212
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.01,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.3149999976158142,
+            "p95": 0.6299999952316284,
+            "p99": 1.6200000047683716,
+            "max": 2.324999988079071
+          },
+          "uploadsPerSec": 1.2468827930174564,
+          "uploadedMpxPerSec": 0.14962593516209477,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.1995012468828,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.2750000059604645,
+            "max": 5.2950000166893005
+          },
+          "pressToNextFrameMs": {
+            "median": 6.310000011921147,
+            "max": 8.06500001311315
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.638,
+            "recalcStyleMs": 0.51,
+            "scriptMs": 124.531,
+            "taskMs": 2681.451,
+            "jsHeapUsed": 35625348
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.015,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.3449999988079071,
+            "p95": 0.6000000238418579,
+            "p99": 1.4600000083446503,
+            "max": 3.0950000286102295
+          },
+          "uploadsPerSec": 1.2453300124533002,
+          "uploadedMpxPerSec": 0.14943960149439603,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.54794520547946,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.8050000071525574,
+            "max": 4.194999992847443
+          },
+          "pressToNextFrameMs": {
+            "median": 1.8249999976160325,
+            "max": 8.584999995231556
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.879,
+            "recalcStyleMs": 0.766,
+            "scriptMs": 134.573,
+            "taskMs": 2938.6989999999996,
+            "jsHeapUsed": 34621840
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "three-adapter-clip",
+      "scene": "two-overlapping",
+      "runs": [
+        {
+          "seconds": 4.015,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.39500001072883606,
+            "p95": 0.7100000083446503,
+            "p99": 1.7249999940395355,
+            "max": 2.5049999952316284
+          },
+          "uploadsPerSec": 1.2453300124533002,
+          "uploadedMpxPerSec": 0.14943960149439603,
+          "clipWritesPerSec": 0,
+          "clipVertices": 8,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.04981320049814,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 4.5,
+            "max": 9.340000003576279
+          },
+          "pressToNextFrameMs": {
+            "median": 2.789999995231483,
+            "max": 9.065000000000055
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.716,
+            "recalcStyleMs": 0.768,
+            "scriptMs": 148.49300000000002,
+            "taskMs": 3033.903,
+            "jsHeapUsed": 21056312
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.007,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.3799999952316284,
+            "p95": 0.7249999940395355,
+            "p99": 1.5099999904632568,
+            "max": 2.5250000059604645
+          },
+          "uploadsPerSec": 1.2478163214374844,
+          "uploadedMpxPerSec": 0.14973795857249814,
+          "clipWritesPerSec": 0,
+          "clipVertices": 8,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.28949338657351,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.564999997615814,
+            "max": 9.825000017881393
+          },
+          "pressToNextFrameMs": {
+            "median": 0.8800000071523755,
+            "max": 13.275000020265452
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.727,
+            "recalcStyleMs": 0.6579999999999999,
+            "scriptMs": 142.46099999999998,
+            "taskMs": 2843.8909999999996,
+            "jsHeapUsed": 26466140
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.004,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.38999998569488525,
+            "p95": 0.7150000035762787,
+            "p99": 1.7649999856948853,
+            "max": 3.5149999856948853
+          },
+          "uploadsPerSec": 1.2487512487512489,
+          "uploadedMpxPerSec": 0.14985014985014988,
+          "clipWritesPerSec": 0,
+          "clipVertices": 8,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.37962037962039,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.155000001192093,
+            "max": 6.7049999833106995
+          },
+          "pressToNextFrameMs": {
+            "median": 0.9799999952315375,
+            "max": 4.734999991655513
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.756,
+            "recalcStyleMs": 0.762,
+            "scriptMs": 148.554,
+            "taskMs": 2930.1899999999996,
+            "jsHeapUsed": 49334228
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "three-adapter-clip",
+      "scene": "two-interpenetrating",
+      "runs": [
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.3449999988079071,
+            "p95": 0.7150000035762787,
+            "p99": 1.395000010728836,
+            "max": 2.030000001192093
+          },
+          "uploadsPerSec": 1.2462612163509472,
+          "uploadedMpxPerSec": 0.14955134596211367,
+          "clipWritesPerSec": 0,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.13958125623132,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.675000011920929,
+            "max": 8.5
+          },
+          "pressToNextFrameMs": {
+            "median": 7.580000001192275,
+            "max": 16.119999985694903
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.5770000000000001,
+            "recalcStyleMs": 0.41300000000000003,
+            "scriptMs": 124.23200000000001,
+            "taskMs": 2297.153,
+            "jsHeapUsed": 38802720
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.004,
+          "frameInterval": {
+            "n": 239,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 33.32999999999993
+          },
+          "composeMs": {
+            "n": 240,
+            "median": 0.3449999988079071,
+            "p95": 0.7299999892711639,
+            "p99": 1.3650000095367432,
+            "max": 3.625
+          },
+          "uploadsPerSec": 1.2487512487512489,
+          "uploadedMpxPerSec": 0.14985014985014988,
+          "clipWritesPerSec": 0,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 119.88011988011989,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.7750000059604645,
+            "max": 7
+          },
+          "pressToNextFrameMs": {
+            "median": 4.715000025033987,
+            "max": 14.510000007152485
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.554,
+            "recalcStyleMs": 0.48000000000000004,
+            "scriptMs": 127.01300000000002,
+            "taskMs": 2299.347,
+            "jsHeapUsed": 44046404
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.015,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.33500000834465027,
+            "p95": 0.679999977350235,
+            "p99": 1.5049999952316284,
+            "max": 1.6949999928474426
+          },
+          "uploadsPerSec": 1.2453300124533002,
+          "uploadedMpxPerSec": 0.14943960149439603,
+          "clipWritesPerSec": 0,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 120.04981320049814,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.2400000095367432,
+            "max": 8.6700000166893
+          },
+          "pressToNextFrameMs": {
+            "median": 6.275000003576679,
+            "max": 10.465000015497026
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.5609999999999999,
+            "recalcStyleMs": 0.432,
+            "scriptMs": 123.334,
+            "taskMs": 2291.654,
+            "jsHeapUsed": 38905740
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "three-adapter-clip",
+      "scene": "two-dynamic",
+      "runs": [
+        {
+          "seconds": 4.008,
+          "frameInterval": {
+            "n": 236,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 33.32999999999993,
+            "max": 33.335000000000036
+          },
+          "composeMs": {
+            "n": 237,
+            "median": 1.6150000095367432,
+            "p95": 3.8400000035762787,
+            "p99": 4.490000009536743,
+            "max": 4.625
+          },
+          "uploadsPerSec": 118.01397205588822,
+          "uploadedMpxPerSec": 14.161676646706587,
+          "clipWritesPerSec": 118.01397205588822,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 118.26347305389221,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 5.389999985694885,
+            "max": 12.659999996423721
+          },
+          "pressToNextFrameMs": {
+            "median": 6.03499997615836,
+            "max": 12.724999983310681
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 73,
+            "recalcStyleCount": 244,
+            "layoutMs": 10.319999999999999,
+            "recalcStyleMs": 30.953000000000003,
+            "scriptMs": 499.055,
+            "taskMs": 2689.531,
+            "jsHeapUsed": 41051904
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.011,
+          "frameInterval": {
+            "n": 230,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 33.335000000000036,
+            "max": 33.335000000000036
+          },
+          "composeMs": {
+            "n": 231,
+            "median": 1.6200000047683716,
+            "p95": 4.530000001192093,
+            "p99": 4.7950000166893005,
+            "max": 5.840000003576279
+          },
+          "uploadsPerSec": 114.4353029169783,
+          "uploadedMpxPerSec": 13.732236350037397,
+          "clipWritesPerSec": 114.4353029169783,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 115.18324607329842,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.7249999940395355,
+            "max": 11.944999992847443
+          },
+          "pressToNextFrameMs": {
+            "median": 4.980000009536525,
+            "max": 8.455000017881503
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 75,
+            "recalcStyleCount": 238,
+            "layoutMs": 11.194,
+            "recalcStyleMs": 30.406000000000002,
+            "scriptMs": 511.24099999999993,
+            "taskMs": 2726.843,
+            "jsHeapUsed": 38507772
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.006,
+          "frameInterval": {
+            "n": 235,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 33.335000000000036,
+            "max": 33.33500000000049
+          },
+          "composeMs": {
+            "n": 236,
+            "median": 1.4850000143051147,
+            "p95": 4.444999992847443,
+            "p99": 4.604999989271164,
+            "max": 5.300000011920929
+          },
+          "uploadsPerSec": 117.57363954068896,
+          "uploadedMpxPerSec": 14.108836744882675,
+          "clipWritesPerSec": 117.32401397903145,
+          "clipVertices": 16,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 117.82326510234647,
+          "pressesDelivered": 2,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 5.0799999833106995,
+            "max": 8.600000023841858
+          },
+          "pressToNextFrameMs": {
+            "median": 3.5399999845026286,
+            "max": 7.584999988079289
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 67,
+            "recalcStyleCount": 242,
+            "layoutMs": 7.935,
+            "recalcStyleMs": 29.813,
+            "scriptMs": 489.438,
+            "taskMs": 2656.2160000000003,
+            "jsHeapUsed": 40924540
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "babylon",
+      "scene": "one-surface",
+      "runs": [
+        {
+          "seconds": 4.013,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.5599999725818634,
+            "p95": 0.8100000023841858,
+            "p99": 0.9500000178813934,
+            "max": 1.219999998807907
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 4.534999996423721,
+            "max": 13.145000010728836
+          },
+          "pressToNextFrameMs": {
+            "median": 10.53499997377412,
+            "max": 12.079999990462966
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 0,
+            "recalcStyleCount": 1,
+            "layoutMs": 0,
+            "recalcStyleMs": 0.12999999999999998,
+            "scriptMs": 166.982,
+            "taskMs": 2714.362,
+            "jsHeapUsed": 24756420
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.013,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.6099999845027924,
+            "p95": 0.7150000035762787,
+            "p99": 0.925000011920929,
+            "max": 1.0349999964237213
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.009999990463257,
+            "max": 11.080000013113022
+          },
+          "pressToNextFrameMs": {
+            "median": 4.45499998807918,
+            "max": 10.64499999284726
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 0,
+            "recalcStyleCount": 1,
+            "layoutMs": 0,
+            "recalcStyleMs": 0.125,
+            "scriptMs": 152.896,
+            "taskMs": 2738.893,
+            "jsHeapUsed": 30654332
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.009,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.5999999940395355,
+            "p95": 0.7349999845027924,
+            "p99": 0.7950000166893005,
+            "max": 0.8650000095367432
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 480000,
+          "texturesLive": 1,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.5,
+            "max": 3.0750000178813934
+          },
+          "pressToNextFrameMs": {
+            "median": 4.35999998569514,
+            "max": 9.020000004768463
+          },
+          "mounts": 1,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 0,
+            "recalcStyleCount": 1,
+            "layoutMs": 0,
+            "recalcStyleMs": 0.159,
+            "scriptMs": 151.915,
+            "taskMs": 2710.857,
+            "jsHeapUsed": 28209212
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "babylon",
+      "scene": "two-side-by-side",
+      "runs": [
+        {
+          "seconds": 4.015,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.5499999821186066,
+            "p95": 0.9899999797344208,
+            "p99": 1.5100000202655792,
+            "max": 2.165000021457672
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.905000001192093,
+            "max": 8.400000005960464
+          },
+          "pressToNextFrameMs": {
+            "median": 2.1199999964237577,
+            "max": 5.320000008344778
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 0,
+            "recalcStyleCount": 1,
+            "layoutMs": 0,
+            "recalcStyleMs": 0.061,
+            "scriptMs": 170.796,
+            "taskMs": 3042.1580000000004,
+            "jsHeapUsed": 22597720
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.4300000071525574,
+            "p95": 0.6200000047683716,
+            "p99": 0.7099999785423279,
+            "max": 0.925000011920929
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.6599999964237213,
+            "max": 7.655000001192093
+          },
+          "pressToNextFrameMs": {
+            "median": 3.874999998808107,
+            "max": 14.305000015497171
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 0,
+            "recalcStyleCount": 1,
+            "layoutMs": 0,
+            "recalcStyleMs": 0.081,
+            "scriptMs": 123.52,
+            "taskMs": 3058.095,
+            "jsHeapUsed": 25538344
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.41999998688697815,
+            "p95": 0.625,
+            "p99": 0.7699999809265137,
+            "max": 0.7750000059604645
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 4.215000003576279,
+            "max": 6.300000011920929
+          },
+          "pressToNextFrameMs": {
+            "median": 0.6650000083445775,
+            "max": 8.689999992847333
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 0,
+            "recalcStyleCount": 1,
+            "layoutMs": 0,
+            "recalcStyleMs": 0.1,
+            "scriptMs": 123.127,
+            "taskMs": 3049.4320000000002,
+            "jsHeapUsed": 31365164
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "babylon",
+      "scene": "two-overlapping",
+      "runs": [
+        {
+          "seconds": 4.005,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.3999999761581421,
+            "p95": 0.5999999940395355,
+            "p99": 0.6849999725818634,
+            "max": 0.7350000143051147
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.719999998807907,
+            "max": 5.375
+          },
+          "pressToNextFrameMs": {
+            "median": 1.5900000047681715,
+            "max": 5.5049999868870145
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.777,
+            "recalcStyleMs": 0.6669999999999999,
+            "scriptMs": 127.783,
+            "taskMs": 2848.7400000000002,
+            "jsHeapUsed": 37107500
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.009,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.41999998688697815,
+            "p95": 0.6050000190734863,
+            "p99": 0.6899999976158142,
+            "max": 0.7049999833106995
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.395000010728836,
+            "max": 21.105000019073486
+          },
+          "pressToNextFrameMs": {
+            "median": -0.32499998688717824,
+            "max": 15.115000017881357
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.772,
+            "recalcStyleMs": 0.914,
+            "scriptMs": 136.443,
+            "taskMs": 3041.997,
+            "jsHeapUsed": 50638500
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.01,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.39500001072883606,
+            "p95": 0.6100000143051147,
+            "p99": 0.7199999988079071,
+            "max": 0.7700000107288361
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 5,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 3.2549999952316284,
+            "max": 5.055000007152557
+          },
+          "pressToNextFrameMs": {
+            "median": 3.200000020265179,
+            "max": 8.894999998808089
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 5,
+            "recalcStyleCount": 11,
+            "layoutMs": 0.6539999999999999,
+            "recalcStyleMs": 0.5479999999999999,
+            "scriptMs": 126.23599999999999,
+            "taskMs": 2879.93,
+            "jsHeapUsed": 24646756
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "babylon",
+      "scene": "two-interpenetrating",
+      "runs": [
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.3400000035762787,
+            "p95": 0.5850000083446503,
+            "p99": 0.6800000071525574,
+            "max": 0.8400000035762787
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 8.990000009536743,
+            "max": 12.775000005960464
+          },
+          "pressToNextFrameMs": {
+            "median": 9.250000022649601,
+            "max": 14.665000007152685
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 0,
+            "recalcStyleCount": 1,
+            "layoutMs": 0,
+            "recalcStyleMs": 0.06899999999999999,
+            "scriptMs": 105.27300000000001,
+            "taskMs": 2652.303,
+            "jsHeapUsed": 30547740
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.002,
+          "frameInterval": {
+            "n": 239,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 240,
+            "median": 0.38999998569488525,
+            "p95": 0.6150000095367432,
+            "p99": 0.6749999821186066,
+            "max": 0.7099999785423279
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.0450000166893005,
+            "max": 9.865000009536743
+          },
+          "pressToNextFrameMs": {
+            "median": 7.4849999880789255,
+            "max": 14.859999994039754
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 0,
+            "recalcStyleCount": 1,
+            "layoutMs": 0,
+            "recalcStyleMs": 0.056,
+            "scriptMs": 113.99199999999999,
+            "taskMs": 2819.56,
+            "jsHeapUsed": 24323336
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.012,
+          "frameInterval": {
+            "n": 240,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 241,
+            "median": 0.3449999988079071,
+            "p95": 0.6200000047683716,
+            "p99": 0.675000011920929,
+            "max": 0.9000000059604645
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 1.3050000071525574,
+            "max": 7.524999976158142
+          },
+          "pressToNextFrameMs": {
+            "median": 1.3900000035764606,
+            "max": 5.605000009536525
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 0,
+            "recalcStyleCount": 1,
+            "layoutMs": 0,
+            "recalcStyleMs": 0.097,
+            "scriptMs": 111.917,
+            "taskMs": 2733.8089999999997,
+            "jsHeapUsed": 30460456
+          },
+          "errors": []
+        }
+      ]
+    },
+    {
+      "track": "babylon",
+      "scene": "two-dynamic",
+      "runs": [
+        {
+          "seconds": 4.013,
+          "frameInterval": {
+            "n": 241,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 242,
+            "median": 0.44999998807907104,
+            "p95": 0.7349999845027924,
+            "p99": 0.9399999976158142,
+            "max": 0.9900000095367432
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 4.030000001192093,
+            "max": 19.19999998807907
+          },
+          "pressToNextFrameMs": {
+            "median": 5.739999986887142,
+            "max": 10.639999986886778
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 72,
+            "recalcStyleCount": 1,
+            "layoutMs": 10.472,
+            "recalcStyleMs": 0.092,
+            "scriptMs": 217.17000000000002,
+            "taskMs": 2995.2140000000004,
+            "jsHeapUsed": 23731792
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.003,
+          "frameInterval": {
+            "n": 239,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 240,
+            "median": 0.4449999928474426,
+            "p95": 0.7199999988079071,
+            "p99": 0.9150000214576721,
+            "max": 0.9850000143051147
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.3499999940395355,
+            "max": 5.480000019073486
+          },
+          "pressToNextFrameMs": {
+            "median": 7.020000013113076,
+            "max": 8.100000015497244
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 63,
+            "recalcStyleCount": 1,
+            "layoutMs": 9.442,
+            "recalcStyleMs": 0.103,
+            "scriptMs": 207.82899999999998,
+            "taskMs": 2933.0919999999996,
+            "jsHeapUsed": 27892676
+          },
+          "errors": []
+        },
+        {
+          "seconds": 4.001,
+          "frameInterval": {
+            "n": 239,
+            "median": 16.664999999999964,
+            "p95": 16.670000000000073,
+            "p99": 16.670000000000073,
+            "max": 16.670000000000073
+          },
+          "composeMs": {
+            "n": 240,
+            "median": 0.4650000035762787,
+            "p95": 0.6899999976158142,
+            "p99": 0.8849999904632568,
+            "max": 1.0600000023841858
+          },
+          "uploadsPerSec": 0,
+          "uploadedMpxPerSec": 0,
+          "clipWritesPerSec": 0,
+          "clipVertices": 0,
+          "textureBytes": 960000,
+          "texturesLive": 2,
+          "geometryCallsPerSec": 0,
+          "pressesDelivered": 0,
+          "pressesSent": 5,
+          "inputQueueDelayMs": {
+            "median": 2.4549999833106995,
+            "max": 10.194999992847443
+          },
+          "pressToNextFrameMs": {
+            "median": 8.834999985695049,
+            "max": 14.66499999165535
+          },
+          "mounts": 2,
+          "unmounts": 0,
+          "jsHeapBytes": 13400000,
+          "cdp": {
+            "layoutCount": 59,
+            "recalcStyleCount": 1,
+            "layoutMs": 9.66,
+            "recalcStyleMs": 0.064,
+            "scriptMs": 223.78799999999998,
+            "taskMs": 3087.447,
+            "jsHeapUsed": 34551396
+          },
+          "errors": []
+        }
+      ]
+    }
+  ]
+}
