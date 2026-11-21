@@ -1,0 +1,11 @@
+﻿# P1-08B Depth Resolver — work in progress
+
+This is an internal, renderer-independent extraction of the P1-08A2 planar rectangle experiment. It is not yet ready for Workspace integration or package export.
+
+The research resolver lets a back-facing rectangle occlude, although ray ownership excludes back faces. It also hides both coplanar rectangles while the ray selects the first one. The SDK version filters back-facing targets and occluders and sorts by key, using the lower key for exactly coplanar planes. The research reproductions remain in `depthResolver.research.test.ts` as expected failures; matching assertions against the SDK are in `depthResolver.test.ts`.
+
+The algorithm still uses sequential convex subtraction, so overlapping occluders do not toggle an area visible. World coordinates and surface CSS coordinates follow `coordinates.ts`. Keys must be unique and nonempty. Geometry must have finite positive dimensions, scale and meters per pixel and a unit quaternion within 1e-9; invalid geometry and zero or nonfinite rays throw. Front faces only participate. InputRouter must still consume the closest hit even if that participant is not interactive.
+
+This is incomplete: exact coplanarity currently uses floating-point equality, ray ties use computed distance equality, and no shared robust numerical tie policy exists. Projection can fail for planes crossing the eye or near parallel to target and throws in some such cases. The inherited 1e-6 CSS-pixel-squared area cutoff was removed, but near-degenerate numerical noise remains unquantified. Boundaries, partial occluders near the eye, crossing surfaces, keep polygons, extremely large numbers, and 3+ surface ray/visibility equivalence require independent tests. The target must currently be the same object as its entry in the plane array. The clipping helper returns a CSS path for compatibility with the research API, although geometry itself has no renderer dependency.
+
+The coordinator must supply one immutable snapshot of geometry, unique stable keys and eye for both visibility and input, and must not assume public package exports exist. Do not integrate until the numerical policy and independent coverage are complete. Performance has not yet been measured.
