@@ -132,6 +132,12 @@ export interface XRHostProps extends HostEvents {
   readonly onCameraFrame?: (frame: HostCameraFrame) => void;
   /** Spatial manipulation handles and input; absent: no handles. */
   readonly manipulation?: HostManipulation;
+  /**
+   * The host's XR session mode changed (`null`: none). Optional and
+   * additive (P1-08B3): a same-document DOM compositor must stop showing
+   * live DOM while the host presents immersively. Hosts may omit it.
+   */
+  readonly onSessionChange?: (mode: string | null) => void;
 }
 
 export type EngineId = "three" | "babylon";

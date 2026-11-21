@@ -13,6 +13,8 @@ export default defineConfig({
         // P1-08B1 Multi-Surface fixture (experimental; own page, the XR Lab
         // shell is unchanged).
         multisurface: "multi-surface.html",
+        // P1-08B3 Multi-Surface XR fixture (experimental; own page).
+        multisurfacexr: "multi-surface-xr.html",
         cssContextResearch: "research-css-context.html",
       },
     },

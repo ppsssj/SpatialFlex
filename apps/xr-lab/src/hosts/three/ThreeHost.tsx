@@ -63,6 +63,7 @@ export function ThreeHost({
   panels,
   onCameraFrame,
   manipulation,
+  onSessionChange,
   ...events
 }: XRHostProps) {
   const [store] = useState(createHostXRStore);
@@ -77,6 +78,10 @@ export function ThreeHost({
   );
   const [error, setError] = useState<string | null>(null);
   const [viewKey, setViewKey] = useState(0);
+  useEffect(
+    () => onSessionChange?.(sessionMode),
+    [onSessionChange, sessionMode],
+  );
 
   const enterVR = async () => {
     setError(null);

@@ -1,0 +1,101 @@
+/* P1-08B3 Multi-Surface XR fixture. */
+.msx-root {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  height: 100vh;
+  font:
+    13px/1.35 system-ui,
+    sans-serif;
+}
+.msx-controls {
+  overflow: auto;
+  padding: 8px 12px;
+  border-right: 1px solid #d0d7de;
+}
+.msx-controls h1 {
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+.msx-controls fieldset {
+  display: flex;
+  gap: 8px;
+}
+.msx-stage {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+.msx-stage > .xr-host {
+  flex: 1;
+}
+.msx-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 6px 0;
+}
+.msx-log {
+  font:
+    11px/1.3 ui-monospace,
+    monospace;
+  padding-left: 18px;
+}
+/* Covers exactly the canvas (the scene writes left/top/width/height). */
+.msx-layer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+}
+/* A live DOM page: CSS size = its Surface resolution (400 × 300). */
+.msx-page {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  width: 400px;
+  height: 300px;
+  padding: 10px 12px;
+  transform-origin: 0 0;
+  pointer-events: auto;
+  overflow: hidden;
+}
+.msx-page[data-surface="A"] {
+  background: rgb(255, 210, 210);
+}
+.msx-page[data-surface="B"] {
+  background: rgb(210, 220, 255);
+}
+.msx-page[data-surface="C"],
+.msx-page[data-surface="D"],
+.msx-page[data-surface="E"] {
+  background: rgb(215, 240, 215);
+}
+.msx-page header {
+  display: flex;
+  justify-content: space-between;
+}
+.msx-page[data-interactive="false"] {
+  outline: 3px dashed #57606a;
+  outline-offset: -3px;
+}
+/* Fail-closed fallback display: placed, unclipped, visibly not live. */
+.msx-page[data-depth="indeterminate"] {
+  opacity: 0.6;
+  filter: grayscale(1);
+  outline: 4px solid #cf222e;
+  outline-offset: -4px;
+}
+.msx-pad {
+  margin-top: 8px;
+  height: 120px;
+  border: 1px dashed rgba(0, 0, 0, 0.35);
+  padding: 4px;
+  user-select: none;
+  touch-action: none;
+}
