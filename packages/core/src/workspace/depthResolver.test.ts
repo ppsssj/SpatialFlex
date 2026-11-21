@@ -288,8 +288,8 @@ it("snapshot copies geometry, array and camera before returning", () => {
   const camera: [number, number, number] = [0, 0, 0];
   const snapshot = resolveDepthSnapshot(planes, camera);
   const before = JSON.stringify(snapshot.visibility);
-  (a.geometry.pose.position as number[])[2] = -9;
-  (a.geometry.pose.rotation as number[])[1] = 1;
+  (a.geometry.pose.position as unknown as number[])[2] = -9;
+  (a.geometry.pose.rotation as unknown as number[])[1] = 1;
   (b.geometry.resolution as { width: number }).width = 1;
   camera[2] = -100;
   planes.splice(0);
