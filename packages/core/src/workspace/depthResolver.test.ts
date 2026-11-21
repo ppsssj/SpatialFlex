@@ -406,6 +406,9 @@ it("snapshot reports eye-plane projection failure as indeterminate", () => {
   expect(() => resolveDepthSnapshot([target, crossing], eye)).toThrow(
     IndeterminateDepthError,
   );
+  expect(() => resolveDepthSnapshot([target, crossing], eye)).toThrow(
+    "Occluder crosses the eye plane or projection is numerically unstable",
+  );
 });
 
 it("deeply freezes snapshot output while retaining ray ownership", () => {
