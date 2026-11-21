@@ -12,6 +12,7 @@
     "vitest.config.ts",
     "playwright.config.ts",
     "playwright.bench.config.ts",
+    "playwright.research.config.ts",
     "bench"
   ]
 }
