@@ -280,3 +280,111 @@ it("snapshot accepts normal intersections and supplies ownership", () => {
   expect(snapshot.depthOwner(ray.direction)?.key).toBe("a");
   expect(snapshot.visibility).toHaveLength(2);
 });
+
+it("snapshot copies geometry, array and camera before returning", () => {
+  const a = plane("a", -1);
+  const b = plane("b", -2);
+  const planes = [a, b];
+  const camera: [number, number, number] = [0, 0, 0];
+  const snapshot = resolveDepthSnapshot(planes, camera);
+  const before = JSON.stringify(snapshot.visibility);
+  (a.geometry.pose.position as number[])[2] = -9;
+  (a.geometry.pose.rotation as number[])[1] = 1;
+  (b.geometry.resolution as { width: number }).width = 1;
+  camera[2] = -100;
+  planes.splice(0);
+  expect(snapshot.depthOwner([0, 0, -1])?.key).toBe("a");
+  expect(JSON.stringify(snapshot.visibility)).toBe(before);
+});
+it("snapshot handles ordinary X crossing", () => {
+  const planes = [-0.4, 0.4].map((angle, i) => {
+    const p = plane(String(i), -2);
+    return {
+      ...p,
+      geometry: {
+        ...p.geometry,
+        pose: {
+          ...p.geometry.pose,
+          rotation: [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)] as const,
+        },
+      },
+    };
+  });
+  expect(resolveDepthSnapshot(planes, eye).visibility).toHaveLength(2);
+});
+it("snapshot rejects zero and nonfinite rays with the same error type", () => {
+  const snapshot = resolveDepthSnapshot([plane("a", -1)], eye);
+  expect(() => snapshot.depthOwner([0, 0, 0])).toThrow(IndeterminateDepthError);
+  expect(() => snapshot.depthOwner([NaN, 0, -1])).toThrow(
+    IndeterminateDepthError,
+  );
+});
+
+it("rejects non-transitive represented coplanar classifications", () => {
+  const q = Math.sin(Math.PI / 8),
+    w = Math.cos(Math.PI / 8);
+  const positions = [
+    [-6146023221944199, 0, 6146023221944198],
+    [5047129602709714, 0, -5047129602709716],
+    [7729199008976106, 0, -7729199008976108],
+  ] as const;
+  const planes = positions.map((position, i) => {
+    const p = plane(String(i), -2);
+    return {
+      ...p,
+      geometry: {
+        ...p.geometry,
+        pose: { ...p.geometry.pose, position, rotation: [0, q, 0, w] as const },
+      },
+    };
+  });
+  expect(() => resolveDepthSnapshot(planes, [0, 5, 10])).toThrow(
+    "Non-transitive coplanar classification",
+  );
+});
+it("rejects numerically tied ray ownership at an X crossing", () => {
+  const planes = [-0.4, 0.4].map((angle, i) => {
+    const p = plane(String(i), -2);
+    return {
+      ...p,
+      geometry: {
+        ...p.geometry,
+        pose: {
+          ...p.geometry.pose,
+          rotation: [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)] as const,
+        },
+      },
+    };
+  });
+  const snapshot = resolveDepthSnapshot(planes, eye);
+  expect(() => snapshot.depthOwner([0, 0, -1])).toThrow(
+    IndeterminateDepthError,
+  );
+});
+
+it("snapshot rejects a numerically degenerate surface polygon", () => {
+  const p = plane("a", -1);
+  const tiny = {
+    ...p,
+    geometry: {
+      ...p.geometry,
+      resolution: { width: Number.MIN_VALUE, height: Number.MIN_VALUE },
+    },
+  };
+  expect(() => resolveDepthSnapshot([tiny], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});
+it("snapshot rejects camera within its scale-dependent tolerance", () => {
+  expect(() => resolveDepthSnapshot([plane("a", -1e-15)], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});
+it("snapshot leaves programmer identity errors distinct", () => {
+  const a = plane("a", -1);
+  expect(() => resolveDepthSnapshot([a, a], eye)).toThrow(TypeError);
+  const broken = { ...a, geometry: { ...a.geometry, metersPerPixel: 0 } };
+  expect(() => resolveDepthSnapshot([broken], eye)).toThrow(
+    IndeterminateDepthError,
+  );
+});

@@ -128,7 +128,7 @@ export function hiddenRegion(
     // X is between the eye and the plane, so the ray reaches the plane at
     // t >= 1. A vertex exactly on the plane (t = 1) is the shared edge.
     if (!hit)
-      throw new RangeError(
+      throw new IndeterminateDepthError(
         "Occluder crosses the eye plane or projection is numerically unstable",
       );
     const snap = (value: number, extent: number) => {
@@ -380,8 +380,48 @@ export class IndeterminateDepthError extends Error {
  * discard the whole snapshot when an error is thrown.
  */
 export function resolveDepthSnapshot(planes: readonly DepthPlane[], eye: Vec3) {
-  validatePlanes(planes);
-  validateVec(eye);
+  try {
+    validatePlanes(planes);
+    validateVec(eye);
+  } catch (error) {
+    if (
+      error instanceof RangeError &&
+      (error.message === "Expected finite 3D vector" ||
+        error.message === "Invalid surface geometry")
+    )
+      throw new IndeterminateDepthError(error.message);
+    throw error;
+  }
+  // Copy all caller-owned data before preflight or calculation.
+  planes = planes.map((p) => ({
+    key: p.key,
+    geometry: {
+      resolution: { ...p.geometry.resolution },
+      metersPerPixel: p.geometry.metersPerPixel,
+      pose: {
+        position: [...p.geometry.pose.position],
+        rotation: [...p.geometry.pose.rotation],
+        scale: p.geometry.pose.scale,
+      },
+    },
+  }));
+  eye = [...eye];
+  for (let i = 0; i < planes.length; i++) {
+    for (let j = 0; j < i; j++)
+      for (let k = 0; k < j; k++) {
+        const a = planes[i]!.geometry,
+          b = planes[j]!.geometry,
+          c = planes[k]!.geometry;
+        const count =
+          Number(coplanar(a, b)) +
+          Number(coplanar(b, c)) +
+          Number(coplanar(a, c));
+        if (count === 2)
+          throw new IndeterminateDepthError(
+            "Non-transitive coplanar classification",
+          );
+      }
+  }
   for (let i = 0; i < planes.length; i++) {
     const a = planes[i]!.geometry;
     const pa = planeOf(a);
@@ -394,7 +434,10 @@ export function resolveDepthSnapshot(planes: readonly DepthPlane[], eye: Vec3) {
         Math.max(a.resolution.width, a.resolution.height),
     );
     const tolerance = 128 * Number.EPSILON * scale;
-    if (Math.abs(dot(pa.normal, sub(eye, pa.point))) <= tolerance)
+    const eyeDistance = dot(pa.normal, sub(eye, pa.point));
+    if (!Number.isFinite(tolerance) || !Number.isFinite(eyeDistance))
+      throw new IndeterminateDepthError("Nonfinite plane calculation");
+    if (Math.abs(eyeDistance) <= tolerance)
       throw new IndeterminateDepthError(
         "Eye is on or numerically near a plane",
       );
@@ -403,6 +446,8 @@ export function resolveDepthSnapshot(planes: readonly DepthPlane[], eye: Vec3) {
       if (coplanar(a, b)) continue;
       const pb = planeOf(b);
       const distance = Math.abs(dot(pa.normal, sub(pb.point, pa.point)));
+      if (!Number.isFinite(distance))
+        throw new IndeterminateDepthError("Nonfinite plane comparison");
       if (
         Math.hypot(...cross(pa.normal, pb.normal)) < 128 * Number.EPSILON &&
         distance < tolerance
@@ -414,16 +459,73 @@ export function resolveDepthSnapshot(planes: readonly DepthPlane[], eye: Vec3) {
   }
   const visibility = planes.map((p) => resolveVisibility(p, planes, eye));
   for (const result of visibility) {
+    if (/NaN|Infinity/.test(result.clipPath))
+      throw new IndeterminateDepthError("Nonfinite clip geometry");
     for (const polygon of [
       ...result.pieces,
       ...result.hidden.map((h) => h.region),
     ])
-      if (polygon.some((point) => !point.every(Number.isFinite)))
-        throw new IndeterminateDepthError("Nonfinite visibility geometry");
+      if (
+        polygon.length < 3 ||
+        polygon.some((point) => !point.every(Number.isFinite)) ||
+        !Number.isFinite(area(polygon)) ||
+        area(polygon) === 0
+      )
+        throw new IndeterminateDepthError(
+          "Degenerate or nonfinite visibility geometry",
+        );
   }
   return {
     visibility,
-    depthOwner: (direction: Vec3) =>
-      depthOwner(planes, { origin: eye, direction }),
+    depthOwner: (direction: Vec3) => {
+      if (direction.length !== 3 || !direction.every(Number.isFinite))
+        throw new IndeterminateDepthError("Invalid ray direction");
+      const length = Math.hypot(...direction);
+      if (!Number.isFinite(length) || length === 0)
+        throw new IndeterminateDepthError("Invalid ray direction");
+      const normalized: Vec3 = [
+        direction[0] / length,
+        direction[1] / length,
+        direction[2] / length,
+      ];
+      const hits: { geometry: SurfaceGeometry; distance: number }[] = [];
+      for (const plane of planes) {
+        const denom = dot(planeOf(plane.geometry).normal, normalized);
+        if (!Number.isFinite(denom))
+          throw new IndeterminateDepthError("Nonfinite ray orientation");
+        if (denom !== 0 && Math.abs(denom) < 128 * Number.EPSILON)
+          throw new IndeterminateDepthError(
+            "Ray is nearly parallel to a plane",
+          );
+        const candidate = intersectSurface(plane.geometry, {
+          origin: eye,
+          direction: normalized,
+        });
+        if (
+          candidate &&
+          ![candidate.u, candidate.v, candidate.distance].every(Number.isFinite)
+        )
+          throw new IndeterminateDepthError("Nonfinite ray intersection");
+        if (candidate?.inside && candidate.front)
+          hits.push({ geometry: plane.geometry, distance: candidate.distance });
+      }
+      hits.sort((a, b) => a.distance - b.distance);
+      for (let i = 1; i < hits.length; i++) {
+        const a = hits[i - 1]!,
+          b = hits[i]!;
+        if (
+          !coplanar(a.geometry, b.geometry) &&
+          Math.abs(a.distance - b.distance) <=
+            128 * Number.EPSILON * Math.max(1, a.distance, b.distance)
+        )
+          throw new IndeterminateDepthError(
+            "Ray ownership is numerically ambiguous",
+          );
+      }
+      const hit = depthOwner(planes, { origin: eye, direction: normalized });
+      if (hit && ![hit.u, hit.v, hit.distance].every(Number.isFinite))
+        throw new IndeterminateDepthError("Nonfinite ray intersection");
+      return hit;
+    },
   };
 }
