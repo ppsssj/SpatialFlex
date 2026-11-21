@@ -33,3 +33,5 @@ Windows, Intel Core i5-9400F, Node 24.12.0; 5 warmups and 20 timed full-scene ca
 | cross    |       20 |    12.455 | 57.578 |    343 |     1378 |
 
 Run with `--disableConsoleIntercept` to see passing-test output. No optimization is claimed. Broad-phase rejection and state caching are candidates for subsequent measurement after correctness is established.
+
+The SDK test `near-parallel crossing must not become a coplanar tie` records an expected failure: two surfaces centered at `[0, 0, -2]`, the second rotated by a quaternion with y = `-1e-15`, and the ray `[0.4, 0, -2]` should select the tilted surface but the current roundoff envelope chooses the lower key. This is a release-blocking algorithmic limitation, not an environmental blocker.

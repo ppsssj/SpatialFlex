@@ -170,3 +170,18 @@ it("keeps distinct parallel planes separated at 1e-10 metres", () => {
   expect(depthOwner([a, z], ray)?.key).toBe("z");
   expect(resolveVisibility(a, [a, z], eye).pieces).toHaveLength(0);
 });
+
+it.fails("near-parallel crossing must not become a coplanar tie", () => {
+  const a = plane("a", -2);
+  const base = plane("z", -2);
+  const z = {
+    ...base,
+    geometry: {
+      ...base.geometry,
+      pose: { ...base.geometry.pose, rotation: [0, -1e-15, 0, 1] as const },
+    },
+  };
+  expect(
+    depthOwner([a, z], { origin: eye, direction: [0.4, 0, -2] })?.key,
+  ).toBe("z");
+});
