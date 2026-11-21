@@ -353,7 +353,8 @@ export function MultiSurfaceXRLab() {
     log.push(`action ${panelId} ${buttonId} → ${ok ? "accepted" : "refused"}`);
   };
 
-  // Read-only test probe (test-hook builds only). It never acts.
+  // Read-only test probe (test-hook builds only). It never acts on the
+  // workspace; `resetMetrics` only empties measurement buffers.
   useEffect(() => {
     if (!testHooksEnabled) return;
     (window as unknown as { __multiSurfaceXR?: unknown }).__multiSurfaceXR = {
@@ -381,6 +382,10 @@ export function MultiSurfaceXRLab() {
         pointer: [...scene.timings.pointer.values],
         counters: { ...scene.counters },
       }),
+      /** Measurement only: empties the timing buffers (no scene state). */
+      resetMetrics: () => {
+        for (const samples of Object.values(scene.timings)) samples.clear();
+      },
     };
   }, [coordinator, scene]);
 

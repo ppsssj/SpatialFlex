@@ -240,6 +240,11 @@ package smoke test.
 
 ## 5. Not implemented (deliberately)
 
+> **Update (P1-08B3):** the shared scene, depth clipping, `FrameAuthority`
+> frames and `InputRouter` routing are implemented in
+> [`p1-08b3-multisurface-xr-integration.md`](p1-08b3-multisurface-xr-integration.md),
+> with Adaptive presentations only. The list below describes B1 as merged.
+
 - **Depth resolution and intersecting-Surface clipping.** These belong to
   ADR 0003 and the Agent B depth resolver.
 - **A shared 3D scene.** Both Surfaces are ordinary page DOM in this

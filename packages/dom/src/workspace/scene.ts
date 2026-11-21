@@ -175,11 +175,15 @@ interface PageState {
   z: string;
 }
 
+/** The last {@link SAMPLES} timings of one kind, in ms (diagnostics). */
 class Samples {
   readonly values: number[] = [];
   push(v: number) {
     this.values.push(v);
     if (this.values.length > SAMPLES) this.values.shift();
+  }
+  clear() {
+    this.values.length = 0;
   }
 }
 
@@ -217,7 +221,7 @@ export class WorkspaceScene {
     authority: null,
     error: null,
   });
-  readonly #unsubscribe: () => void;
+  #unsubscribe: (() => void) | null = null;
   #disposed = false;
   readonly counters = {
     accepted: 0,
@@ -258,7 +262,16 @@ export class WorkspaceScene {
       isAuthoritative: (lease) =>
         this.#status === "resolved" && this.#authority.isAuthoritative(lease),
     });
-    this.#unsubscribe = coordinator.subscribe(this.#onSurfaces);
+  }
+
+  /**
+   * Starts following the coordinator on first use (renderer, layer, page or
+   * input), not in the constructor: an instance React discards (StrictMode
+   * double-invokes state initializers) never subscribes.
+   */
+  #follow() {
+    if (this.#unsubscribe || this.#disposed) return;
+    this.#unsubscribe = this.#coordinator.subscribe(this.#onSurfaces);
     this.#onSurfaces();
   }
 
@@ -299,6 +312,7 @@ export class WorkspaceScene {
 
   connectRenderer(hostId: string): WorkspaceRenderer {
     this.#assertLive();
+    this.#follow();
     const lease = this.#authority.connect(hostId);
     return {
       lease,
@@ -521,6 +535,7 @@ export class WorkspaceScene {
 
   /** The fixed layer over the renderer's canvas that holds the pages. */
   attachLayer(element: HTMLElement): () => void {
+    this.#follow();
     this.#layer = element;
     this.#layerKey = "";
     return () => {
@@ -534,6 +549,7 @@ export class WorkspaceScene {
    * first composited frame.
    */
   attachPage(ref: SurfaceRef, element: HTMLElement): () => void {
+    this.#follow();
     const key = surfaceKey(ref);
     if (!this.#coordinator.isLive(ref)) return () => {};
     this.#detachPage(key);
@@ -548,7 +564,8 @@ export class WorkspaceScene {
       z: "",
     });
     this.#elements.set(element, key);
-    if (this.#frame && this.#status !== "suspended") this.#compose(this.#frame);
+    // Shown by the next resolved frame (the current snapshot, if any, does
+    // not include it); composing now would hide every page for a frame.
     return () => {
       if (this.#pages.get(key)?.element === element) this.#detachPage(key);
     };
@@ -911,6 +928,7 @@ export class WorkspaceScene {
    * pages and the renderer's canvas. `isScene` tells canvas targets.
    */
   bindInput(root: HTMLElement, isScene: (element: Element) => boolean) {
+    this.#follow();
     const targetOf = (event: Event): InputTarget => {
       let node = event.target instanceof Element ? event.target : null;
       while (node) {
@@ -1056,7 +1074,8 @@ export class WorkspaceScene {
   dispose() {
     if (this.#disposed) return;
     this.#disposed = true;
-    this.#unsubscribe();
+    this.#unsubscribe?.();
+    this.#unsubscribe = null;
     for (const { host } of this.#hosts.values()) host.disconnect();
     this.#hosts.clear();
     for (const key of [...this.#pages.keys()]) this.#detachPage(key);

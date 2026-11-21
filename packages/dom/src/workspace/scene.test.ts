@@ -618,6 +618,19 @@ describe("P1-08B3 WorkspaceScene — DOM input gate and lifecycle", () => {
     expect(clicks).toHaveBeenCalledTimes(2);
   });
 
+  it("an unused scene never subscribes to the coordinator (StrictMode discards)", () => {
+    coordinator = new WorkspaceCoordinator();
+    const subscribe = vi.spyOn(coordinator, "subscribe");
+    const discarded = new WorkspaceScene(coordinator);
+    expect(subscribe).not.toHaveBeenCalled();
+    scene = new WorkspaceScene(coordinator);
+    const r = scene.connectRenderer("three");
+    expect(subscribe).toHaveBeenCalledTimes(1);
+    r.disconnect();
+    scene.dispose();
+    discarded.dispose();
+  });
+
   it("50 remove/add cycles leave no hosts, pages, gestures or registry listeners behind", () => {
     const { A, sa, pa } = setup(SIDE_A, SIDE_B);
     const r = scene.connectRenderer("three");

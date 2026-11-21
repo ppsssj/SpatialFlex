@@ -543,6 +543,7 @@ SpatialFlex는 WebSpatial이나 React Three Fiber와 같은 렌더링 기술을 
 - [x] **P1-08A — Multi-Surface Workspace Architecture & Contracts:** Surface별 런타임 + Workspace 조정자 결정(ADR 0001), 합성·가림 전략(ADR 0002), 내부 계약 원시 타입과 A1–A9 테스트, 두 Surface 브라우저 실험
 - [x] **P1-08A2 — Unified Depth Compositing 실현 가능성 연구:** 교차하는 두 Surface에서 HTML-in-Canvas(Chromium)와 깊이 인식 DOM 합성(전 브라우저)을 실측 비교했고, 기하 기반 깊이 소유 영역(ADR 0003, 제안)을 권고합니다
 - [x] **P1-08B1 — Multi-Surface Workspace Runtime (실험적):** `WorkspaceCoordinator`(Surface별 독립 Registry·`PresentationRuntime`, epoch·오래된 참조 거부), React `useSpatialSurface`, XR Lab 2-Surface Fixture
+- [x] **P1-08B3 — Multi-Surface XR Scene Integration (실험적, Draft PR):** 하나의 Three.js Scene·Camera에 독립 React Surface 2–5개, `FrameAuthority` 프레임 경로, 깊이 Snapshot 기반 Clip과 `InputRouter` 입력 라우팅(X 교차), Fail-Closed 깊이 정책
 - [ ] **P1-08B — Multi-Surface MVP:** 같은 문서의 두 Surface(B1–B6 단계)
 - [ ] **Future — Generalized Detach to XR:** 런타임 capability에 따른 더 폭넓은 presentation 재사용; 자동 DOM 변환을 뜻하지 않음
 - [ ] **Future — Adaptive Layout / Persistence:** 자동 배치, 충돌 방지, 레이아웃 저장·복원
@@ -619,6 +620,7 @@ P0([#1](https://github.com/ppsssj/SpatialFlex/issues/1)–[#5](https://github.co
 - **P1-08A2 Unified Depth 연구 (실험, 제품 기능 아님):** 두 Surface가 X자로 교차할 때 보이는 것·깊이상 앞에 있는 것·입력을 받는 것이 일치하는지 실제 브라우저에서 측정했습니다. Chromium 159의 HTML-in-Canvas는 WebGL 깊이로 화면은 맞지만, 브라우저 히트 테스트가 깊이가 아닌 요소 등록 순서를 따라 한쪽 면의 클릭이 다른 Surface로 갑니다. Three.js r187의 `HTMLTexture`는 Chrome 157+ API와 맞지 않아 아무 오류 없이 검은 면을 그립니다. 기존 `z-index` 순서 방식(ADR 0002)은 교차 한쪽이 잘못 그려집니다. 렌더러와 무관한 깊이 해석기로 각 면이 실제로 가장 앞인 영역을 계산해 `clip-path`로 적용하면, 두 방식·두 브라우저·모든 시나리오에서 불일치가 0이었습니다. 이 방향을 ADR 0003(제안)으로 정리했고, 공개 API 변경은 없습니다. [결과 / 성능 / 권고](docs/p1-08a2-unified-depth-feasibility.md).
 
 - **P1-08B1 Multi-Surface Workspace Runtime (실험적):** 여러 독립 React Surface를 하나의 Workspace에 등록합니다. 각 Surface는 자기 `<SpatialWorkspace>`(Registry·컨트롤러)를 유지하고, `WorkspaceCoordinator`가 Surface마다 별도의 `PresentationRuntime`을 만들고 정리합니다. Surface를 지웠다 다시 등록하면 새 epoch가 되어 이전 참조와 액션이 거부되고, 다른 Surface의 상태와 DOM은 그대로 유지됩니다. 새 API는 모두 추가분이며 실험적입니다(`@spatialflex/core/workspace`, `WorkspaceCoordinator`, `useSpatialSurface`). 깊이 합성·교차 클리핑·Surface 간 입력 라우팅은 아직 포함하지 않습니다. [구조 / API / 검증](docs/p1-08b1-multisurface-runtime.md).
+- **P1-08B3 Multi-Surface XR Scene Integration (실험적):** 독립 React Surface들을 하나의 Three.js Scene과 Camera에 배치합니다. 각 Surface 페이지는 WebGL 텍스처가 아니라 Canvas 위에 합성된 Live DOM입니다. `WorkspaceScene`이 `FrameAuthority`로 권위 있는 카메라 프레임만 받아, 프레임마다 하나의 깊이 Snapshot으로 페이지 Clip과 포인터 소유자를 함께 결정합니다. 그래서 X자로 교차하는 Surface에서도 보이는 쪽과 클릭되는 쪽이 일치합니다. 깊이를 확정할 수 없으면 입력을 모두 막고 비상호작용 표시로 전환합니다(Fail-Closed). Native DOM 제시와 실제 HMD 표시는 아직 지원하지 않습니다. [구조 / 검증 / 측정](docs/p1-08b3-multisurface-xr-integration.md).
 
 ### 아직 구현되지 않은 것
 

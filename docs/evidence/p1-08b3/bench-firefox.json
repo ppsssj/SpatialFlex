@@ -1,0 +1,299 @@
+{
+  "note": "Exploratory, single machine, software WebGL in headless browsers; not a performance claim or threshold.",
+  "date": "2026-11-21T15:01:31.074Z",
+  "machine": {
+    "cpu": "Intel(R) Core(TM) i5-9400F CPU @ 2.90GHz",
+    "cores": 6,
+    "os": "win32 10.0.26100"
+  },
+  "framesPerRun": 240,
+  "clicksPerRun": 20,
+  "results": [
+    {
+      "browser": "firefox",
+      "surfaces": 2,
+      "layout": "side",
+      "frames": 242,
+      "depthSnapshotMs": {
+        "n": 242,
+        "median": 0.08,
+        "p95": 0.24,
+        "max": 0.74
+      },
+      "composeMs": {
+        "n": 242,
+        "median": 0.14,
+        "p95": 0.3,
+        "max": 0.88
+      },
+      "sceneFrameMs": {
+        "n": 242,
+        "median": 0.28,
+        "p95": 0.54,
+        "max": 1.78
+      },
+      "rendererFrameIntervalMs": {
+        "n": 245,
+        "median": 8.54,
+        "p95": 9.98,
+        "max": 14.34
+      },
+      "pointerDecisionMs": {
+        "n": 20,
+        "median": 0.1,
+        "p95": 0.2,
+        "max": 0.2
+      },
+      "clipVertices": [0, 0],
+      "pieces": [1, 1],
+      "counters": {
+        "accepted": 361,
+        "rejected": 0,
+        "failures": 0,
+        "blocked": 0,
+        "mismatches": 0,
+        "cancelledGestures": 0
+      }
+    },
+    {
+      "browser": "firefox",
+      "surfaces": 2,
+      "layout": "cross",
+      "frames": 242,
+      "depthSnapshotMs": {
+        "n": 242,
+        "median": 0.14,
+        "p95": 0.32,
+        "max": 0.62
+      },
+      "composeMs": {
+        "n": 242,
+        "median": 0.14,
+        "p95": 0.32,
+        "max": 0.76
+      },
+      "sceneFrameMs": {
+        "n": 242,
+        "median": 0.32,
+        "p95": 0.7,
+        "max": 1.36
+      },
+      "rendererFrameIntervalMs": {
+        "n": 244,
+        "median": 8.44,
+        "p95": 11.5,
+        "max": 27.26
+      },
+      "pointerDecisionMs": {
+        "n": 20,
+        "median": 0.08,
+        "p95": 0.2,
+        "max": 0.2
+      },
+      "clipVertices": [8, 12],
+      "pieces": [2, 3],
+      "counters": {
+        "accepted": 358,
+        "rejected": 0,
+        "failures": 0,
+        "blocked": 0,
+        "mismatches": 0,
+        "cancelledGestures": 0
+      }
+    },
+    {
+      "browser": "firefox",
+      "surfaces": 3,
+      "layout": "side",
+      "frames": 242,
+      "depthSnapshotMs": {
+        "n": 242,
+        "median": 0.16,
+        "p95": 0.38,
+        "max": 0.96
+      },
+      "composeMs": {
+        "n": 242,
+        "median": 0.14,
+        "p95": 0.4,
+        "max": 0.96
+      },
+      "sceneFrameMs": {
+        "n": 242,
+        "median": 0.34,
+        "p95": 0.86,
+        "max": 1.84
+      },
+      "rendererFrameIntervalMs": {
+        "n": 243,
+        "median": 8.44,
+        "p95": 9.76,
+        "max": 17.56
+      },
+      "pointerDecisionMs": {
+        "n": 20,
+        "median": 0.08,
+        "p95": 0.22,
+        "max": 0.22
+      },
+      "clipVertices": [0, 0, 16],
+      "pieces": [1, 1, 4],
+      "counters": {
+        "accepted": 348,
+        "rejected": 0,
+        "failures": 0,
+        "blocked": 0,
+        "mismatches": 0,
+        "cancelledGestures": 0
+      }
+    },
+    {
+      "browser": "firefox",
+      "surfaces": 3,
+      "layout": "cross",
+      "frames": 243,
+      "depthSnapshotMs": {
+        "n": 243,
+        "median": 0.2,
+        "p95": 0.6,
+        "max": 1.22
+      },
+      "composeMs": {
+        "n": 243,
+        "median": 0.2,
+        "p95": 0.48,
+        "max": 0.92
+      },
+      "sceneFrameMs": {
+        "n": 243,
+        "median": 0.46,
+        "p95": 1.16,
+        "max": 1.78
+      },
+      "rendererFrameIntervalMs": {
+        "n": 243,
+        "median": 8.64,
+        "p95": 14.7,
+        "max": 26.6
+      },
+      "pointerDecisionMs": {
+        "n": 20,
+        "median": 0.12,
+        "p95": 0.44,
+        "max": 0.44
+      },
+      "clipVertices": [8, 12, 4],
+      "pieces": [2, 3, 1],
+      "counters": {
+        "accepted": 359,
+        "rejected": 0,
+        "failures": 0,
+        "blocked": 0,
+        "mismatches": 0,
+        "cancelledGestures": 0
+      }
+    },
+    {
+      "browser": "firefox",
+      "surfaces": 5,
+      "layout": "side",
+      "frames": 242,
+      "depthSnapshotMs": {
+        "n": 242,
+        "median": 0.34,
+        "p95": 0.78,
+        "max": 1.08
+      },
+      "composeMs": {
+        "n": 242,
+        "median": 0.24,
+        "p95": 0.48,
+        "max": 1.12
+      },
+      "sceneFrameMs": {
+        "n": 242,
+        "median": 0.66,
+        "p95": 1.26,
+        "max": 1.64
+      },
+      "rendererFrameIntervalMs": {
+        "n": 243,
+        "median": 8.74,
+        "p95": 14.18,
+        "max": 24.28
+      },
+      "pointerDecisionMs": {
+        "n": 20,
+        "median": 0.1,
+        "p95": 0.28,
+        "max": 0.28
+      },
+      "clipVertices": [0, 0, 16, 8, 12],
+      "pieces": [1, 1, 4, 2, 3],
+      "counters": {
+        "accepted": 352,
+        "rejected": 0,
+        "failures": 0,
+        "blocked": 0,
+        "mismatches": 0,
+        "cancelledGestures": 0
+      }
+    },
+    {
+      "browser": "firefox",
+      "surfaces": 5,
+      "layout": "cross",
+      "frames": 243,
+      "depthSnapshotMs": {
+        "n": 243,
+        "median": 0.52,
+        "p95": 1.14,
+        "max": 1.88
+      },
+      "composeMs": {
+        "n": 243,
+        "median": 0.34,
+        "p95": 0.64,
+        "max": 2.52
+      },
+      "sceneFrameMs": {
+        "n": 243,
+        "median": 1,
+        "p95": 1.78,
+        "max": 3.84
+      },
+      "rendererFrameIntervalMs": {
+        "n": 243,
+        "median": 13.06,
+        "p95": 16.04,
+        "max": 19.96
+      },
+      "pointerDecisionMs": {
+        "n": 20,
+        "median": 0.1,
+        "p95": 0.22,
+        "max": 0.22
+      },
+      "clipVertices": [8, 12, 4, 12, 4],
+      "pieces": [2, 3, 1, 3, 1],
+      "counters": {
+        "accepted": 360,
+        "rejected": 0,
+        "failures": 0,
+        "blocked": 0,
+        "mismatches": 0,
+        "cancelledGestures": 0
+      }
+    },
+    {
+      "browser": "firefox",
+      "lifecycle": "20 remove/re-add cycles of A",
+      "liveSurfaces": 2,
+      "runtimeHosts": 2,
+      "attachedPages": 2,
+      "activeGestures": 0,
+      "pagesInDocument": 2,
+      "presentations": ["B:0", "A:0"]
+    }
+  ]
+}

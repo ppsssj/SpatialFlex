@@ -101,3 +101,20 @@ replaced by clipping each occluder to the page's eye-side half-space.
 - **Babylon.js 9.36 `HtmlInteractionManager`** uses screen-aligned affine
   hit quads and DOM order. It is not depth-correct for oblique or crossing
   planes, so a SpatialFlex Babylon path must drive the hit regions itself.
+
+## Implementation review (P1-08B3) — status unchanged
+
+P1-08B3 implements items 1–5 for planar Surface pages and Adaptive panels
+in one Three.js scene, with Chromium and Firefox E2E. It adds two policies
+this ADR did not have:
+
+- **Fail-closed indeterminate depth.**
+- **An input gate:** the DOM target must equal the snapshot's owner.
+
+The page `keep` of Native descendants, HTML-in-Canvas, the seam policy,
+keyboard focus occlusion, the Babylon path and real-HMD behaviour remain
+open.
+
+The status stays **Proposed** until review and hardware or HMD
+measurements. See the item-by-item review in
+[`docs/p1-08b3-multisurface-xr-integration.md` §8](../p1-08b3-multisurface-xr-integration.md#8-adr-0003-review-status-unchanged-proposed).
