@@ -1,6 +1,7 @@
 ﻿import { describe, expect, it } from "vitest";
 import { cssToWorld } from "./coordinates.js";
 import {
+  boundaryDistance,
   depthOwner,
   resolveVisibility,
   type DepthPlane,
@@ -171,7 +172,7 @@ it("keeps distinct parallel planes separated at 1e-10 metres", () => {
   expect(resolveVisibility(a, [a, z], eye).pieces).toHaveLength(0);
 });
 
-it.fails("near-parallel crossing must not become a coplanar tie", () => {
+it("near-parallel crossing must not become a coplanar tie", () => {
   const a = plane("a", -2);
   const base = plane("z", -2);
   const z = {
@@ -184,4 +185,54 @@ it.fails("near-parallel crossing must not become a coplanar tie", () => {
   expect(
     depthOwner([a, z], { origin: eye, direction: [0.4, 0, -2] })?.key,
   ).toBe("z");
+});
+
+it("agrees with ray ownership away from boundaries for three crossing planes", () => {
+  const planes = [-0.45, 0, 0.45].map((angle, i) => {
+    const p = plane(String(i), -2);
+    return {
+      ...p,
+      geometry: {
+        ...p.geometry,
+        pose: {
+          ...p.geometry.pose,
+          rotation: [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)] as const,
+        },
+      },
+    };
+  });
+  let tested = 0;
+  const contains = (
+    poly: readonly (readonly [number, number])[],
+    u: number,
+    v: number,
+  ) => {
+    const twiceArea = Math.abs(
+      poly.reduce((sum, p, i) => {
+        const q = poly[(i + 1) % poly.length]!;
+        return sum + p[0] * q[1] - q[0] * p[1];
+      }, 0),
+    );
+    if (twiceArea < 1e-9) return false;
+    const signs = poly.map((p, i) => {
+      const q = poly[(i + 1) % poly.length]!;
+      return (q[0] - p[0]) * (v - p[1]) - (q[1] - p[1]) * (u - p[0]);
+    });
+    return signs.every((x) => x >= -1e-8) || signs.every((x) => x <= 1e-8);
+  };
+  for (const p of planes) {
+    const visibility = resolveVisibility(p, planes, eye);
+    for (let u = 3.13; u < 98; u += 6.71)
+      for (let v = 4.31; v < 98; v += 8.23) {
+        if (boundaryDistance(visibility, u, v) < 0.05) continue;
+        const direction = cssToWorld(p.geometry, u, v);
+        const owner = depthOwner(planes, { origin: eye, direction });
+        expect(
+          visibility.pieces.some((poly) => contains(poly, u, v)),
+          `${p.key} ${u},${v} owner=${JSON.stringify(owner)} visible=${JSON.stringify(visibility)}`,
+        ).toBe(owner?.key === p.key);
+        tested++;
+      }
+  }
+  expect(tested).toBeGreaterThan(100);
 });

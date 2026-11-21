@@ -24,27 +24,13 @@ const cross = (a: Vec3, b: Vec3): Vec3 => [
 ];
 
 function coplanar(a: SurfaceGeometry, b: SurfaceGeometry): boolean {
-  const unitNormal = (g: SurfaceGeometry): Vec3 => {
-    const n = rotateVector(g.pose.rotation, [0, 0, 1]);
-    const length = Math.hypot(...n);
-    return [n[0] / length, n[1] / length, n[2] / length];
-  };
-  const na = unitNormal(a);
-  const nb = unitNormal(b);
-  if (Math.hypot(...cross(na, nb)) > 16 * Number.EPSILON || dot(na, nb) <= 0)
-    return false;
-  const scale = Math.max(
-    1,
-    ...a.pose.position.map(Math.abs),
-    ...b.pose.position.map(Math.abs),
-    a.resolution.width * a.metersPerPixel * a.pose.scale,
-    a.resolution.height * a.metersPerPixel * a.pose.scale,
-    b.resolution.width * b.metersPerPixel * b.pose.scale,
-    b.resolution.height * b.metersPerPixel * b.pose.scale,
-  );
+  const na = planeOf(a).normal;
+  const nb = planeOf(b).normal;
+  const alignment = cross(na, nb);
   return (
-    Math.abs(dot(na, sub(b.pose.position, a.pose.position))) <=
-    8 * Number.EPSILON * scale
+    alignment.every((v) => v === 0) &&
+    dot(na, nb) > 0 &&
+    dot(na, sub(b.pose.position, a.pose.position)) === 0
   );
 }
 
@@ -59,12 +45,16 @@ export function corners(g: SurfaceGeometry): [Vec3, Vec3, Vec3, Vec3] {
   ];
 }
 
-/** Unit-free plane normal (+z of the page) and a point on it. */
+/** Plane normal and origin in world space, from the pose instead of CSS differences. */
 export function planeOf(g: SurfaceGeometry) {
-  const o = cssToWorld(g, 0, 0);
-  const n = cross(sub(cssToWorld(g, 1, 0), o), sub(cssToWorld(g, 0, 1), o));
-  // (+u) 횞 (+v) points into the page (v runs down); flip to the front face.
-  return { point: o, normal: [-n[0], -n[1], -n[2]] as Vec3 };
+  const n = rotateVector(g.pose.rotation, [0, 0, 1]);
+  const length = Math.hypot(...n);
+  if (!Number.isFinite(length) || length === 0)
+    throw new RangeError("Invalid plane normal");
+  return {
+    point: g.pose.position,
+    normal: [n[0] / length, n[1] / length, n[2] / length] as Vec3,
+  };
 }
 
 /** Signed distance-like value of X relative to g's plane (> 0: front side). */
@@ -174,6 +164,7 @@ export function subtractConvex(subject: Polygon, hole: Polygon): Polygon[] {
   for (let i = 0; i < hole.length && rest.length >= 3; i++) {
     const a = hole[i]!;
     const b = hole[(i + 1) % hole.length]!;
+    if (a[0] === b[0] && a[1] === b[1]) continue;
     const inside = (p: Point) =>
       s * ((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]));
     const outside = clipHalf(rest, (p) => -inside(p));

@@ -1,6 +1,9 @@
 ﻿import { it } from "vitest";
 import { performance } from "node:perf_hooks";
-import { resolveVisibility, type DepthPlane } from "./depthResolver.js";
+import {
+  resolveVisibility,
+  type DepthPlane,
+} from "../packages/core/src/workspace/depthResolver.js";
 it.skipIf(!process.env.DEPTH_BENCH)(
   "reports planar resolver timing",
   () => {
