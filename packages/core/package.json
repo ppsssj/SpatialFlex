@@ -10,6 +10,11 @@
       "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./workspace": {
+      "source": "./src/workspace/index.ts",
+      "types": "./dist/workspace/index.d.ts",
+      "default": "./dist/workspace/index.js"
     }
   },
   "files": [

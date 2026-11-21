@@ -46,3 +46,8 @@ export {
   type SpatialPresentation,
 } from "./presentationRuntime.js";
 export * from "./projection.js";
+/**
+ * EXPERIMENTAL (P1-08B1): Multi-Surface Workspace coordinator. May change
+ * without notice; see docs/p1-08b1-multisurface-runtime.md.
+ */
+export * from "./workspace/index.js";

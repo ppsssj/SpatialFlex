@@ -16,10 +16,19 @@ export interface SurfaceOwner {
 
 /**
  * Contract violation of the experimental workspace primitives. Kept apart
- * from the public `SpatialFlexError` codes until the API is published.
+ * from the public `SpatialFlexError` codes until the API is stable.
+ *
+ * - `INVALID_SURFACE_ID`, `DUPLICATE_SURFACE_ID`: `SurfaceTable.add`.
+ * - `SHARED_SOURCE_SCOPE`: two live Surfaces given the same registry
+ *   (ADR 0001: each Surface owns its own registry).
+ * - `DISPOSED`: a disposed coordinator was used.
  */
 export class WorkspaceContractError extends Error {
-  readonly code: "INVALID_SURFACE_ID" | "DUPLICATE_SURFACE_ID";
+  readonly code:
+    | "INVALID_SURFACE_ID"
+    | "DUPLICATE_SURFACE_ID"
+    | "SHARED_SOURCE_SCOPE"
+    | "DISPOSED";
   constructor(code: WorkspaceContractError["code"], message: string) {
     super(message);
     this.name = "WorkspaceContractError";
