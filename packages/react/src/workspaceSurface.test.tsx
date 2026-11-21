@@ -234,7 +234,52 @@ describe("P1-08B1 React Multi-Surface bindings", () => {
     const moved = geometry(-1);
     render(<App aGeo={moved} />);
     expect(seen.A!.surface!.ref).toBe(a.ref);
-    expect(coordinatorSeen!.surface(a.ref)!.geometry).toBe(moved);
+    const stored = coordinatorSeen!.surface(a.ref)!.geometry;
+    // Immutable input contract: a frozen copy, equal by value.
+    expect(stored).toEqual(moved);
+    expect(stored).not.toBe(moved);
+    expect(Object.isFrozen(stored.pose.position)).toBe(true);
+  });
+
+  it("mutating a passed geometry in place changes nothing", () => {
+    render(<App />);
+    const ref = seen.A!.surface!.ref;
+    const c = coordinatorSeen!;
+    const before = c.getSnapshot().version;
+    const stored = c.surface(ref)!.geometry;
+    // The caller's object, mutated in place, then re-rendered as-is.
+    (A_GEO.pose.position as unknown as number[])[0] = 99;
+    try {
+      render(<App />);
+      expect(c.surface(ref)!.geometry).toBe(stored);
+      expect(c.surface(ref)!.geometry.pose.position[0]).toBe(-0.6);
+      expect(c.getSnapshot().version).toBe(before);
+      expect(seen.A!.surface!.geometry).toBe(stored);
+    } finally {
+      (A_GEO.pose.position as unknown as number[])[0] = -0.6;
+    }
+  });
+
+  it("after removal the hook returns no Surface", () => {
+    render(<App />);
+    const ref = seen.A!.surface!.ref;
+    render(<App showA={false} />);
+    expect(coordinatorSeen!.surface(ref)).toBeUndefined();
+    expect(seen.B!.surface).not.toBeNull();
+  });
+
+  it("after a geometry change the hook returns the coordinator's current Surface", () => {
+    render(<App />);
+    const ref = seen.A!.surface!.ref;
+    const moved = geometry(-1.2);
+    render(<App aGeo={moved} />);
+    const fromHook = seen.A!.surface!;
+    const fromCoordinator = coordinatorSeen!.surface(ref)!;
+    // One source of truth: the same record, not a stale copy.
+    expect(fromHook).toBe(fromCoordinator);
+    expect(fromHook.geometry).toBe(fromCoordinator.geometry);
+    expect(fromHook.geometry.pose.position).toEqual([-1.2, 1.4, -1.5]);
+    expect(fromHook.ref).toBe(ref);
   });
 
   it("unmounting the owner removes every Surface and ends every runtime", () => {

@@ -59,6 +59,42 @@ export type ScopedExtractResult =
     }
   | { readonly ok: false; readonly reason: string };
 
+/**
+ * Immutable input contract: a geometry is copied and deeply frozen when it
+ * enters the coordinator (`addSurface`, `setGeometry`). Later mutation of
+ * the caller's object (for example `pose.position[0] = …`) can therefore
+ * never change a Surface behind the coordinator's back without a new
+ * snapshot version. The copy is a fixed, tiny shape (O(1)).
+ */
+export function freezeGeometry(g: SurfaceGeometry): SurfaceGeometry {
+  const [px, py, pz] = g.pose.position;
+  const [qx, qy, qz, qw] = g.pose.rotation;
+  return Object.freeze({
+    resolution: Object.freeze({
+      width: g.resolution.width,
+      height: g.resolution.height,
+    }),
+    metersPerPixel: g.metersPerPixel,
+    pose: Object.freeze({
+      position: Object.freeze([px, py, pz] as const),
+      rotation: Object.freeze([qx, qy, qz, qw] as const),
+      scale: g.pose.scale,
+    }),
+  });
+}
+
+/** Value equality of two geometries (every field). */
+export function sameGeometry(a: SurfaceGeometry, b: SurfaceGeometry) {
+  return (
+    a.resolution.width === b.resolution.width &&
+    a.resolution.height === b.resolution.height &&
+    a.metersPerPixel === b.metersPerPixel &&
+    a.pose.scale === b.pose.scale &&
+    a.pose.position.every((v, i) => v === b.pose.position[i]) &&
+    a.pose.rotation.every((v, i) => v === b.pose.rotation[i])
+  );
+}
+
 interface Record_ {
   surface: WorkspaceSurface;
   readonly disconnect: () => void;
@@ -77,6 +113,11 @@ interface Record_ {
  *   Surface incarnation + item registration + instance), so a stale
  *   reference never reaches another Surface or a re-registered one.
  * - An extension point for renderer hosts (`connectHost` per Surface).
+ *
+ * Immutability: geometries are copied and frozen on input; snapshots,
+ * `WorkspaceSurface` records and their geometries are deeply frozen and
+ * replaced (never mutated) on change. Only `registry` and `runtime` are live
+ * handles, by design.
  *
  * It does NOT resolve depth, clip intersecting Surfaces or route input
  * across Surfaces yet (later P1-08B stages; ADR 0003 is proposed).
@@ -112,8 +153,9 @@ export class WorkspaceCoordinator {
           "SHARED_SOURCE_SCOPE",
           `Surface "${surfaceId}" would share the registry of live Surface "${surface.ref.surfaceId}"; each Surface owns its own registry.`,
         );
+    const geometry = freezeGeometry(options.geometry);
     // Identity first: a rejected id creates no runtime.
-    const ref = this.#table.add(surfaceId, options.geometry, scope.registry);
+    const ref = this.#table.add(surfaceId, geometry, scope.registry);
     const runtime = new PresentationRuntime(
       scope.registry,
       scope.controller,
@@ -130,7 +172,7 @@ export class WorkspaceCoordinator {
       ref,
       registry: scope.registry,
       runtime,
-      geometry: options.geometry,
+      geometry,
     });
     this.#records.set(surfaceId, { surface, disconnect });
     this.#publish();
@@ -161,11 +203,18 @@ export class WorkspaceCoordinator {
     return !!this.#current(ref);
   }
 
-  /** Moves a live Surface (pose or size). Stale refs are rejected. */
+  /**
+   * Moves a live Surface (pose or size). Stale refs are rejected (`false`).
+   * The geometry is copied and frozen; a value-equal geometry changes
+   * nothing (no new snapshot version).
+   */
   setGeometry(ref: SurfaceRef, geometry: SurfaceGeometry): boolean {
     const record = this.#current(ref);
-    if (!record || !this.#table.setGeometry(ref, geometry)) return false;
-    record.surface = Object.freeze({ ...record.surface, geometry });
+    if (!record) return false;
+    if (sameGeometry(record.surface.geometry, geometry)) return true;
+    const frozen = freezeGeometry(geometry);
+    if (!this.#table.setGeometry(ref, frozen)) return false;
+    record.surface = Object.freeze({ ...record.surface, geometry: frozen });
     this.#publish();
     return true;
   }

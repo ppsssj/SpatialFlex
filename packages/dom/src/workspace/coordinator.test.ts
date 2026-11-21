@@ -257,6 +257,58 @@ describe("P1-08B1 WorkspaceCoordinator", () => {
     host.disconnect();
   });
 
+  it("geometry is copied and deeply frozen on input (immutable contract)", () => {
+    coordinator = new WorkspaceCoordinator();
+    const A = scope();
+    const input = geometry(0);
+    const a = coordinator.addSurface("A", A, { geometry: input });
+    const stored = coordinator.surface(a.ref)!.geometry;
+    expect(stored).toEqual(input);
+    expect(stored).not.toBe(input);
+    for (const part of [
+      stored,
+      stored.resolution,
+      stored.pose,
+      stored.pose.position,
+      stored.pose.rotation,
+    ])
+      expect(Object.isFrozen(part)).toBe(true);
+    // Mutating the caller's object afterwards changes nothing.
+    (input.pose.position as unknown as number[])[0] = 42;
+    (input.resolution as { width: number }).width = 1;
+    expect(coordinator.surface(a.ref)!.geometry.pose.position[0]).toBe(0);
+    expect(coordinator.surface(a.ref)!.geometry.resolution.width).toBe(720);
+    // Frozen outputs cannot be mutated either.
+    expect(() => {
+      (stored.pose.position as unknown as number[])[0] = 7;
+    }).toThrow(TypeError);
+    // Snapshot and records are frozen; registry/runtime stay live handles.
+    const snap = coordinator.getSnapshot();
+    expect(Object.isFrozen(snap)).toBe(true);
+    expect(Object.isFrozen(snap.surfaces)).toBe(true);
+    expect(Object.isFrozen(snap.surfaces[0])).toBe(true);
+    expect(snap.surfaces[0]!.runtime).toBe(a.runtime);
+  });
+
+  it("setGeometry replaces the record; equal values publish nothing", () => {
+    coordinator = new WorkspaceCoordinator();
+    const A = scope();
+    const a = coordinator.addSurface("A", A, { geometry: geometry(0) });
+    const record = coordinator.surface(a.ref)!;
+    const v = coordinator.getSnapshot().version;
+    expect(coordinator.setGeometry(a.ref, geometry(0))).toBe(true);
+    expect(coordinator.getSnapshot().version).toBe(v);
+    expect(coordinator.surface(a.ref)).toBe(record);
+    const next = geometry(0.5);
+    expect(coordinator.setGeometry(a.ref, next)).toBe(true);
+    const moved = coordinator.surface(a.ref)!;
+    expect(moved).not.toBe(record);
+    expect(record.geometry.pose.position[0]).toBe(0); // old record untouched
+    expect(moved.geometry).toEqual(next);
+    expect(coordinator.getSnapshot().surfaces[0]).toBe(moved);
+    expect(coordinator.getSnapshot().version).toBe(v + 1);
+  });
+
   it("dispose removes every Surface, then refuses use", () => {
     coordinator = new WorkspaceCoordinator();
     const A = scope();

@@ -1,5 +1,7 @@
 export {
   WorkspaceCoordinator,
+  freezeGeometry,
+  sameGeometry,
   type AddSurfaceOptions,
   type ScopedExtractResult,
   type SurfaceSourceScope,

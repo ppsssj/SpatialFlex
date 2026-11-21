@@ -5,7 +5,7 @@ import {
   type WorkspaceSnapshot,
   type WorkspaceSurface,
 } from "@spatialflex/dom";
-import type { SurfaceGeometry } from "@spatialflex/core/workspace";
+import type { SurfaceGeometry, SurfaceRef } from "@spatialflex/core/workspace";
 import { useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useWorkspace } from "./context.js";
 
@@ -34,6 +34,7 @@ const EMPTY_PRESENTATIONS = Object.freeze({
 }) as PresentationSnapshot;
 const getEmptyPresentations = () => EMPTY_PRESENTATIONS;
 const noSubscription = () => () => {};
+const getNoSurface = (): WorkspaceSurface | null => null;
 
 /**
  * A `WorkspaceCoordinator` owned by the calling component (one per mount).
@@ -60,14 +61,22 @@ export function useWorkspaceSurfaces(
 }
 
 export interface SpatialSurfaceOptions {
-  /** Page geometry; a new object moves the Surface (`setGeometry`). */
+  /**
+   * Page geometry. Treated as an immutable value: pass a NEW object to move
+   * the Surface (`setGeometry`); mutating a previously passed object in place
+   * has no effect (the coordinator keeps a frozen copy).
+   */
   readonly geometry: SurfaceGeometry;
   /** Read when the Surface's runtime is created. */
   readonly runtime?: PresentationRuntimeOptions;
 }
 
 export interface SpatialSurfaceState extends PresentationSnapshot {
-  /** The live incarnation, or `null` before the first commit / on the server. */
+  /**
+   * The coordinator's current record of this Surface (identical to
+   * `coordinator.surface(ref)`, deeply frozen except `registry` / `runtime`),
+   * or `null` before the first commit, after removal and on the server.
+   */
   readonly surface: WorkspaceSurface | null;
 }
 
@@ -85,8 +94,13 @@ export function useSpatialSurface(
   options: SpatialSurfaceOptions,
 ): SpatialSurfaceState {
   const workspace = useWorkspace();
-  const [surface, setSurface] = useState<WorkspaceSurface | null>(null);
+  // Only the incarnation's ref is React state. The Surface record itself is
+  // always read from the coordinator, so the returned `surface` (and its
+  // geometry) is the coordinator's current one, never a stale copy.
+  const [ref, setRef] = useState<SurfaceRef | null>(null);
   const latest = useRef(options);
+  /** The caller's geometry object last given to the coordinator. */
+  const applied = useRef<SurfaceGeometry | null>(null);
   // Declared before the registering effect, so it sees the latest options.
   useLayoutEffect(() => {
     latest.current = options;
@@ -96,20 +110,29 @@ export function useSpatialSurface(
   // the first frame is drawn.
   useLayoutEffect(() => {
     const added = coordinator.addSurface(surfaceId, workspace, latest.current);
-    setSurface(added);
+    applied.current = latest.current.geometry;
+    setRef(added.ref);
     return () => {
       coordinator.removeSurface(added.ref);
-      setSurface((current) => (current === added ? null : current));
+      setRef((current) => (current === added.ref ? null : current));
     };
   }, [coordinator, surfaceId, workspace]);
 
-  // Pose / size changes move the live incarnation; they never re-register.
+  // A new geometry object moves the live incarnation; it never
+  // re-registers. (The coordinator stores a frozen copy, so the caller's
+  // object identity, not the stored one, tells whether it changed.)
   const { geometry } = options;
   useLayoutEffect(() => {
-    if (surface && surface.geometry !== geometry)
-      coordinator.setGeometry(surface.ref, geometry);
-  }, [coordinator, surface, geometry]);
+    if (!ref || applied.current === geometry) return;
+    applied.current = geometry;
+    coordinator.setGeometry(ref, geometry);
+  }, [coordinator, ref, geometry]);
 
+  const surface = useSyncExternalStore(
+    coordinator.subscribe,
+    () => (ref ? (coordinator.surface(ref) ?? null) : null),
+    getNoSurface,
+  );
   const runtime = surface?.runtime;
   const snapshot = useSyncExternalStore(
     runtime?.subscribe ?? noSubscription,

@@ -72,7 +72,7 @@ live Surface (`SHARED_SOURCE_SCOPE`).
 | `removeSurface(ref)`                  | Removes exactly that incarnation and disconnects its runtime, which ends its presentations and releases its registry listeners. Other Surfaces are untouched. A stale ref is a no-op.            |
 | re-add the same id                    | Creates a new epoch and a new runtime. Old `SurfaceRef`s and `ScopedPresentationRef`s are refused, even though the new runtime reuses the same instance ids and the item keeps its registration. |
 | item remounted inside a live Surface  | The item gets a new registration key, so old scoped refs are refused (`SurfaceTable.isCurrent`).                                                                                                 |
-| `setGeometry(ref, g)`                 | Moves the live incarnation (pose base) without re-registering it.                                                                                                                                |
+| `setGeometry(ref, g)`                 | Moves the live incarnation (pose base) without re-registering it. It replaces the frozen record (records are never mutated), and value-equal geometry changes nothing.                           |
 | `dispose()`                           | Removes every Surface and clears listeners; any later `addSurface` throws `DISPOSED`.                                                                                                            |
 
 ## 2. Public API changes (all additive, all marked EXPERIMENTAL)
@@ -82,7 +82,7 @@ Existing APIs and their behavior are unchanged.
 | Package                      | Addition                                                                                                                                                                                                                                                                                                                |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@spatialflex/core`          | New subpath `@spatialflex/core/workspace`: the P1-08A primitives (`SurfaceTable`, `SurfaceRef`, `ScopedItemRef`, `ScopedPresentationRef`, `SurfaceGeometry`, coordinates, `FrameAuthority`, `InputRouter`). The root entry is unchanged. `WorkspaceContractError` gains the codes `SHARED_SOURCE_SCOPE` and `DISPOSED`. |
-| `@spatialflex/dom`           | `WorkspaceCoordinator` and the types `SurfaceSourceScope`, `AddSurfaceOptions`, `WorkspaceSurface`, `WorkspaceSnapshot`, `ScopedExtractResult`.                                                                                                                                                                         |
+| `@spatialflex/dom`           | `WorkspaceCoordinator`, `freezeGeometry`, `sameGeometry`, and the types `SurfaceSourceScope`, `AddSurfaceOptions`, `WorkspaceSurface`, `WorkspaceSnapshot`, `ScopedExtractResult`.                                                                                                                                      |
 | `@spatialflex/react/spatial` | `useWorkspaceCoordinator()`, `useSpatialSurface(coordinator, id, { geometry, runtime? })`, `useWorkspaceSurfaces(coordinator)`, and re-exports of the coordinator and its types.                                                                                                                                        |
 
 **What stays unchanged:**
@@ -96,6 +96,30 @@ Existing APIs and their behavior are unchanged.
 **Usage rule:** in a Surface registered with `useSpatialSurface`, do **not**
 also call `useSpatialPresentations`. Both would create a runtime over the
 same registry.
+
+### Immutability contract
+
+Geometry is an immutable value.
+
+- **Inputs are copied.** `addSurface` and `setGeometry` deep-copy the
+  geometry and freeze it (`freezeGeometry`). The copy has a fixed, tiny
+  shape, so the cost is O(1).
+- **Inputs cannot be changed afterwards.** Mutating the caller's object
+  later (for example `pose.position[0] = …`) never changes a Surface. A move
+  needs a new geometry value.
+- **Outputs are deeply frozen and never mutated.** This covers
+  `WorkspaceSnapshot`, its `surfaces` array, every `WorkspaceSurface` record
+  and its geometry. On a change, records are replaced; old records keep
+  their values.
+- **Two fields are intentionally live:** `registry` and `runtime` are the
+  Surface's own objects (handles), not data.
+- **Equal values publish nothing.** `setGeometry` with value-equal geometry
+  (`sameGeometry`) returns `true`, creates no new snapshot version, and
+  notifies nobody.
+- **One source of truth in React.** `useSpatialSurface` keeps only the
+  `SurfaceRef` in React state. Its returned `surface` is read from the
+  coordinator (`useSyncExternalStore`), so after any move it is identical
+  to `coordinator.surface(ref)`, including its geometry.
 
 ### React semantics
 
@@ -150,7 +174,7 @@ cd apps/xr-lab && pnpm dev   # then open /multi-surface.html
 
 ### Unit tests (jsdom; real `SpatialRegistry`, `PresentationRuntime`, React 19 + StrictMode)
 
-`packages/dom/src/workspace/coordinator.test.ts` (9 tests):
+`packages/dom/src/workspace/coordinator.test.ts` (11 tests):
 
 1. Two Surfaces registered, each with its own runtime and its own registry
    listeners.
@@ -169,8 +193,13 @@ cd apps/xr-lab && pnpm dev   # then open /multi-surface.html
 8. `setGeometry` and `connectHost` act on the live incarnation (a host frame
    produces rays).
 9. `dispose` removes everything, then any further use throws.
+10. Geometry is copied and deeply frozen on input. Mutating the caller's
+    object afterwards changes nothing, frozen outputs throw on write, and
+    the snapshot and records are frozen while `runtime` stays live.
+11. `setGeometry` replaces the record and leaves the old record untouched.
+    Equal values publish nothing.
 
-`packages/react/src/workspaceSurface.test.tsx` (6 tests):
+`packages/react/src/workspaceSurface.test.tsx` (9 tests):
 
 1. Two `<SpatialWorkspace>` Surfaces register with their own registries and
    runtimes. After StrictMode, only the final incarnations are live.
@@ -178,9 +207,17 @@ cd apps/xr-lab && pnpm dev   # then open /multi-surface.html
 3. Removing A leaves B with the same DOM node, the same state, no remount
    and a live presentation. Re-adding A gives a new epoch and a fresh
    subtree, and A's old ref is refused.
-4. A new geometry moves the Surface without re-registering it.
+4. A new geometry moves the Surface without re-registering it. The stored
+   geometry is a frozen copy, equal by value.
 5. Unmounting removes every Surface and ends every runtime.
 6. Server rendering registers nothing.
+7. After a geometry change, the hook's `surface` (and its geometry) is
+   identical to `coordinator.surface(ref)`. This was a bug found in the
+   pre-merge review: the hook used to return the stale record.
+8. Mutating a passed geometry in place and re-rendering with the same
+   object changes nothing: same stored geometry, same snapshot version.
+9. After removal, the coordinator has no record, and the other Surface
+   remains.
 
 ### Browser E2E (`apps/xr-lab/e2e/multi-surface.spec.ts`; Chromium and Firefox; real input)
 
