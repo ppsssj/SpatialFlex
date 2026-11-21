@@ -359,11 +359,14 @@ unmodified.
 
 **Firefox limitation found:**
 
-- Double-click word selection does not select inside a
-  perspective-transformed `<input>`.
-- This happens in the baseline too (control run), so it is not caused by
-  split clips.
-- Mouse-drag and keyboard selection work.
+- Mouse selection inside a perspective-transformed `<input>` is unreliable:
+  - double-click selects no word (Windows and Linux CI);
+  - mouse-drag selects only partially on Windows and selects nothing in
+    Linux CI (headed, under Xvfb).
+- Both happen in the baseline too, which is the control run, so they are not
+  caused by split clips. The test asserts that split mode behaves the same
+  as the baseline.
+- Keyboard selection (Shift+Home) works everywhere and is asserted.
 
 ## 8. X-shaped Surface intersection test
 
@@ -727,8 +730,9 @@ tables: `node scripts/summarize-p1-08a2-perf.mjs`.
 6. Babylon's interaction manager is affine and DOM-ordered (§6).
 7. Firefox 159 has no HTML-in-Canvas. Babylon's fallback shows page
    backgrounds only and is not interactive.
-8. Firefox 159 does not select a word on double-click in a
-   perspective-transformed input. This happens in the baseline too.
+8. Firefox 159 mouse selection (double-click, drag) in a
+   perspective-transformed input is unreliable. This happens in the
+   baseline too.
 9. Split clips create a ≤ 0.2 px seam on the intersection line.
 10. Clip changes force HTML-in-Canvas re-captures (§12).
 11. Tab focus ignores occlusion: a fully hidden control is still focusable

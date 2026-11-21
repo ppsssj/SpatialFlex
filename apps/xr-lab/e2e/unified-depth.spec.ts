@@ -639,23 +639,31 @@ test.describe("P1-08A2 Track B — depth-aware DOM composition", () => {
       await page.mouse.move(a.x - 40, a.y, { steps: 5 });
       await page.mouse.up();
       const drag = await sel();
+      // Keyboard selection in the focused input (native, deterministic).
+      await page.keyboard.press("End");
+      await page.keyboard.press("Shift+Home");
+      const keyboard = await sel();
       const values = await page.evaluate(() => ({
         a: (document.getElementById("A-input") as HTMLInputElement).value,
         b: (document.getElementById("B-input") as HTMLInputElement).value,
       }));
-      selections[compose] = { values, dblclick, drag };
+      selections[compose] = { values, dblclick, drag, keyboard };
       expect(values).toEqual({ a: "alpha beta", b: "gamma" });
-      expect(drag.focused).toBe("A-input");
-      expect(drag.length).toBeGreaterThan(0);
-      if (browserName === "chromium")
+      expect(keyboard).toEqual({ focused: "A-input", length: 10 });
+      if (browserName === "chromium") {
         expect(dblclick.length).toBeGreaterThan(0);
+        expect(drag.length).toBeGreaterThan(0);
+      }
     }
-    // Firefox 159: double-click word selection does not happen in a
-    // perspective-transformed input, with or without split clips (control).
-    if (browserName === "firefox")
-      expect((selections.split as { dblclick: unknown }).dblclick).toEqual(
-        (selections.order as { dblclick: unknown }).dblclick,
-      );
+    // Firefox 159: mouse word/drag selection inside a perspective-transformed
+    // input is unreliable (none on Linux CI, partial on Windows) with or
+    // without split clips. Split clips must not change it (order = control).
+    if (browserName === "firefox") {
+      const pick = (c: string) =>
+        selections[c] as { dblclick: unknown; drag: { length: number } };
+      expect(pick("split").dblclick).toEqual(pick("order").dblclick);
+      expect(pick("split").drag.length > 0).toBe(pick("order").drag.length > 0);
+    }
     record(info, { test: "B/keyboard", selections });
   });
 });
