@@ -3,6 +3,7 @@
   intersectSurface,
   type SurfaceGeometry,
 } from "./coordinates.js";
+import { rotateVector } from "../manipulation.js";
 
 export type Vec3 = readonly [number, number, number];
 export type Point = readonly [number, number];
@@ -21,6 +22,31 @@ const cross = (a: Vec3, b: Vec3): Vec3 => [
   a[2] * b[0] - a[0] * b[2],
   a[0] * b[1] - a[1] * b[0],
 ];
+
+function coplanar(a: SurfaceGeometry, b: SurfaceGeometry): boolean {
+  const unitNormal = (g: SurfaceGeometry): Vec3 => {
+    const n = rotateVector(g.pose.rotation, [0, 0, 1]);
+    const length = Math.hypot(...n);
+    return [n[0] / length, n[1] / length, n[2] / length];
+  };
+  const na = unitNormal(a);
+  const nb = unitNormal(b);
+  if (Math.hypot(...cross(na, nb)) > 16 * Number.EPSILON || dot(na, nb) <= 0)
+    return false;
+  const scale = Math.max(
+    1,
+    ...a.pose.position.map(Math.abs),
+    ...b.pose.position.map(Math.abs),
+    a.resolution.width * a.metersPerPixel * a.pose.scale,
+    a.resolution.height * a.metersPerPixel * a.pose.scale,
+    b.resolution.width * b.metersPerPixel * b.pose.scale,
+    b.resolution.height * b.metersPerPixel * b.pose.scale,
+  );
+  return (
+    Math.abs(dot(na, sub(b.pose.position, a.pose.position))) <=
+    8 * Number.EPSILON * scale
+  );
+}
 
 /** World corners (top-left, top-right, bottom-right, bottom-left). */
 export function corners(g: SurfaceGeometry): [Vec3, Vec3, Vec3, Vec3] {
@@ -91,6 +117,7 @@ export function hiddenRegion(
   target: SurfaceGeometry,
   occluder: SurfaceGeometry,
   eye: Vec3,
+  tie = false,
 ): Polygon | null {
   validateGeometry(target);
   validateGeometry(occluder);
@@ -98,7 +125,9 @@ export function hiddenRegion(
   const eyeSide = Math.sign(side(target, eye));
   if (eyeSide <= 0 || side(occluder, eye) <= 0) return null;
   // The occluder's part on the eye's side of the target plane.
-  const front = clipHalf(corners(occluder), (x) => eyeSide * side(target, x));
+  const front = tie
+    ? corners(occluder)
+    : clipHalf(corners(occluder), (x) => eyeSide * side(target, x));
   if (front.length < 3) return null;
   const local: Point[] = [];
   for (const x of front) {
@@ -112,7 +141,18 @@ export function hiddenRegion(
       throw new RangeError(
         "Occluder crosses the eye plane or projection is numerically unstable",
       );
-    local.push([hit.u, hit.v]);
+    const snap = (value: number, extent: number) => {
+      const tolerance = 64 * Number.EPSILON * Math.max(1, extent);
+      return Math.abs(value) <= tolerance
+        ? 0
+        : Math.abs(value - extent) <= tolerance
+          ? extent
+          : value;
+    };
+    local.push([
+      snap(hit.u, target.resolution.width),
+      snap(hit.v, target.resolution.height),
+    ]);
   }
   const { width: W, height: H } = target.resolution;
   let r: Point[] = local;
@@ -210,10 +250,9 @@ export function resolveVisibility(
     a.key < b.key ? -1 : a.key > b.key ? 1 : 0,
   )) {
     if (other.key === target.key) continue;
-    const sides = corners(other.geometry).map((p) => side(target.geometry, p));
-    const coplanar = sides.every((value) => value === 0);
-    if (coplanar && other.key > target.key) continue;
-    const region = hiddenRegion(target.geometry, other.geometry, eye);
+    const tied = coplanar(target.geometry, other.geometry);
+    if (tied && other.key > target.key) continue;
+    const region = hiddenRegion(target.geometry, other.geometry, eye, tied);
     if (region) hidden.push({ by: other.key, region });
   }
   if (hidden.length === 0 && keep.length === 0)
@@ -259,13 +298,21 @@ export function depthOwner(
   if (Math.hypot(...ray.direction) === 0)
     throw new RangeError("Ray direction must be nonzero");
   let best: DepthHit | null = null;
+  let bestGeometry: SurfaceGeometry | null = null;
   for (const p of [...planes].sort((a, b) =>
     a.key < b.key ? -1 : a.key > b.key ? 1 : 0,
   )) {
     const hit = intersectSurface(p.geometry, ray);
     if (!hit?.inside || !hit.front) continue;
-    if (!best || hit.distance < best.distance)
+    if (
+      !best ||
+      (bestGeometry &&
+        !coplanar(p.geometry, bestGeometry) &&
+        hit.distance < best.distance)
+    ) {
       best = { key: p.key, u: hit.u, v: hit.v, distance: hit.distance };
+      bestGeometry = p.geometry;
+    }
   }
   return best;
 }

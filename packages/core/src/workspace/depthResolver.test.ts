@@ -135,3 +135,38 @@ it("agrees with independent ray probes for five partially overlapping planes", (
       }
   }
 });
+
+it("resolves rotated coplanar surfaces by key in either order", () => {
+  const q = Math.sin(Math.PI / 8),
+    w = Math.cos(Math.PI / 8);
+  const first = plane("a", -2);
+  const a = {
+    ...first,
+    geometry: {
+      ...first.geometry,
+      pose: { ...first.geometry.pose, rotation: [0, q, 0, w] as const },
+    },
+  };
+  const b = {
+    ...a,
+    key: "z",
+    geometry: {
+      ...a.geometry,
+      pose: { ...a.geometry.pose, rotation: [0, -q, 0, -w] as const },
+    },
+  };
+  for (const planes of [
+    [a, b],
+    [b, a],
+  ]) {
+    expect(depthOwner(planes, ray)?.key).toBe("a");
+    expect(resolveVisibility(a, planes, eye).pieces.length).toBeGreaterThan(0);
+    expect(resolveVisibility(b, planes, eye).pieces).toHaveLength(0);
+  }
+});
+it("keeps distinct parallel planes separated at 1e-10 metres", () => {
+  const z = plane("z", -1);
+  const a = plane("a", -1 - 1e-10);
+  expect(depthOwner([a, z], ray)?.key).toBe("z");
+  expect(resolveVisibility(a, [a, z], eye).pieces).toHaveLength(0);
+});
