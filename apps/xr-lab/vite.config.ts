@@ -10,6 +10,9 @@ export default defineConfig({
         host: "host.html",
         // P1-08A2 research page (isolated; not part of the XR Lab shell).
         research: "research-depth.html",
+        // P1-08B1 Multi-Surface fixture (experimental; own page, the XR Lab
+        // shell is unchanged).
+        multisurface: "multi-surface.html",
       },
     },
     // The bundled WebXR emulator (IWER) and its optional rooms are large,

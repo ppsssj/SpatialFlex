@@ -101,3 +101,25 @@ export {
   type PresentationSupport,
   type SpatialPresentation,
 } from "@spatialflex/dom";
+
+/**
+ * EXPERIMENTAL (P1-08B1): Multi-Surface Workspace bindings. May change
+ * without notice; see docs/p1-08b1-multisurface-runtime.md.
+ */
+export {
+  useSpatialSurface,
+  useWorkspaceCoordinator,
+  useWorkspaceSurfaces,
+  type SpatialSurfaceOptions,
+  type SpatialSurfaceState,
+} from "./workspaceSurface.js";
+export {
+  WorkspaceCoordinator,
+  freezeGeometry,
+  sameGeometry,
+  type AddSurfaceOptions,
+  type ScopedExtractResult,
+  type SurfaceSourceScope,
+  type WorkspaceSnapshot,
+  type WorkspaceSurface,
+} from "@spatialflex/dom";
