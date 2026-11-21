@@ -1,0 +1,251 @@
+{
+  "browser": "firefox",
+  "browserVersion": "159.0",
+  "viewport": {
+    "width": 1000,
+    "height": 700
+  },
+  "camera": {
+    "eye": [0, 1.4, 2],
+    "target": [0, 1.4, -1],
+    "fovYDeg": 50
+  },
+  "planes": {
+    "A": {
+      "id": "A",
+      "position": [-0.3, 1.4, -1.6],
+      "yaw": 0,
+      "resolution": {
+        "width": 400,
+        "height": 300
+      }
+    },
+    "B": {
+      "id": "B",
+      "position": [0.3, 1.4, -0.9],
+      "yaw": 0,
+      "resolution": {
+        "width": 400,
+        "height": 300
+      }
+    },
+    "A_CROSS": {
+      "id": "A",
+      "position": [0, 1.4, -1.2],
+      "yaw": 0.8,
+      "resolution": {
+        "width": 400,
+        "height": 300
+      }
+    },
+    "B_FLAT": {
+      "id": "B",
+      "position": [0, 1.4, -1.2],
+      "yaw": 0,
+      "resolution": {
+        "width": 400,
+        "height": 300
+      }
+    },
+    "PANEL": {
+      "id": "panel",
+      "position": [-0.62, 1.25, -1.2],
+      "yaw": 0,
+      "resolution": {
+        "width": 120,
+        "height": 80
+      }
+    },
+    "NATIVE": {
+      "id": "A/native",
+      "position": [0.42, 1.2, -0.6],
+      "yaw": 0,
+      "resolution": {
+        "width": 120,
+        "height": 80
+      }
+    }
+  },
+  "records": [
+    {
+      "scenario": "S1 depth-sorted DOM order",
+      "probe": "overlap",
+      "point": {
+        "x": 498,
+        "y": 348
+      },
+      "contractOwner": "B",
+      "painted": "B",
+      "hitTarget": "B",
+      "clicked": "B",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": true
+    },
+    {
+      "scenario": "S2 reversed DOM order",
+      "probe": "overlap",
+      "point": {
+        "x": 498,
+        "y": 348
+      },
+      "contractOwner": "B",
+      "painted": "A",
+      "hitTarget": "A",
+      "clicked": "A",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": false
+    },
+    {
+      "scenario": "S3 coordinator z-index by depth",
+      "probe": "overlap",
+      "point": {
+        "x": 498,
+        "y": 348
+      },
+      "contractOwner": "B",
+      "painted": "B",
+      "hitTarget": "B",
+      "clicked": "B",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": true
+    },
+    {
+      "scenario": "S4 interpenetrating, z-index",
+      "probe": "A in front",
+      "point": {
+        "x": 468,
+        "y": 348
+      },
+      "contractOwner": "A",
+      "painted": "A",
+      "hitTarget": "A",
+      "clicked": "A",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": true
+    },
+    {
+      "scenario": "S4 interpenetrating, z-index",
+      "probe": "B in front",
+      "point": {
+        "x": 534,
+        "y": 348
+      },
+      "contractOwner": "B",
+      "painted": "A",
+      "hitTarget": "A",
+      "clicked": "A",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": false
+    },
+    {
+      "scenario": "S4b interpenetrating, preserve-3d depth",
+      "probe": "A in front",
+      "point": {
+        "x": 468,
+        "y": 348
+      },
+      "contractOwner": "A",
+      "painted": "A",
+      "hitTarget": "A",
+      "clicked": "A",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": true
+    },
+    {
+      "scenario": "S4b interpenetrating, preserve-3d depth",
+      "probe": "B in front",
+      "point": {
+        "x": 534,
+        "y": 348
+      },
+      "contractOwner": "B",
+      "painted": "A",
+      "hitTarget": "B",
+      "clicked": "B",
+      "paintedEqualsHit": false,
+      "hitEqualsClick": true,
+      "agreesWithContract": true
+    },
+    {
+      "scenario": "S5 Adaptive panel, no hole",
+      "probe": "panel over A",
+      "point": {
+        "x": 372,
+        "y": 378
+      },
+      "contractOwner": "canvas",
+      "painted": "A",
+      "hitTarget": "A",
+      "clicked": "A",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": false
+    },
+    {
+      "scenario": "S5 Adaptive panel, hole in A",
+      "probe": "panel over A",
+      "point": {
+        "x": 372,
+        "y": 378
+      },
+      "contractOwner": "canvas",
+      "painted": "panel",
+      "hitTarget": "canvas",
+      "clicked": "canvas",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": true
+    },
+    {
+      "scenario": "S6 Native of A in front of B, z-index",
+      "probe": "native over B",
+      "point": {
+        "x": 594,
+        "y": 396
+      },
+      "contractOwner": "A/native",
+      "painted": "B",
+      "hitTarget": "B",
+      "clicked": "B",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": false
+    },
+    {
+      "scenario": "S6 Native of A in front of B, hole in B",
+      "probe": "native over B",
+      "point": {
+        "x": 594,
+        "y": 396
+      },
+      "contractOwner": "A/native",
+      "painted": "A/native",
+      "hitTarget": "A/native",
+      "clicked": "A/native",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": true
+    },
+    {
+      "scenario": "S7 after removing B",
+      "probe": "overlap",
+      "point": {
+        "x": 498,
+        "y": 348
+      },
+      "contractOwner": "A",
+      "painted": "A",
+      "hitTarget": "A",
+      "clicked": "A",
+      "paintedEqualsHit": true,
+      "hitEqualsClick": true,
+      "agreesWithContract": true
+    }
+  ]
+}

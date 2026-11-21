@@ -10,8 +10,11 @@ const packages = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const FORBIDDEN =
   /^(react|react-dom|three|@react-three\/|@babylonjs\/|@spatialflex\/react)/;
 
+// Every non-test source, subdirectories included (P1-08A added
+// core/src/workspace).
 const sources = (pkg: string) =>
-  readdirSync(join(packages, pkg, "src"))
+  readdirSync(join(packages, pkg, "src"), { recursive: true })
+    .map(String)
     .filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts"))
     .map((f) => readFileSync(join(packages, pkg, "src", f), "utf8"));
 
@@ -37,5 +40,27 @@ describe("SDK runtime boundary", () => {
       ...manifest.peerDependencies,
     });
     expect(declared.filter((d) => FORBIDDEN.test(d))).toEqual([]);
+  });
+
+  // P1-08A A8: the Multi-Surface primitives are renderer-, framework- and
+  // DOM-free, and depend on core modules only.
+  it("core/src/workspace depends on relative core modules only", () => {
+    const dir = join(packages, "core", "src", "workspace");
+    const files = readdirSync(dir).filter(
+      (f) => f.endsWith(".ts") && !f.endsWith(".test.ts"),
+    );
+    expect(files.length).toBeGreaterThan(0);
+    for (const file of files) {
+      const code = readFileSync(join(dir, file), "utf8");
+      for (const [, specifier] of code.matchAll(/from\s+"([^"]+)"/g))
+        expect(specifier, `${file}: ${specifier}`).toMatch(
+          /^\.\.?\/[\w./]+\.js$/,
+        );
+      // Code only (comments may mention documents and the DOM).
+      const code_ = code.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
+      expect(code_, file).not.toMatch(
+        /\b(HTMLElement|Element|Document|document|window|EventTarget)\b/,
+      );
+    }
   });
 });
